@@ -1,97 +1,116 @@
-# lawsonhart.me Blog
+# blog-template (lawsonhart.me)
 
-This is the source code for the blog section of [lawsonhart.me](https://lawsonhart.me). The project is designed to showcase articles, tutorials, and personal posts.
+This is the Astro codebase that powers the blog/posts section of **lawsonhart.me** — and it’s also set up to be published as a lightweight **blog template**.
 
-## Features
+It’s meant to be cloned and customized (site config + content), while letting you export a “public template snapshot” that omits private integrations.
 
-- Modern blog platform
-- Markdown-based posts
-- Responsive design
-- Easy content management
+## What you get
 
-## Getting Started
+- Astro 5 + TypeScript
+- Content Collections for posts + notes
+- Tailwind styling + a component-driven layout
+- Opinionated linting/formatting (Biome + Prettier)
+
+## Quick start
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16+ recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- Node.js 20+ (recommended)
+- pnpm
 
-### Installation
-
-Clone the repository:
+### Install
 
 ```sh
-git clone https://github.com/yourusername/lawsonhart.me.git
-cd blog
+pnpm install
 ```
 
-Install dependencies:
+### Run locally
 
 ```sh
-npm install
-# or
-yarn install
+pnpm dev
 ```
 
-### Running Locally
+Open http://localhost:4321
 
-Start the development server:
+## Scripts
 
-```sh
-npm run dev
-# or
-yarn dev
-```
+These are the main scripts you’ll use day-to-day:
 
-Open [http://localhost:4321](http://localhost:4321) to view the blog in your browser.
+- `pnpm dev` / `pnpm start` — Run the dev server
+- `pnpm check` — Run `astro check`
+- `pnpm lint` — Run Biome lint
+- `pnpm format` — Format code + imports (Biome + Prettier)
 
-## Template Sandbox (optional-feature validation)
+Template-focused helpers:
 
-This repo supports a "template sandbox" mode that runs the site in a temporary sandbox copy with selected files/folders excluded.
+- `pnpm template:dev` — Run the site from a sandbox copy with excluded paths removed
+- `pnpm template:build` — Build the sandbox copy (useful to verify the template export won’t break)
 
-- Edit [template-excludes.txt](template-excludes.txt) (one workspace-relative path per line)
-- Run `pnpm template:dev` or `pnpm template:build`
+Notes:
 
-You can also pass explicit excludes:
+- `pnpm install` runs a `postinstall` patch for Astro MDX internals (see `scripts/patch-astrojs-mdx-server.cjs`).
 
-```sh
-pnpm template:dev -- --exclude src/utils/spotifyStore.ts
-pnpm template:build -- --exclude src/components/HolidayOverlay.tsx
-```
+## Configure your site
 
-## Content & Frontmatter
+At minimum, update the site metadata in `src/site.config.ts`:
 
-Posts live under `src/content/post/**`. Each post supports the following frontmatter fields:
+- `url` (your domain)
+- `title`, `author`, and `description`
+
+You’ll also probably want to adjust navigation links (`menuLinks`) and any integrations you don’t use.
+
+## Content & frontmatter
+
+Posts live under `src/content/post/**` and notes live under `src/content/note/**`.
+
+Frontmatter for posts supports:
 
 ```yaml
-title: "Your Post Title"          # required
-description: "Short summary"      # required
-publishDate: "2025-09-01"         # required (string or date)
-updatedDate: 2025-09-15            # optional
-tags: [astro, webgl]               # optional, array of strings
-draft: false                       # optional, defaults false
-coverImage:                        # optional
-	alt: "Alt text"
-	src: ./cover.png
-ogImage: "/og/custom.png"         # optional
-tryLink: "https://example.app"     # optional – adds a prominent "Try it live" button under the title
+title: "Your Post Title"           # required
+description: "Short summary"       # required
+publishDate: "2025-09-01"          # required (string or date)
+updatedDate: 2025-09-15             # optional
+tags: [astro, webgl]                # optional
+draft: false                        # optional (defaults false)
+coverImage:                         # optional
+  alt: "Alt text"
+  src: ./cover.png
+ogImage: "/og/custom.png"          # optional
+tryLink: "https://example.app"      # optional (adds a "Try it live" button)
 ```
 
-If `tryLink` is present, a styled button will appear beneath the post title allowing readers to quickly access the related live project/product.
+## Environment variables
 
-## Project Structure (simplified)
+This template supports optional integrations driven by `import.meta.env`.
 
-- `src/content/post` — Markdown/MDX blog posts
-- `src/content/note` — Short-form notes
-- `src/components` — Astro/TSX components
-- `src/layouts` — Layout wrappers (e.g. `BlogPost.astro`)
-- `public` — Static assets
-- `src/pages` — Top-level routed pages
+Common ones:
 
-## Contributing
+- `PUBLIC_COMMENTS_API_ORIGIN` — Comments API origin (if you use the comment service)
+- `PUBLIC_COMMENTS_DEBUG` — Enables client-side debug logging for comments
+- `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO` — Used for GitHub-powered widgets
+- `UMAMI_*` — Used for analytics proxying/widgets (if enabled)
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+See `src/env.d.ts` for the full list.
+
+## Template sandbox + exporting
+
+This repo has a simple workflow for keeping the **real site** private while producing a safe-to-publish **template snapshot**.
+
+1) Add private paths to `template-excludes.txt` (one workspace-relative path per line)
+2) Validate the template view:
+
+```sh
+pnpm template:dev
+```
+
+3) Export a filtered snapshot:
+
+```sh
+node scripts/export-template.cjs --out .template-export
+```
+
+The exporter also hard-excludes any `.env*` files as defense-in-depth.
 
 ## License
 
-[MIT](LICENSE)
+MIT — see LICENSE.
