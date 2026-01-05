@@ -38,6 +38,7 @@ declare global {
 
 interface ImportMetaEnv {
 	readonly BASE_URL: string;
+	readonly PUBLIC_TEMPLATE_REPO_URL?: string;
 	readonly PUBLIC_COMMENTS_API_ORIGIN?: string;
 	readonly PUBLIC_ENABLE_VERCEL_ANALYTICS?: string;
 	readonly PUBLIC_ENABLE_SPEED_INSIGHTS?: string;

@@ -59,6 +59,18 @@ At minimum, update the site metadata in `src/site.config.ts`:
 
 You’ll also probably want to adjust navigation links (`menuLinks`) and any integrations you don’t use.
 
+## Site credits
+
+The About page includes a short credits section that references:
+
+- Built with Astro
+- Theme base: Astro Cactus
+
+It also includes two quick links:
+
+- `Info & stats` (internal): `/info-stats`
+- `Blog template` (external): only shown when configured via `PUBLIC_TEMPLATE_REPO_URL`
+
 ## Content & frontmatter
 
 Posts live under `src/content/post/**` and notes live under `src/content/note/**`.

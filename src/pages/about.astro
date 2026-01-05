@@ -12,6 +12,8 @@ const meta = {
   description: "A little bit about me!",
 };
 
+const templateRepoUrl = import.meta.env.PUBLIC_TEMPLATE_REPO_URL;
+
 const defaultResumePdfUrl = "/Lawson_Hart_Resume.pdf";
 const defaultResumePdfPath = fileURLToPath(new URL("../../public/Lawson_Hart_Resume.pdf", import.meta.url));
 const hasResumePdf = fs.existsSync(defaultResumePdfPath);
@@ -132,20 +134,30 @@ const hasResumePdf = fs.existsSync(defaultResumePdfPath);
 
       <div class="space-y-4">
         <p class="text-base text-global-text/85 leading-relaxed">
-          I built this site with <a class="lawson-link" href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>
-          and started with the super clean and sleek <a class="lawson-link" href="https://github.com/chrismwilliams/astro-theme-cactus" target="_blank" rel="noopener noreferrer">Astro Cactus</a> theme.
-          While keeping the same core structure and functionality, I've completely rewritten most of the components to add my own features and styling.
+          This site is built with <a class="lawson-link" href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>
+          and is based on the <a class="lawson-link" href="https://github.com/chrismwilliams/astro-theme-cactus" target="_blank" rel="noopener noreferrer">Astro Cactus</a>
+          theme. I kept the core structure, but redesigned and extended the components and styling.
         </p>
 
-        <p class="text-base text-global-text/75 leading-relaxed">
-          The source code isn't public, but if you're interested in viewing it or discussing any of the
-          technical implementations, feel free to reach out through the contact methods above!
-        </p>
+        <div class="flex flex-wrap gap-2">
+          {templateRepoUrl ? (
+            <a
+              href={templateRepoUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+            >
+              Blog template
+            </a>
+          ) : null}
 
-        <p class="text-base text-global-text/75 leading-relaxed mt-4">
-          For detailed technical information about the site, including package versions, design system details, and build information,
-          check out the <a class="lawson-link" href="/info-stats">info & stats</a> page.
-        </p>
+          <a
+            href="/info-stats"
+            class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+          >
+            Info &amp; stats
+          </a>
+        </div>
       </div>
     </div>
   </section>
