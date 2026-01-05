@@ -41,79 +41,126 @@ const quickLinks = [
 	</button>
 	<dialog
 		aria-label="search"
-		class="bg-global-bg/95 h-full max-h-full w-full max-w-full border border-zinc-200/50 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] backdrop:backdrop-blur-xl backdrop:bg-black/30 open:flex open:animate-in open:fade-in-0 open:zoom-in-95 sm:mx-auto sm:mt-16 sm:mb-auto sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-2xl dark:bg-global-bg/90 dark:border-zinc-700/50 dark:backdrop:bg-black/50 dark:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.25),0_10px_10px_-5px_rgba(0,0,0,0.1)]"
+		class="relative overflow-visible h-full max-h-full w-full max-w-full border border-zinc-200/50 bg-zinc-50/60 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] backdrop:backdrop-blur-xl backdrop:bg-black/30 open:flex flex-col open:animate-in open:fade-in-0 open:zoom-in-95 sm:mx-auto sm:mt-16 sm:mb-auto sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-2xl dark:border-zinc-700/50 dark:bg-zinc-800/40 dark:backdrop:bg-black/50 dark:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.25),0_10px_10px_-5px_rgba(0,0,0,0.1)]"
 	>
-		<div class="dialog-frame flex grow flex-col gap-6 p-8 pt-16 sm:pt-8">
-			<div class="flex items-center justify-between mb-2">
-				<h2 class="text-2xl font-bold text-global-text">Search</h2>
-				<button
-					class="flex items-center gap-2 cursor-pointer rounded-xl bg-zinc-50/80 px-4 py-2.5 text-sm font-medium text-zinc-600 transition-all duration-200 hover:bg-zinc-100/90 hover:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 dark:bg-zinc-800/60 dark:text-zinc-400 dark:hover:bg-zinc-700/80 dark:hover:text-zinc-200 dark:focus:ring-offset-zinc-900 backdrop-blur-sm"
-					data-close-modal
-				>
-					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-					</svg>
-					Close
-				</button>
-			</div>
-			{
-				import.meta.env.DEV ? (
-					<div class="mx-auto text-center p-8">
-						<div class="bg-accent/10 border border-accent/20 rounded-lg p-6">
-							<svg class="mx-auto h-12 w-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+		<div class="dialog-frame flex min-h-0 grow flex-col overflow-hidden">
+			<div class="px-8 pt-16 sm:pt-8">
+				<div class="flex items-center justify-between mb-2">
+					<h2 class="text-2xl font-bold text-global-text">Search</h2>
+					<div class="flex items-center gap-2">
+						{!import.meta.env.DEV && (
+							<button
+								type="button"
+								class="group flex items-center gap-2 cursor-pointer rounded-lg bg-zinc-50/80 px-4 py-2.5 text-sm font-medium text-global-text transition-all duration-200 hover:bg-accent/10 hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 dark:bg-zinc-800/60 dark:hover:bg-accent/20 dark:focus:ring-offset-zinc-900 backdrop-blur-sm border border-zinc-200/50 hover:border-accent/50 dark:border-zinc-700/50 dark:hover:border-accent/50 hover:shadow-md"
+								data-toggle-tags
+								data-tags-button
+								aria-expanded="false"
+							>
+								<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10M7 12h10M7 17h10"></path>
+								</svg>
+								<span data-tags-label>Tags</span><span data-tags-count hidden></span>
+							</button>
+						)}
+						<button
+							class="group flex items-center gap-2 cursor-pointer rounded-lg bg-zinc-50/80 px-4 py-2.5 text-sm font-medium text-global-text transition-all duration-200 hover:bg-accent/10 hover:text-accent focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 dark:bg-zinc-800/60 dark:hover:bg-accent/20 dark:focus:ring-offset-zinc-900 backdrop-blur-sm border border-zinc-200/50 hover:border-accent/50 dark:border-zinc-700/50 dark:hover:border-accent/50 hover:shadow-md"
+							data-close-modal
+						>
+							<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
 							</svg>
-							<h3 class="text-lg font-semibold text-accent mb-2">Search Unavailable in Development</h3>
-							<p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-								Gotta build to see this stuff twin
-							</p>
-						</div>
+							Close
+						</button>
 					</div>
-				) : (
-					<div class="search-container">
-						<div id="lawson__search" />
-						<div id="search-placeholder" class="search-placeholder">
-							<div class="placeholder-content">
-								<!-- Popular Tags -->
-								<div class="mb-8">
-									<h3 class="text-lg font-semibold text-global-text mb-4">Popular Tags</h3>
-									<div class="flex flex-wrap gap-2">
-										{topTags.map(([tag, count]) => (
-											<a
-												href={`/tags/${tag}/`}
-												class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 border border-accent/20 hover:border-accent/40 rounded-lg text-sm font-medium text-accent transition-all duration-200"
-												data-close-on-click
-											>
-												<span>#{tag}</span>
-												<span class="text-xs opacity-70">({count})</span>
-											</a>
-										))}
-									</div>
-								</div>
+				</div>
+			</div>
+			<div class="min-h-0 flex-1 overflow-y-auto overflow-x-hidden" data-search-scroll>
+				<div class="px-8 pb-8">
+				{
+					import.meta.env.DEV ? (
+						<div class="mx-auto text-center p-8">
+							<div class="bg-accent/10 border border-accent/20 rounded-lg p-6">
+								<svg class="mx-auto h-12 w-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+								</svg>
+								<h3 class="text-lg font-semibold text-accent mb-2">Search Unavailable in Development</h3>
+								<p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+									Gotta build to see this stuff twin
+								</p>
+							</div>
+						</div>
+					) : (
+						<div class="search-container flex min-h-0 flex-1 flex-col">
+							<div class="search-main flex min-h-0 min-w-0 flex-1 flex-col">
+								<div id="lawson__search" class="min-h-0 flex-1" />
+								<div id="search-placeholder" class="search-placeholder">
+									<div class="placeholder-content">
+										<!-- Popular Tags -->
+										<div class="mb-8">
+											<h3 class="text-lg font-semibold text-global-text mb-4">Popular Tags</h3>
+											<div class="flex flex-wrap gap-2">
+												{topTags.map(([tag, count]) => (
+													<a
+														href={`/tags/${tag}/`}
+														class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 border border-accent/20 hover:border-accent/40 rounded-lg text-sm font-medium text-accent transition-all duration-200"
+														data-close-on-click
+													>
+														<span>#{tag}</span>
+														<span class="text-xs opacity-70">({count})</span>
+													</a>
+												))}
+											</div>
+										</div>
 
-								<!-- Quick Links -->
-								<div>
-									<h3 class="text-lg font-semibold text-global-text mb-4">Quick Links</h3>
-									<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-										{quickLinks.map((link) => (
-											<a
-												href={link.href}
-												class="group flex items-center justify-between px-4 py-3 bg-zinc-50/80 hover:bg-accent/10 dark:bg-zinc-800/60 dark:hover:bg-accent/20 rounded-lg text-global-text hover:text-accent transition-all duration-200 border border-zinc-200/50 hover:border-accent/50 dark:border-zinc-700/50 dark:hover:border-accent/50 hover:shadow-md hover:translate-x-1"
-												data-close-on-click
-											>
-												<span class="font-medium">{link.title}</span>
-												<svg class="h-5 w-5 flex-shrink-0 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
-												</svg>
-											</a>
-										))}
-									</div>
+										<!-- Quick Links -->
+										<div>
+											<h3 class="text-lg font-semibold text-global-text mb-4">Quick Links</h3>
+											<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+												{quickLinks.map((link) => (
+													<a
+														href={link.href}
+														class="group flex items-center justify-between px-4 py-3 bg-zinc-50/80 hover:bg-accent/10 dark:bg-zinc-800/60 dark:hover:bg-accent/20 rounded-lg text-global-text hover:text-accent transition-all duration-200 border border-zinc-200/50 hover:border-accent/50 dark:border-zinc-700/50 dark:hover:border-accent/50 hover:shadow-md hover:translate-x-1"
+														data-close-on-click
+													>
+														<span class="font-medium">{link.title}</span>
+														<svg class="h-5 w-5 flex-shrink-0 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+															<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+														</svg>
+													</a>
+												))}
+											</div>
+										</div>
 								</div>
 							</div>
 						</div>
 					</div>
 				)
 			}
+				{!import.meta.env.DEV && (
+					<aside
+						id="search-tags-panel"
+						hidden
+						class="search-tags-panel w-full sm:w-56 md:w-64"
+						aria-label="Tag filters"
+					>
+						<div class="rounded-xl border border-zinc-200/50 bg-zinc-50/60 p-4 dark:border-zinc-700/50 dark:bg-zinc-800/40 backdrop-blur-sm">
+							<div class="mb-3 flex items-center justify-between">
+								<h3 class="text-sm font-semibold text-global-text">Tags</h3>
+								<button
+									type="button"
+									class="text-xs font-medium text-zinc-600 hover:text-accent dark:text-zinc-400 dark:hover:text-accent transition-colors"
+									data-clear-tags
+									hidden
+								>
+									Clear
+								</button>
+							</div>
+							<div id="search-tags-panel-content" class="max-h-[50vh] overflow-auto pr-1" />
+						</div>
+					</aside>
+				)}
+				</div>
+			</div>
 		</div>
 	</dialog>
 </site-search>
@@ -124,7 +171,15 @@ const quickLinks = [
 		#dialog: HTMLDialogElement | null;
 		#dialogFrame: HTMLDivElement | null;
 		#openBtn: HTMLButtonElement | null;
+		#toggleTagsBtn: HTMLButtonElement | null;
+		#tagsCountEl: HTMLElement | null;
+		#tagsBtn: HTMLButtonElement | null;
+		#tagsPanel: HTMLElement | null;
+		#tagsPanelContent: HTMLElement | null;
+		#clearTagsBtn: HTMLButtonElement | null;
+		#filterPanelObserver: MutationObserver | null;
 		#controller: AbortController;
+		#positionTagsRaf: number | null;
 
 		constructor() {
 			super();
@@ -132,7 +187,15 @@ const quickLinks = [
 			this.#closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]");
 			this.#dialog = this.querySelector<HTMLDialogElement>("dialog");
 			this.#dialogFrame = this.querySelector(".dialog-frame");
+			this.#toggleTagsBtn = this.querySelector<HTMLButtonElement>("[data-toggle-tags]");
+			this.#tagsBtn = this.querySelector<HTMLButtonElement>("[data-tags-button]");
+			this.#tagsCountEl = this.querySelector<HTMLElement>("[data-tags-count]");
+			this.#tagsPanel = this.querySelector<HTMLElement>("#search-tags-panel");
+			this.#tagsPanelContent = this.querySelector<HTMLElement>("#search-tags-panel-content");
+			this.#clearTagsBtn = this.querySelector<HTMLButtonElement>("[data-clear-tags]");
+			this.#filterPanelObserver = null;
 			this.#controller = new AbortController();
+			this.#positionTagsRaf = null;
 
 			// Set up events
 			if (this.#openBtn) {
@@ -151,6 +214,9 @@ const quickLinks = [
 			if (this.#dialog) {
 				this.#dialog.addEventListener("close", () => {
 					window.removeEventListener("click", this.onWindowClick);
+					document.documentElement.removeAttribute("data-search-modal-open");
+					document.body.removeAttribute("data-search-modal-open");
+					window.removeEventListener("resize", this.positionTagsPanel);
 				});
 			} else {
 				console.warn("Dialog not found");
@@ -158,6 +224,7 @@ const quickLinks = [
 
 			// only add pagefind in production
 			if (import.meta.env.DEV) return;
+			this.initTagsPanel();
 			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
 			onIdle(async () => {
 				const { PagefindUI } = await import("@pagefind/default-ui");
@@ -175,6 +242,7 @@ const quickLinks = [
 						search_suggestion: "0 results",
 					},
 				});
+				this.attachFilterPanel();
 			});
 		}
 
@@ -184,6 +252,7 @@ const quickLinks = [
 		}
 
 		disconnectedCallback() {
+			this.#filterPanelObserver?.disconnect();
 			this.#controller.abort();
 		}
 
@@ -194,17 +263,40 @@ const quickLinks = [
 			}
 
 			this.#dialog.showModal();
+			document.documentElement.setAttribute("data-search-modal-open", "true");
+			document.body.setAttribute("data-search-modal-open", "true");
 			this.querySelector("input")?.focus();
 			event?.stopPropagation();
+			window.addEventListener("resize", this.positionTagsPanel, { signal: this.#controller.signal });
 			// Remove focus from the button to prevent persistent outline
 			this.#openBtn?.blur();
 			window.addEventListener("click", this.onWindowClick, { signal: this.#controller.signal });
-
 			// Sync placeholder based on current search state (prevents it showing under existing results)
 			this.syncPlaceholder();
 
+			// Always start with the Tags panel closed; user can open via the Tags button
+			this.setTagsPanelOpen(false);
+
 			// Bind the input listener once (Pagefind UI renders lazily)
 			setTimeout(() => this.bindPlaceholderToSearchInput(), 100);
+			setTimeout(() => this.attachFilterPanel(), 100);
+		};
+
+		positionTagsPanel = () => {
+			if (!this.#dialog || !this.#tagsPanel) return;
+			if (this.#tagsPanel.hidden) return;
+			// On small screens the panel is in-flow (static), so no fixed positioning needed.
+			if (window.matchMedia("(max-width: 640px)").matches) return;
+
+			const rect = this.#dialog.getBoundingClientRect();
+			// Match the previous CSS offsets: top ≈ 5.25rem (84px), gap ≈ 1rem (16px), max-height subtract ≈ 6.5rem (104px)
+			const top = Math.round(rect.top + 84);
+			const left = Math.round(rect.right + 16);
+			const maxHeight = Math.max(160, Math.round(rect.height - 104));
+
+			this.#tagsPanel.style.setProperty("--search-tags-top", `${top}px`);
+			this.#tagsPanel.style.setProperty("--search-tags-left", `${left}px`);
+			this.#tagsPanel.style.setProperty("--search-tags-max-height", `${maxHeight}px`);
 		};
 
 		closeModal = () => this.#dialog?.close();
@@ -258,20 +350,131 @@ const quickLinks = [
 			}
 		};
 
+		initTagsPanel = () => {
+			if (!this.#toggleTagsBtn || !this.#tagsPanel) return;
+			this.setTagsPanelOpen(false);
+
+			this.#toggleTagsBtn.addEventListener(
+				"click",
+				() => {
+					const isOpen = !this.#tagsPanel?.hasAttribute("hidden");
+					this.setTagsPanelOpen(!isOpen);
+				},
+				{ signal: this.#controller.signal },
+			);
+
+			this.#clearTagsBtn?.addEventListener(
+				"click",
+				() => {
+					const checkboxes = this.#tagsPanel?.querySelectorAll<HTMLInputElement>(
+						'input[type="checkbox"]:checked',
+					);
+					checkboxes?.forEach((cb) => cb.click());
+					this.syncClearTagsVisibility();
+				},
+				{ signal: this.#controller.signal },
+			);
+		};
+
+		setTagsPanelOpen = (open: boolean) => {
+			if (!this.#toggleTagsBtn || !this.#tagsPanel) return;
+			if (open) {
+				this.#tagsPanel.removeAttribute("hidden");
+				this.#toggleTagsBtn.setAttribute("aria-expanded", "true");
+				// Wait one frame so layout settles, then anchor the fixed panel.
+				this.#positionTagsRaf && cancelAnimationFrame(this.#positionTagsRaf);
+				this.#positionTagsRaf = requestAnimationFrame(() => this.positionTagsPanel());
+			} else {
+				this.#tagsPanel.setAttribute("hidden", "");
+				this.#toggleTagsBtn.setAttribute("aria-expanded", "false");
+			}
+		};
+
+		attachFilterPanel = () => {
+			if (!this.#tagsPanelContent) return;
+			const root = this.querySelector<HTMLElement>("#lawson__search");
+			if (!root) return;
+
+			const tryMove = () => {
+				if (this.#tagsPanelContent?.querySelector(".pagefind-ui__filter-panel")) return;
+				const filterPanel = root.querySelector<HTMLElement>(".pagefind-ui__filter-panel");
+				if (!filterPanel) return;
+				this.#tagsPanelContent?.appendChild(filterPanel);
+				this.bindFilterPanelInteractions();
+				this.syncClearTagsVisibility();
+				this.syncTagsButtonState();
+			};
+
+			tryMove();
+			if (this.#filterPanelObserver) return;
+			this.#filterPanelObserver = new MutationObserver(() => {
+				tryMove();
+				this.syncClearTagsVisibility();
+				this.syncTagsButtonState();
+			});
+			this.#filterPanelObserver.observe(root, { childList: true, subtree: true });
+		};
+
+		bindFilterPanelInteractions = () => {
+			const panel = this.#tagsPanelContent?.querySelector<HTMLElement>(".pagefind-ui__filter-panel");
+			if (!panel) return;
+			panel.querySelectorAll<HTMLDetailsElement>("details").forEach((d) => {
+				d.open = true;
+			});
+			panel.addEventListener(
+				"change",
+				() => this.syncClearTagsVisibility(),
+				{ signal: this.#controller.signal },
+			);
+		};
+
+		syncClearTagsVisibility = () => {
+			if (!this.#clearTagsBtn) return;
+			const hasChecked =
+				(this.#tagsPanel?.querySelector('input[type="checkbox"]:checked') ?? null) !== null;
+			if (hasChecked) {
+				this.#clearTagsBtn.removeAttribute("hidden");
+			} else {
+				this.#clearTagsBtn.setAttribute("hidden", "");
+			}
+			this.syncTagsButtonState();
+		};
+
+		getSelectedTagsCount = () => {
+			return this.#tagsPanel?.querySelectorAll('input[type="checkbox"]:checked').length ?? 0;
+		};
+
+		syncTagsButtonState = () => {
+			if (!this.#tagsBtn || !this.#tagsCountEl) return;
+			const count = this.getSelectedTagsCount();
+			if (count > 0) {
+				this.#tagsBtn.setAttribute("data-has-selection", "true");
+				this.#tagsCountEl.textContent = ` (${count})`;
+				this.#tagsCountEl.removeAttribute("hidden");
+			} else {
+				this.#tagsBtn.removeAttribute("data-has-selection");
+				this.#tagsCountEl.textContent = "";
+				this.#tagsCountEl.setAttribute("hidden", "");
+			}
+		};
+
 		onWindowClick = (event: MouseEvent) => {
 			// check if it's a link
 			const isLink = "href" in (event.target || {});
 			// check if it's a close-on-click element
 			const target = event.target as HTMLElement;
 			const isCloseOnClick = target?.closest("[data-close-on-click]");
+			const isInTagsPanel = target?.closest("#search-tags-panel");
 
 			// make sure the click is either a link, close-on-click, or outside of the dialog
 			if (
 				isLink ||
 				isCloseOnClick ||
+				isInTagsPanel ||
 				(document.body.contains(event.target as Node) &&
 					!this.#dialogFrame?.contains(event.target as Node))
 			) {
+				if (isInTagsPanel) return;
 				this.closeModal();
 			}
 		};

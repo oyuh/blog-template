@@ -4,6 +4,32 @@
 	--pagefind-ui-font: inherit;
 }
 
+/* Prevent the page behind the modal from scrolling */
+html[data-search-modal-open],
+body[data-search-modal-open] {
+	overflow: hidden;
+}
+
+#search dialog[aria-label="search"] {
+	overscroll-behavior: contain;
+	/* Let the internal scroll wrapper own vertical scrolling so the scrollbar
+	   sits next to the results (no padded gutter). Keep horizontal overflow
+	   hidden to prevent sideways scrolling. The tags panel is fixed-positioned. */
+	overflow-y: hidden !important;
+	overflow-x: hidden !important;
+}
+
+/* Tags button: show selected-count and an active (accent/blue) background when tags are selected */
+#search [data-tags-button][data-has-selection="true"] {
+	background-color: oklch(from var(--color-accent) l c h / 0.12) !important;
+	border-color: color-mix(in srgb, var(--color-accent) 45%, transparent) !important;
+	color: var(--color-accent) !important;
+}
+
+#search [data-tags-button][data-has-selection="true"]:hover {
+	background-color: oklch(from var(--color-accent) l c h / 0.18) !important;
+}
+
 #lawson__search {
 	--pagefind-ui-primary: var(--color-accent);
 	--pagefind-ui-text: var(--color-global-text);
@@ -11,6 +37,28 @@
 	--pagefind-ui-border: color-mix(in srgb, var(--color-global-text) 18%, transparent);
 	--pagefind-ui-border-width: 1px;
 	--pagefind-ui-border-radius: 12px;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Keep the modal header + tags panel fixed while results scroll */
+#lawson__search .pagefind-ui {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	flex: 1;
+}
+
+#lawson__search .pagefind-ui__results-area {
+	flex: 0 0 auto;
+	min-height: 0;
+	overflow: visible;
+	padding-right: 0 !important;
+	/* Prevent the results column from enforcing a minimum width that can cause
+	   horizontal overflow (cards appearing to run under the scrollbar). */
+	min-width: 0 !important;
+	width: 100%;
 }
 
 /* Enhanced search input styling */
@@ -37,7 +85,7 @@
 	font-size: 1.0625rem;
 	font-family: inherit;
 	font-weight: 400;
-	background-color: color-mix(in srgb, var(--pagefind-ui-background) 92%, transparent);
+	background-color: color-mix(in srgb, var(--pagefind-ui-background) 78%, transparent);
 	border: 1px solid var(--pagefind-ui-border);
 	border-radius: 12px;
 	color: var(--pagefind-ui-text);
@@ -111,14 +159,23 @@
 }
 
 #lawson__search .pagefind-ui__results {
-	margin-top: 1rem;
+	/* Avoid compounding spacing with results-area margin-top */
+	margin-top: 0;
+}
+
+/* If any result text is long/unbroken, force wrapping to prevent horizontal overflow */
+#lawson__search .pagefind-ui__result,
+#lawson__search .pagefind-ui__result * {
+	min-width: 0;
+	overflow-wrap: anywhere;
+	word-break: break-word;
 }
 
 #lawson__search .pagefind-ui__result {
 	border: 0;
 	margin-bottom: 0.75rem;
 	padding: 1rem;
-	background: var(--color-global-bg);
+	background: color-mix(in srgb, var(--color-global-bg) 78%, transparent);
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
 	border-radius: 0.75rem;
 	transition: all 0.2s ease;
@@ -291,9 +348,137 @@
 	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.1);
 }
 
-/* Hide the filters/tags dropdown entirely */
+/* Keep Pagefind's built-in filter UI out of the main results area.
+   The search modal relocates the filter panel into the right-side Tags panel. */
 #lawson__search .pagefind-ui__filter-panel {
 	display: none !important;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel {
+	display: block !important;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+/* Remove Pagefind's filter group dropdown/header in the Tags sidebar (but keep tag text) */
+#search-tags-panel .pagefind-ui__filter-panel summary,
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-select,
+#search-tags-panel .pagefind-ui__filter-panel summary .pagefind-ui__filter-name {
+	display: none !important;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel details {
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel details[open] {
+	padding-top: 0;
+}
+
+/* Detached tags panel: sits outside the modal to the right (does not change modal width) */
+#search-tags-panel {
+	position: fixed;
+	top: var(--search-tags-top, 6rem);
+	left: var(--search-tags-left, 0);
+	max-height: var(--search-tags-max-height, 50vh);
+	z-index: 60;
+}
+
+@media (max-width: 640px) {
+	#search-tags-panel {
+		position: static;
+		left: auto;
+		top: auto;
+		max-height: none;
+		margin-top: 1rem;
+	}
+}
+
+/* Make the tag list compact and easy to scan */
+#search-tags-panel .pagefind-ui__filter-panel label {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.375rem 0.5rem;
+	border-radius: 0.5rem;
+	cursor: pointer;
+	user-select: none;
+	border: 1px solid transparent;
+	color: color-mix(in srgb, var(--color-global-text) 90%, transparent);
+}
+
+/* Remove Pagefind's default checkbox decoration (prevents double-check icons) */
+#search-tags-panel .pagefind-ui__filter-panel label::before,
+#search-tags-panel .pagefind-ui__filter-panel label::after,
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]::after {
+	content: none !important;
+	display: none !important;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel label:hover {
+	background-color: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel label:has(input[type="checkbox"]:checked) {
+	background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel label:has(input[type="checkbox"]:focus-visible) {
+	outline: none;
+	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"] {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 1rem;
+	height: 1rem;
+	border-radius: 0.25rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 25%, transparent);
+	background-color: transparent;
+	background-image: none !important;
+	flex: 0 0 auto;
+	display: inline-grid;
+	place-content: center;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]::before {
+	content: "";
+	width: 0.625rem;
+	height: 0.625rem;
+	transform: scale(0);
+	transition: transform 120ms ease-in-out;
+	background-color: var(--color-global-bg);
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked {
+	background-color: var(--color-accent);
+	border-color: var(--color-accent);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked::before {
+	transform: scale(1);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-label {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-count {
+	opacity: 0.7;
+	font-size: 0.75rem;
 }
 
 /* Search placeholder styling */
