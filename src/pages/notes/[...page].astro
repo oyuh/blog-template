@@ -13,6 +13,8 @@ export const getStaticPaths = (async ({ paginate }) => {
 	return paginate(allNotes.sort(collectionDateSort), { pageSize: MAX_NOTES_PER_PAGE });
 }) satisfies GetStaticPaths;
 
+export const prerender = true;
+
 interface Props {
 	page: Page<CollectionEntry<"note">>;
 	uniqueTags: string[];

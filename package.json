@@ -9,7 +9,7 @@
 		"template:build": "node scripts/template-sandbox.cjs build",
 		"build": "astro build --remote",
 		"postbuild": "node scripts/pagefind.mjs",
-		"preview": "astro preview",
+		"preview": "node scripts/preview.mjs",
 		"lint": "biome lint .",
 		"format": "pnpm run format:code && pnpm run format:imports",
 		"format:code": "biome format . --write && prettier -w \"**/*\" \"!**/*.{md,mdx}\" --ignore-unknown --cache",

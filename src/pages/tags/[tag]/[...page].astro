@@ -21,6 +21,8 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
 	});
 };
 
+export const prerender = true;
+
 interface Props {
 	page: Page<CollectionEntry<"post">>;
 }

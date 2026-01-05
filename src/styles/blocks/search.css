@@ -8,14 +8,9 @@
 	--pagefind-ui-primary: var(--color-accent);
 	--pagefind-ui-text: var(--color-global-text);
 	--pagefind-ui-background: var(--color-global-bg);
-	--pagefind-ui-border: oklch(94% 0.005 264);
+	--pagefind-ui-border: color-mix(in srgb, var(--color-global-text) 18%, transparent);
 	--pagefind-ui-border-width: 1px;
-	--pagefind-ui-border-radius: 8px;
-
-	[data-theme="dark"] & {
-		--pagefind-ui-background: var(--color-global-bg);
-		--pagefind-ui-border: oklch(20% 0.01 264);
-	}
+	--pagefind-ui-border-radius: 12px;
 }
 
 /* Enhanced search input styling */
@@ -38,46 +33,36 @@
 
 #lawson__search .pagefind-ui__search-input {
 	width: 100%;
-	padding: 1rem 3.5rem 1rem 1.25rem;
+	padding: 1rem 8rem 1rem 1.25rem;
 	font-size: 1.0625rem;
 	font-family: inherit;
 	font-weight: 400;
-	background-color: var(--pagefind-ui-background);
-	border: 1.5px solid var(--pagefind-ui-border);
+	background-color: color-mix(in srgb, var(--pagefind-ui-background) 92%, transparent);
+	border: 1px solid var(--pagefind-ui-border);
 	border-radius: 12px;
 	color: var(--pagefind-ui-text);
 	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	box-shadow:
-		0 1px 3px rgba(0, 0, 0, 0.05),
-		0 1px 2px rgba(0, 0, 0, 0.1);
+	box-shadow: none;
 
 	&:focus {
 		outline: none;
 		border-color: var(--color-accent);
-		box-shadow:
-			0 0 0 3px oklch(from var(--color-accent) l c h / 0.12),
-			0 4px 16px rgba(0, 0, 0, 0.12),
-			0 2px 6px rgba(0, 0, 0, 0.08);
-		transform: translateY(-1px);
+		box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
 	}
 
 	&::placeholder {
-		color: oklch(65% 0.005 264);
+		color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 		font-weight: 400;
-
-		[data-theme="dark"] & {
-			color: oklch(55% 0.01 264);
-		}
 	}
 }
 
 #lawson__search .pagefind-ui__search-clear {
 	position: absolute;
-	right: 0.75rem;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 2rem;
-	height: 2rem;
+	right: 0.5rem;
+	top: 0.5rem;
+	transform: none;
+	width: 2.25rem;
+	height: 2.25rem;
 	padding: 0;
 	background-color: transparent;
 	border: none;
@@ -85,6 +70,10 @@
 	cursor: pointer;
 	transition: all 0.2s ease-in-out;
 	overflow: hidden;
+	color: transparent;
+	text-indent: 200%;
+	white-space: nowrap;
+	z-index: 10;
 
 	&:hover {
 		background-color: oklch(from var(--color-accent) l c h / 0.1);
@@ -117,6 +106,10 @@
 }
 
 /* Enhanced results styling */
+#lawson__search .pagefind-ui__results-area {
+	margin-top: 0.75rem;
+}
+
 #lawson__search .pagefind-ui__results {
 	margin-top: 1rem;
 }
@@ -125,9 +118,9 @@
 	border: 0;
 	margin-bottom: 0.75rem;
 	padding: 1rem;
-	background-color: oklch(99% 0.002 264);
-	border: 1px solid oklch(96% 0.002 264);
-	border-radius: 8px;
+	background: var(--color-global-bg);
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	border-radius: 0.75rem;
 	transition: all 0.2s ease;
 	position: relative;
 
@@ -136,21 +129,10 @@
 	}
 
 	&:hover {
-		background-color: oklch(98% 0.002 264);
-		border-color: oklch(from var(--color-accent) l c h / 0.2);
-		transform: translateY(-1px);
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-	}
-
-	[data-theme="dark"] & {
-		background-color: oklch(12% 0.01 264);
-		border-color: oklch(18% 0.01 264);
-
-		&:hover {
-			background-color: oklch(15% 0.01 264);
-			border-color: oklch(from var(--color-accent) l c h / 0.3);
-			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-		}
+		background: color-mix(in srgb, var(--color-global-bg) 96%, transparent);
+		border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+		transform: none;
+		box-shadow: none;
 	}
 }
 
@@ -159,7 +141,7 @@
 }
 
 #lawson__search .pagefind-ui__result-link {
-	color: var(--color-global-text);
+	color: var(--color-accent-2);
 	text-decoration: none;
 	font-weight: 600;
 	font-size: 1.125rem;
@@ -181,15 +163,11 @@
 }
 
 #lawson__search .pagefind-ui__result-excerpt {
-	color: oklch(60% 0.005 264);
+	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
 	font-size: 0.875rem;
 	line-height: 1.6;
 	margin-top: 0.5rem;
 	font-weight: 400;
-
-	[data-theme="dark"] & {
-		color: oklch(70% 0.01 264);
-	}
 }
 
 #lawson__search .pagefind-ui__result-tags {
@@ -200,18 +178,18 @@
 }
 
 #lawson__search .pagefind-ui__result-tag {
-	background-color: oklch(from var(--color-accent) l c h / 0.1);
-	color: var(--color-accent);
+	background-color: transparent;
+	color: color-mix(in srgb, var(--color-global-text) 85%, transparent);
 	padding: 0.25rem 0.5rem;
 	border-radius: 0.375rem;
 	font-size: 0.75rem;
 	font-weight: 500;
-	border: 1px solid oklch(from var(--color-accent) l c h / 0.2);
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 20%, transparent);
 }
 
 #lawson__search mark {
 	color: var(--color-accent);
-	background-color: oklch(from var(--color-accent) l c h / 0.08);
+	background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
 	padding: 0.125rem 0.25rem;
 	border-radius: 4px;
 	font-weight: 600;
@@ -220,14 +198,26 @@
 
 /* Enhanced messages and loading states */
 #lawson__search .pagefind-ui__message {
-	text-align: center;
-	padding: 2rem 1rem;
-	color: oklch(60% 0.005 264);
-	font-style: italic;
-
-	[data-theme="dark"] & {
-		color: oklch(70% 0.01 264);
-	}
+	position: absolute;
+	top: 0.5rem;
+	right: 3.25rem;
+	height: 2.25rem;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	margin: 0;
+	padding: 0 0.5rem;
+	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+	font-style: normal;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1;
+	font-size: 0.875rem;
+	pointer-events: none;
+	white-space: nowrap;
+	max-width: calc(100% - 4.25rem);
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 #lawson__search .pagefind-ui__loading {
@@ -256,28 +246,23 @@
 
 /* Button enhancements */
 #lawson__search .pagefind-ui__button {
-	background-color: var(--color-accent);
-	color: white;
-	border: none;
-	padding: 0.5rem 1rem;
-	border-radius: 0.375rem;
-	font-weight: 500;
+	background: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
+	color: var(--color-global-text);
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	padding: 0.75rem 1rem;
+	border-radius: 0.75rem;
+	font-weight: 600;
 	cursor: pointer;
 	transition: all 0.2s ease-in-out;
 
 	&:hover {
-		background-color: oklch(from var(--color-accent) calc(l - 0.05) c h);
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px oklch(from var(--color-accent) l c h / 0.3);
+		border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+		color: var(--color-accent);
 	}
 
 	&:focus {
 		outline: none;
-		box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.3);
-	}
-
-	&:active {
-		transform: translateY(0);
+		box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
 	}
 }
 
@@ -289,7 +274,7 @@
 	}
 
 	#lawson__search .pagefind-ui__search-input {
-		padding: 0.75rem 2.5rem 0.75rem 0.875rem;
+		padding: 0.75rem 6.75rem 0.75rem 0.875rem;
 		font-size: 0.9375rem;
 	}
 
@@ -300,59 +285,10 @@
 	}
 }
 
-/* Custom scrollbar for results */
-#lawson__search .pagefind-ui__results {
-	scrollbar-width: thin;
-	scrollbar-color: oklch(from var(--color-accent) l c h / 0.3) transparent;
-
-	&::-webkit-scrollbar {
-		width: 8px;
-	}
-
-	&::-webkit-scrollbar-track {
-		background: transparent;
-		border-radius: 4px;
-	}
-
-	&::-webkit-scrollbar-thumb {
-		background: oklch(from var(--color-accent) l c h / 0.3);
-		border-radius: 4px;
-		transition: background-color 0.2s ease-in-out;
-
-		&:hover {
-			background: oklch(from var(--color-accent) l c h / 0.5);
-		}
-	}
-}
-
 /* Focus management improvements */
 #lawson__search .pagefind-ui__result:focus-within {
 	border-color: var(--color-accent);
 	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.1);
-}
-
-/* Better loading indicator */
-#lawson__search .pagefind-ui__loading {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 0.5rem;
-
-	&::before {
-		flex-shrink: 0;
-		margin-right: 0;
-	}
-}
-
-/* Empty state styling */
-#lawson__search .pagefind-ui__message:empty::before {
-	content: "No results found. Try adjusting your search terms.";
-	color: oklch(60% 0.005 264);
-	font-style: italic;
-
-	[data-theme="dark"] & {
-		color: oklch(70% 0.01 264);
-	}
 }
 
 /* Hide the filters/tags dropdown entirely */

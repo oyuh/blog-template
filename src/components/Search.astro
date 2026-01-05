@@ -167,6 +167,13 @@ const quickLinks = [
 					element: "#lawson__search",
 					showImages: false,
 					showSubResults: true,
+					translations: {
+						zero_results: "0 results",
+						one_result: "1 result",
+						many_results: "[COUNT] results",
+						alt_search: "[COUNT] results",
+						search_suggestion: "0 results",
+					},
 				});
 			});
 		}
@@ -193,22 +200,11 @@ const quickLinks = [
 			this.#openBtn?.blur();
 			window.addEventListener("click", this.onWindowClick, { signal: this.#controller.signal });
 
-			// Show placeholder initially
-			this.showPlaceholder();
+			// Sync placeholder based on current search state (prevents it showing under existing results)
+			this.syncPlaceholder();
 
-			// Set up event listener to hide placeholder when user types
-			setTimeout(() => {
-				const searchInput = this.querySelector<HTMLInputElement>(".pagefind-ui__search-input");
-				if (searchInput) {
-					searchInput.addEventListener("input", () => {
-						if (searchInput.value.trim().length > 0) {
-							this.hidePlaceholder();
-						} else {
-							this.showPlaceholder();
-						}
-					});
-				}
-			}, 100);
+			// Bind the input listener once (Pagefind UI renders lazily)
+			setTimeout(() => this.bindPlaceholderToSearchInput(), 100);
 		};
 
 		closeModal = () => this.#dialog?.close();
@@ -224,6 +220,41 @@ const quickLinks = [
 			const placeholder = this.querySelector<HTMLDivElement>("#search-placeholder");
 			if (placeholder) {
 				placeholder.style.display = "none";
+			}
+		};
+
+		syncPlaceholder = () => {
+			const searchInput = this.querySelector<HTMLInputElement>(".pagefind-ui__search-input");
+			if (!searchInput) return;
+			if (searchInput.value.trim().length > 0) {
+				this.hidePlaceholder();
+			} else {
+				this.showPlaceholder();
+			}
+		};
+
+		bindPlaceholderToSearchInput = () => {
+			const searchInput = this.querySelector<HTMLInputElement>(".pagefind-ui__search-input");
+			if (!searchInput) return;
+			if (searchInput.dataset.placeholderBound === "true") return;
+			searchInput.dataset.placeholderBound = "true";
+
+			searchInput.addEventListener("input", () => this.syncPlaceholder(), {
+				signal: this.#controller.signal,
+			});
+
+			// Pagefind's clear button doesn't consistently emit an input event
+			const clearButton = this.querySelector<HTMLButtonElement>(".pagefind-ui__search-clear");
+			if (clearButton && clearButton.dataset.placeholderBound !== "true") {
+				clearButton.dataset.placeholderBound = "true";
+				clearButton.addEventListener(
+					"click",
+					() => {
+						// Let Pagefind clear the value first
+						setTimeout(() => this.syncPlaceholder(), 0);
+					},
+					{ signal: this.#controller.signal },
+				);
 			}
 		};
 

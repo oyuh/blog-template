@@ -19,6 +19,8 @@ export const getStaticPaths = (async ({ paginate }) => {
 	});
 }) satisfies GetStaticPaths;
 
+export const prerender = true;
+
 interface Props {
 	page: Page<CollectionEntry<"post">>;
 	uniqueTags: string[];

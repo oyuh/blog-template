@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import mdx from "@astrojs/mdx";
+import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import tailwind from "@tailwindcss/vite";
@@ -25,9 +26,14 @@ import rehypeInlineImages from "./src/plugins/rehype-inline-images";
 
 import react from "@astrojs/react";
 
+// `@astrojs/vercel` intentionally does not support `astro preview`.
+// Our `pnpm preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
+const useNodeAdapter = process.env.ASTRO_ADAPTER === "node";
+
 export default defineConfig({
 	site: siteConfig.url,
-	adapter: vercel(),
+	output: "server",
+	adapter: useNodeAdapter ? node({ mode: "standalone" }) : vercel(),
 	image: {
 		service: { entrypoint: "astro/assets/services/noop" },
 	},

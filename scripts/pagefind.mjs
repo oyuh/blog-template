@@ -2,9 +2,24 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 
 function resolveSiteDir() {
+	const adapter = process.env.ASTRO_ADAPTER;
+
+	// When building for local preview with `@astrojs/node`, output is under `dist/`.
+	// Prefer `dist/client` (where prerendered HTML lives) over `dist`.
+	if (adapter === "node") {
+		const distClient = "dist/client";
+		if (existsSync(distClient)) return distClient;
+		const dist = "dist";
+		if (existsSync(dist)) return dist;
+	}
+
 	// Astro + @astrojs/vercel writes static assets here.
 	const vercelStatic = ".vercel/output/static";
 	if (existsSync(vercelStatic)) return vercelStatic;
+
+	// If not using Vercel output, prefer dist/client when it exists.
+	const distClient = "dist/client";
+	if (existsSync(distClient)) return distClient;
 
 	// Default Astro output directory.
 	const dist = "dist";
