@@ -1,0 +1,255 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+import pkg from "../../package.json";
+
+const meta = {
+	description: "Site information, package versions, design details, and analytics overview",
+	title: "Info & Stats",
+};
+
+const websiteId = "81d211e4-2c57-43aa-ae8e-86db227aacf9";
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+// SOFT IMPORT (template-safe): this section exists on my private site, but can be
+// removed from the public template repo by deleting `InfoStatsChangelog.astro`.
+const infoStatsChangelogModules = import.meta.glob("../components/InfoStatsChangelog.astro", { eager: true });
+const InfoStatsChangelog = (infoStatsChangelogModules["../components/InfoStatsChangelog.astro"] as unknown as { default?: AstroComponent })?.default;
+
+// SOFT IMPORT (template-safe): Umami widget is optional in the public template repo.
+const umamiIslandModules = import.meta.glob("../components/UmamiStatsIsland.astro", { eager: true });
+const UmamiStatsIsland = (umamiIslandModules["../components/UmamiStatsIsland.astro"] as unknown as { default?: AstroComponent })?.default;
+
+// Main dependencies to highlight
+const mainPackages = {
+	"Astro": pkg.dependencies.astro,
+	"React": pkg.dependencies.react,
+	"Tailwind CSS": pkg.devDependencies.tailwindcss,
+	"TypeScript": pkg.devDependencies.typescript,
+	"Framer Motion": pkg.dependencies["framer-motion"],
+	"Vercel Analytics": pkg.dependencies["@vercel/analytics"],
+};
+
+// Design tokens from global.css
+const colorTokens = {
+	light: {
+		"Background": "oklch(98.48% 0 0)",
+		"Text": "oklch(26.99% 0.0096 235.05)",
+		"Accent": "oklch(57.24% 0.1 238.12)",
+		"Accent Dark": "oklch(47.24% 0.1 238.12)",
+	},
+	dark: {
+		"Background": "oklch(0.24 0.0045 265.31)",
+		"Text": "oklch(83.54% 0 264)",
+		"Accent": "oklch(57.24% 0.1 238.12)",
+		"Accent Dark": "oklch(52% 0.1 238.12)",
+	},
+};
+---
+
+<PageLayout meta={meta}>
+	<div class="w-full">
+		<div class="mb-8">
+			<h1 class="title mb-2 text-5xl font-bold">Info & Stats</h1>
+			<p class="text-lg opacity-80">
+				Technical details, design system, and analytics overview
+			</p>
+		</div>
+
+		<!-- Package Versions -->
+		<section class="mb-12">
+			<h2 class="mb-4 text-3xl font-bold">Package Versions</h2>
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+				{
+					Object.entries(mainPackages).map(([name, version]) => (
+						<div class="rounded-lg border border-accent/20 bg-global-bg p-4 shadow-sm">
+							<h3 class="mb-1 font-semibold">{name}</h3>
+							<code class="text-sm text-accent">{version}</code>
+						</div>
+					))
+				}
+			</div>
+			<details class="mt-6">
+				<summary class="cursor-pointer text-sm font-semibold opacity-70 hover:opacity-100">
+					View All Dependencies
+				</summary>
+				<div class="mt-4 grid gap-2 text-sm">
+					<div class="rounded border border-accent/10 p-4">
+						<h4 class="mb-2 font-semibold">Production Dependencies</h4>
+						<ul class="grid gap-1 sm:grid-cols-2">
+							{
+								Object.entries(pkg.dependencies)
+									.sort(([a], [b]) => a.localeCompare(b))
+									.map(([name, version]) => (
+										<li class="font-mono text-xs">
+											<span class="opacity-70">{name}:</span> {version}
+										</li>
+									))
+							}
+						</ul>
+					</div>
+					<div class="rounded border border-accent/10 p-4">
+						<h4 class="mb-2 font-semibold">Dev Dependencies</h4>
+						<ul class="grid gap-1 sm:grid-cols-2">
+							{
+								Object.entries(pkg.devDependencies)
+									.sort(([a], [b]) => a.localeCompare(b))
+									.map(([name, version]) => (
+										<li class="font-mono text-xs">
+											<span class="opacity-70">{name}:</span> {version}
+										</li>
+									))
+							}
+						</ul>
+					</div>
+				</div>
+			</details>
+		</section>
+
+		<!-- Design System -->
+		<section class="mb-12">
+			<h2 class="mb-4 text-3xl font-bold">Design System</h2>
+
+			<!-- Color Palette -->
+			<div class="mb-6">
+				<h3 class="mb-3 text-xl font-semibold">Color Palette</h3>
+				<div class="grid gap-4 lg:grid-cols-2">
+					<!-- Light Theme -->
+					<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+						<h4 class="mb-3 font-semibold">Light Theme</h4>
+						<div class="space-y-2">
+							{
+								Object.entries(colorTokens.light).map(([name, value]) => (
+									<div class="flex items-center gap-3">
+										<div
+											class="h-10 w-10 rounded border border-accent/30"
+											style={`background-color: ${value}`}
+										/>
+										<div>
+											<div class="text-sm font-medium">{name}</div>
+											<code class="text-xs opacity-70">{value}</code>
+										</div>
+									</div>
+								))
+							}
+						</div>
+					</div>
+
+					<!-- Dark Theme -->
+					<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+						<h4 class="mb-3 font-semibold">Dark Theme</h4>
+						<div class="space-y-2">
+							{
+								Object.entries(colorTokens.dark).map(([name, value]) => (
+									<div class="flex items-center gap-3">
+										<div
+											class="h-10 w-10 rounded border border-accent/30"
+											style={`background-color: ${value}`}
+										/>
+										<div>
+											<div class="text-sm font-medium">{name}</div>
+											<code class="text-xs opacity-70">{value}</code>
+										</div>
+									</div>
+								))
+							}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Typography -->
+			<div class="mb-6">
+				<h3 class="mb-3 text-xl font-semibold">Typography</h3>
+				<div class="grid gap-4 sm:grid-cols-3">
+					<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+						<h4 class="mb-1 text-sm font-semibold opacity-70">Main Font</h4>
+						<p class="text-lg font-medium" style="font-family: 'Atkinson Hyperlegible', system-ui, sans-serif;">
+							Atkinson Hyperlegible
+						</p>
+					</div>
+					<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+						<h4 class="mb-1 text-sm font-semibold opacity-70">Code Font</h4>
+						<p class="text-lg font-medium font-mono">
+							Atkinson Hyperlegible Mono
+						</p>
+					</div>
+					<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+						<h4 class="mb-1 text-sm font-semibold opacity-70">Fallback</h4>
+						<p class="text-lg font-medium" style="font-family: system-ui, sans-serif;">
+							system-ui, sans-serif
+						</p>
+					</div>
+				</div>
+			</div>
+
+			<!-- Design Principles -->
+			<div>
+				<h3 class="mb-3 text-xl font-semibold">Design Philosophy</h3>
+				<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+					<ul class="space-y-2 text-sm">
+						<li class="flex items-start gap-2">
+							<span class="text-accent">•</span>
+							<span
+								><strong>Accessibility First:</strong> WCAG AA compliant with Atkinson Hyperlegible
+								font for maximum readability</span
+							>
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="text-accent">•</span>
+							<span
+								><strong>Color System:</strong> OKLCH color space for perceptually uniform colors
+								across themes</span
+							>
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="text-accent">•</span>
+							<span
+								><strong>Responsive Design:</strong> Mobile-first approach with fluid typography
+								and spacing</span
+							>
+						</li>
+						<li class="flex items-start gap-2">
+							<span class="text-accent">•</span>
+							<span
+								><strong>Performance:</strong> Static-first with hydration islands for
+								interactivity</span
+							>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</section>
+
+		<!-- Analytics Overview -->
+		<section class="mb-12">
+			<h2 class="mb-4 text-3xl font-bold">Live Analytics</h2>
+			<div class="rounded-lg border border-accent/20 bg-global-bg p-6">
+				<p class="mb-2 opacity-80">
+					This site uses <strong>Umami Analytics</strong> for privacy-friendly, open-source analytics tracking.
+				</p>
+				<p class="mb-6 text-sm opacity-60">
+					Data refreshes every minute. Click "Refresh" for the latest stats from Umami.
+				</p>
+				{UmamiStatsIsland && <UmamiStatsIsland websiteId={websiteId} />}
+			</div>
+		</section>
+
+		<!-- Build Info -->
+		<section>
+			<h2 class="mb-4 text-3xl font-bold">Build Information</h2>
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+					<h3 class="mb-2 font-semibold">Site Version</h3>
+					<p class="text-2xl font-bold text-accent">{pkg.version}</p>
+				</div>
+				<div class="rounded-lg border border-accent/20 bg-global-bg p-4">
+					<h3 class="mb-2 font-semibold">Build Tool</h3>
+					<p class="text-lg font-medium">Astro {pkg.dependencies.astro}</p>
+				</div>
+			</div>
+		</section>
+
+		{InfoStatsChangelog && <InfoStatsChangelog />}
+
+	</div>
+</PageLayout>

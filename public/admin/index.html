@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>Content Manager - Decap CMS</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📝%3C/text%3E%3C/svg%3E" />
+  <style>
+    /* NUCLEAR DARK MODE - Force dark on EVERYTHING */
+
+    /* Base */
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      background: #0d0d0d !important;
+      color: #e5e7eb !important;
+    }
+
+    /* Force ALL elements to have dark background by default */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: #3a3a3a #0d0d0d;
+    }
+
+    *:not(header):not([class*="Header"]):not(button[class*="primary"]):not([class*="ButtonPrimary"]) {
+      background-color: #0d0d0d !important;
+      color: #e5e7eb !important;
+    }
+
+    /* All containers */
+    #nc-root,
+    div, section, article, main, aside, nav,
+    [class*="App"], [class*="Layout"], [class*="Container"],
+    [class*="Wrapper"], [class*="Panel"], [class*="Card"],
+    [class*="Modal"], [class*="Dropdown"], [class*="Menu"],
+    [class*="List"], [class*="Item"], [class*="Entry"],
+    [class*="Collection"], [class*="Editor"], [class*="Widget"],
+    [class*="Control"], [class*="Field"], [class*="Object"] {
+      background: #0d0d0d !important;
+      color: #e5e7eb !important;
+    }
+
+    /* Sidebar - slightly lighter */
+    [class*="Sidebar"], [class*="SidebarContainer"], nav {
+      background: #1a1a1a !important;
+      border-right: 1px solid #2a2a2a !important;
+    }
+
+    /* Header - purple gradient */
+    header, [class*="AppHeader"], [class*="Header"], [class*="TopBar"] {
+      background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+      border-bottom: 1px solid #2a2a2a !important;
+      color: white !important;
+    }
+
+    header *, [class*="Header"] * {
+      color: white !important;
+    }
+
+    /* ALL INPUT FIELDS - SUPER AGGRESSIVE */
+    input, textarea, select,
+    input[type="text"], input[type="email"], input[type="password"],
+    input[type="number"], input[type="search"], input[type="date"],
+    input[type="datetime-local"], input[type="url"],
+    [class*="Input"], [class*="TextField"], [class*="TextArea"],
+    [class*="Select"], [contenteditable="true"],
+    [role="textbox"], [role="combobox"] {
+      background: #0d0d0d !important;
+      background-color: #0d0d0d !important;
+      border: 1px solid #2a2a2a !important;
+      color: #e5e7eb !important;
+      padding: 0.5rem !important;
+      border-radius: 4px !important;
+    }
+
+    /* Input focus states */
+    input:focus, textarea:focus, select:focus, [contenteditable="true"]:focus {
+      border-color: #4f46e5 !important;
+      outline: none !important;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.3) !important;
+      background: #0d0d0d !important;
+    }
+
+    /* Placeholders */
+    ::placeholder, ::-webkit-input-placeholder {
+      color: #6b7280 !important;
+      opacity: 1 !important;
+    }
+
+    /* FORCE any white backgrounds to dark */
+    [style*="background: white"],
+    [style*="background: #fff"],
+    [style*="background: #ffffff"],
+    [style*="background-color: white"],
+    [style*="background-color: #fff"],
+    [style*="background-color: #ffffff"],
+    [style*="background-color: rgb(255, 255, 255)"],
+    [style*="backgroundColor: white"],
+    [style*="backgroundColor:#fff"] {
+      background: #0d0d0d !important;
+      background-color: #0d0d0d !important;
+    }
+
+    /* Buttons - default */
+    button, [class*="Button"], [role="button"], a[class*="Button"] {
+      background: #2a2a2a !important;
+      color: #e5e7eb !important;
+      border: 1px solid #3a3a3a !important;
+      padding: 0.5rem 1rem !important;
+      border-radius: 4px !important;
+      cursor: pointer !important;
+    }
+
+    button:hover, [class*="Button"]:hover {
+      background: #3a3a3a !important;
+      border-color: #4a4a4a !important;
+    }
+
+    /* Primary buttons */
+    button[class*="primary"], button[class*="Primary"],
+    [class*="ButtonPrimary"], [class*="Button-primary"] {
+      background: #4f46e5 !important;
+      background-color: #4f46e5 !important;
+      border-color: #4f46e5 !important;
+      color: white !important;
+    }
+
+    button[class*="primary"]:hover, [class*="ButtonPrimary"]:hover {
+      background: #4338ca !important;
+      border-color: #4338ca !important;
+    }
+
+    /* Labels */
+    label, [class*="Label"], [class*="Hint"],
+    [class*="FieldLabel"], [class*="ControlLabel"] {
+      color: #d1d5db !important;
+      font-weight: 500 !important;
+      margin-bottom: 0.25rem !important;
+      display: block !important;
+    }
+
+    /* Text elements */
+    h1, h2, h3, h4, h5, h6 {
+      color: #f3f4f6 !important;
+    }
+
+    p, span, div:not([class*="Button"]) {
+      color: #e5e7eb !important;
+    }
+
+    /* Links */
+    a:not([class*="Button"]) {
+      color: #818cf8 !important;
+      text-decoration: none !important;
+    }
+
+    a:not([class*="Button"]):hover {
+      color: #a5b4fc !important;
+      text-decoration: underline !important;
+    }
+
+    /* Cards and panels */
+    [class*="Card"], [class*="Panel"],
+    [class*="EntryCard"], [class*="ListCard"],
+    [class*="WorkflowCard"] {
+      background: #1a1a1a !important;
+      border: 1px solid #2a2a2a !important;
+      border-radius: 6px !important;
+      padding: 1rem !important;
+    }
+
+    [class*="Card"]:hover, [class*="EntryCard"]:hover {
+      background: #222 !important;
+      border-color: #3a3a3a !important;
+    }
+
+    /* Markdown/Code editor */
+    [class*="MarkdownControl"], [class*="RawEditor"],
+    .CodeMirror, .cm-editor {
+      background: #0a0a0a !important;
+      color: #e5e7eb !important;
+      border: 1px solid #2a2a2a !important;
+      border-radius: 4px !important;
+    }
+
+    .CodeMirror-gutters {
+      background: #0f0f0f !important;
+      border-right: 1px solid #2a2a2a !important;
+    }
+
+    .CodeMirror-linenumber {
+      color: #6b7280 !important;
+    }
+
+    .CodeMirror-cursor {
+      border-left-color: #e5e7eb !important;
+    }
+
+    /* Rich text editor */
+    [class*="RichText"] [contenteditable="true"],
+    [class*="EditorContent"], [class*="ProseMirror"] {
+      background: #0d0d0d !important;
+      color: #e5e7eb !important;
+      min-height: 200px !important;
+    }
+
+    /* Tabs */
+    [class*="TabButton"], [class*="Tab"], [role="tab"] {
+      background: #1a1a1a !important;
+      border: 1px solid #2a2a2a !important;
+      color: #9ca3af !important;
+      padding: 0.5rem 1rem !important;
+    }
+
+    [class*="TabButton"][class*="active"], [class*="Tab"][class*="active"],
+    [role="tab"][aria-selected="true"] {
+      background: #4f46e5 !important;
+      background-color: #4f46e5 !important;
+      color: white !important;
+      border-color: #4f46e5 !important;
+    }
+
+    /* Toggle switches / checkboxes */
+    input[type="checkbox"], [class*="Toggle"], [class*="Switch"] {
+      background: #2a2a2a !important;
+      border: 1px solid #3a3a3a !important;
+      accent-color: #4f46e5 !important;
+    }
+
+    input[type="checkbox"]:checked {
+      background: #4f46e5 !important;
+      border-color: #4f46e5 !important;
+    }
+
+    /* Dropdowns and menus */
+    [class*="Menu"], [class*="Dropdown"],
+    [class*="Select"] [class*="menu"],
+    select {
+      background: #1a1a1a !important;
+      border: 1px solid #2a2a2a !important;
+      color: #e5e7eb !important;
+    }
+
+    [class*="MenuItem"], [class*="Option"], option {
+      background: #1a1a1a !important;
+      color: #e5e7eb !important;
+      padding: 0.5rem !important;
+    }
+
+    [class*="MenuItem"]:hover, [class*="Option"]:hover {
+      background: #2a2a2a !important;
+    }
+
+    /* Image/File upload areas */
+    [class*="ImagePreview"], [class*="FilePreview"],
+    [class*="MediaPreview"], [class*="AssetProxy"],
+    [class*="ImageControl"], [class*="FileControl"] {
+      background: #1a1a1a !important;
+      border: 1px dashed #3a3a3a !important;
+      border-radius: 4px !important;
+      padding: 1rem !important;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+      background: #0d0d0d !important;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #0d0d0d !important;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #3a3a3a !important;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #4a4a4a !important;
+    }
+
+    /* Preview pane */
+    [class*="PreviewPane"], iframe {
+      background: #0d0d0d !important;
+      border: 1px solid #2a2a2a !important;
+    }
+
+    /* Date picker */
+    [class*="DatePicker"], [class*="Calendar"], [class*="DateControl"] {
+      background: #0d0d0d !important;
+      border: 1px solid #2a2a2a !important;
+      color: #e5e7eb !important;
+    }
+
+    /* Search */
+    [class*="SearchInput"], [class*="SearchBar"], [class*="Filter"] {
+      background: #0d0d0d !important;
+      border: 1px solid #2a2a2a !important;
+      color: #e5e7eb !important;
+    }
+
+    /* Toolbar */
+    [class*="Toolbar"], [class*="EditorToolbar"], [class*="ControlPane"] {
+      background: #1a1a1a !important;
+      border-bottom: 1px solid #2a2a2a !important;
+      padding: 0.5rem !important;
+    }
+
+    /* Modals */
+    [class*="Modal"], [class*="Dialog"], [class*="Overlay"] {
+      background: #0d0d0d !important;
+      border: 1px solid #2a2a2a !important;
+      border-radius: 8px !important;
+    }
+
+    [class*="ModalBackdrop"], [class*="Backdrop"] {
+      background: rgba(0, 0, 0, 0.8) !important;
+    }
+  </style>
+</head>
+  <script src="https://unpkg.com/decap-cms@^3.3.3/dist/decap-cms.js"></script>
+
+  <script>
+    // Decap CMS configuration and initialization
+    if (window.CMS) {
+      console.log('✅ Decap CMS loaded successfully');
+      console.log('📦 Version: 3.3.3+');
+      console.log('🌙 Dark mode enabled');
+
+      // Register preview styles
+      CMS.registerPreviewStyle('/admin/preview.css');
+    }
+  </script>
+</body>
+</html>

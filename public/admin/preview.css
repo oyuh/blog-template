@@ -1,0 +1,328 @@
+/* Preview styles that EXACTLY match the blog's dark mode theme */
+
+/* Import Atkinson Hyperlegible font (matching your site) */
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+/* CSS Variables matching your site's dark theme */
+:root {
+  /* Dark mode colors from your global.css */
+  --color-global-bg: oklch(0.24 0.0045 265.31);
+  --color-global-text: oklch(83.54% 0 264);
+  --color-link: oklch(57.24% 0.1 238.12);
+  --color-accent: oklch(57.24% 0.1 238.12);
+  --color-accent-dark: oklch(52% 0.1 238.12);
+  --color-accent-2: oklch(94.66% 0 0);
+  --color-quote: oklch(57.24% 0.1 238.12);
+
+  /* Converted to regular colors for better compatibility */
+  --bg: #161620;
+  --text: #d5d5e0;
+  --accent: #5782ff;
+  --accent-2: #f1f1f3;
+  --border: #666;
+}
+
+/* Base styles matching your blog */
+body {
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-family: 'Atkinson Hyperlegible', system-ui, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  padding: 2rem !important;
+  max-width: 65ch !important;
+  margin: 0 auto !important;
+}
+
+/* Headings with your exact styling */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--accent-2) !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+  position: relative !important;
+}
+
+h1 {
+  font-size: 2.25em !important;
+  margin-bottom: 0.8em !important;
+}
+
+h1 {
+  font-size: 2.25em !important;
+  margin-bottom: 0.8em !important;
+}
+
+h2 {
+  font-size: 1.875em !important;
+}
+
+h3 {
+  font-size: 1.5em !important;
+}
+
+h4 {
+  font-size: 1.25em !important;
+}
+
+h5, h6 {
+  font-size: 1.125em !important;
+}
+
+/* Paragraph styling */
+p {
+  margin-bottom: 1em !important;
+  color: var(--text) !important;
+}
+
+/* Links matching your site's style */
+a {
+  color: var(--text) !important;
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+  text-decoration-color: var(--accent) !important;
+  transition: all 0.2s ease !important;
+}
+
+a:hover {
+  text-decoration-thickness: 2px !important;
+  text-decoration-color: var(--accent) !important;
+  color: var(--accent) !important;
+}
+
+/* Code styling - matching your Atkinson Hyperlegible Mono */
+code {
+  font-family: 'Courier New', Courier, monospace !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 2px !important;
+  border: 1px dotted var(--border) !important;
+  font-size: 0.9em !important;
+  color: var(--text) !important;
+}
+
+/* Code blocks */
+pre {
+  background: #0a0a0a !important;
+  color: var(--text) !important;
+  padding: 1em !important;
+  border-radius: 6px !important;
+  overflow-x: auto !important;
+  margin: 1.5em 0 !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  border: none !important;
+  color: inherit !important;
+}
+
+/* Blockquotes matching your site */
+blockquote {
+  border-left: 3px solid var(--accent) !important;
+  margin: 1.5em 0 !important;
+  padding: 0.5em 1em !important;
+  background: rgba(87, 130, 255, 0.05) !important;
+  font-style: italic !important;
+  color: var(--quote) !important;
+}
+
+blockquote p {
+  color: var(--text) !important;
+}
+
+/* Lists */
+ul, ol {
+  margin: 1em 0 !important;
+  padding-left: 2em !important;
+  color: var(--text) !important;
+}
+
+li {
+  margin: 0.5em 0 !important;
+  color: var(--text) !important;
+}
+
+ul li::marker {
+  color: var(--text) !important;
+}
+
+ol li::marker {
+  color: var(--text) !important;
+  font-weight: 600 !important;
+}
+
+/* Images */
+img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 6px !important;
+  margin: 1.5em 0 !important;
+}
+
+/* Tables matching your site */
+table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1.5em 0 !important;
+  color: var(--text) !important;
+}
+
+th, td {
+  border: 1px dashed var(--border) !important;
+  padding: 0.75em !important;
+  text-align: left !important;
+  color: var(--text) !important;
+}
+
+th {
+  background: rgba(255, 255, 255, 0.03) !important;
+  font-weight: 700 !important;
+  border-bottom: 1px dashed var(--border) !important;
+}
+
+tbody tr {
+  border-bottom: none !important;
+}
+
+tfoot {
+  border-top: 1px dashed var(--border) !important;
+}
+
+/* Horizontal rule */
+hr {
+  border: none !important;
+  border-top: 0.5px dashed var(--border) !important;
+  margin: 2em 0 !important;
+}
+
+/* Strong/Bold */
+strong, b {
+  font-weight: 700 !important;
+  color: var(--text) !important;
+}
+
+/* Emphasis/Italic */
+em, i {
+  font-style: italic !important;
+  color: var(--text) !important;
+}
+
+/* Keyboard keys */
+kbd {
+  background: var(--text) !important;
+  color: var(--bg) !important;
+  padding: 0.2em 0.4em !important;
+  border-radius: 3px !important;
+  font-family: 'Courier New', Courier, monospace !important;
+  font-size: 0.9em !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Selection styling matching your site */
+::selection {
+  background-color: var(--accent) !important;
+  color: var(--bg) !important;
+}
+
+::-moz-selection {
+  background-color: var(--accent) !important;
+  color: var(--bg) !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(213, 213, 224, 0.3) !important;
+  border-radius: 4px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(213, 213, 224, 0.5) !important;
+}
+
+/* Ensure everything uses dark theme */
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(213, 213, 224, 0.3) transparent !important;
+}
+
+/* Admonition blocks (note, tip, warning, etc.) */
+.admonition {
+  margin: 1.5em 0 !important;
+  padding: 1em !important;
+  border-left: 3px solid var(--accent) !important;
+  background: rgba(87, 130, 255, 0.05) !important;
+  border-radius: 4px !important;
+}
+
+.admonition-title {
+  font-weight: 700 !important;
+  color: var(--accent) !important;
+  margin-bottom: 0.5em !important;
+}
+
+/* Footnotes */
+.footnote-ref {
+  color: var(--accent) !important;
+  text-decoration: none !important;
+}
+
+.footnote-ref:hover {
+  text-decoration: underline !important;
+}
+
+.footnotes {
+  margin-top: 3em !important;
+  padding-top: 1em !important;
+  border-top: 1px dashed var(--border) !important;
+  font-size: 0.9em !important;
+}
+
+.footnotes ol {
+  padding-left: 1.5em !important;
+}
+
+.footnotes li {
+  margin: 0.5em 0 !important;
+}
+
+/* Task lists */
+input[type="checkbox"] {
+  margin-right: 0.5em !important;
+  accent-color: var(--accent) !important;
+}
+
+/* Definition lists */
+dl {
+  margin: 1em 0 !important;
+}
+
+dt {
+  font-weight: 700 !important;
+  color: var(--accent-2) !important;
+  margin-top: 1em !important;
+}
+
+dd {
+  margin-left: 2em !important;
+  margin-bottom: 1em !important;
+  color: var(--text) !important;
+}
+
+/* Ensure all text is visible in dark mode */
+h1, h2, h3, h4, h5, h6, p, li, td, th, blockquote, code, pre, strong, em, span, div {
+  color: inherit !important;
+}

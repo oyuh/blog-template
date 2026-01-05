@@ -1,0 +1,48 @@
+---
+import type { TocItem } from "@/utils/generateToc";
+
+interface Props {
+	heading: TocItem;
+}
+
+const {
+	heading: { children, depth, slug, text },
+} = Astro.props;
+---
+
+<li class="relative">
+	<!-- IDE-style indentation lines -->
+	{depth > 1 && (
+		<div class="absolute left-0 top-0 bottom-0 flex">
+			{Array.from({ length: depth - 1 }, (_, i) => (
+				<div
+					class="w-4 border-l border-global-text/10 first:border-l-0"
+					style={`margin-left: ${i * 16}px`}
+				></div>
+			))}
+		</div>
+	)}
+
+	<a
+		class={`
+			block py-2 px-3 text-sm text-global-text hover:text-accent transition-all duration-200 rounded-lg hover:bg-accent/8 hover:scale-[1.02] relative leading-relaxed
+			${depth === 1 ? 'font-semibold text-accent-2 text-base' : ''}
+			${depth === 2 ? 'font-medium' : ''}
+			${depth >= 3 ? 'text-global-text/75 text-xs' : ''}
+		`}
+		style={`margin-left: ${Math.max(0, (depth - 1) * 18)}px; padding-left: ${depth > 1 ? '24px' : '12px'}`}
+		href={`#${slug}`}
+		data-toc-link
+		data-depth={depth}
+	>
+		{text}
+	</a>
+
+	{!!children.length && (
+		<ol>
+			{children.map((subheading) => (
+				<Astro.self heading={subheading} />
+			))}
+		</ol>
+	)}
+</li>

@@ -1,0 +1,6 @@
+---
+const { icon, alt = "", className = "w-5 h-5" } = Astro.props;
+---
+<span class={`align-middle ${className}`}>
+  <img src={`https://api.iconify.design/${icon}.svg`} alt={alt} loading="lazy" />
+</span>

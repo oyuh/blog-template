@@ -1,0 +1,117 @@
+---
+import BaseHead from "@/components/BaseHead.astro";
+// import CookieConsent from "@/components/CookieConsent.astro"; // DISABLED: Cookie consent temporarily disabled
+import SkipLink from "@/components/SkipLink.astro";
+import ThemeProviderOptional from "@/components/ThemeProviderOptional.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Header from "@/components/layout/Header.astro";
+import { siteConfig } from "@/site.config";
+import type { SiteMeta } from "@/types";
+import Analytics from "@vercel/analytics/astro";
+import "aos/dist/aos.css";
+
+// SOFT IMPORT (template-safe): holiday overlay exists on my private site,
+// but the public template repo may omit it entirely.
+const holidayOverlayIslandModules = import.meta.glob("../components/HolidayOverlayIsland.astro", { eager: true });
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+const HolidayOverlayIsland = (holidayOverlayIslandModules["../components/HolidayOverlayIsland.astro"] as unknown as { default?: AstroComponent })?.default;
+
+interface Props {
+	meta: SiteMeta;
+	disableHolidayOverlay?: boolean;
+	disableDitherBackground?: boolean;
+}
+
+const {
+	meta: { articleDate, description = siteConfig.description, ogImage, title },
+	disableHolidayOverlay = false,
+} = Astro.props;
+
+const enableVercelAnalytics =
+	(import.meta.env.PUBLIC_ENABLE_VERCEL_ANALYTICS ?? "").toLowerCase() === "true" ||
+	import.meta.env.VERCEL === "1";
+---
+<html class="scroll-smooth" lang={siteConfig.lang}>
+	<head>
+		<BaseHead articleDate={articleDate} description={description} ogImage={ogImage} title={title} />
+
+		{enableVercelAnalytics && <Analytics />}
+
+		<script is:inline>
+			(function () {
+				function sendTitle() {
+					var title = document.title || "lawsonhart.me";
+					// send to whoever is framing us
+					window.parent.postMessage(
+						{ type: "page-title", title: title },
+						"*" // you can tighten this later
+					);
+				}
+				sendTitle();
+				document.addEventListener("visibilitychange", sendTitle);
+			})();
+		</script>
+	</head>
+	<body
+		class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-5xl flex-col px-4 font-sans text-sm font-normal antialiased sm:px-8"
+	>
+		<ThemeProviderOptional />
+		<SkipLink />
+        <!-- <CookieConsent/> DISABLED: Cookie consent temporarily disabled -->
+		{HolidayOverlayIsland && <HolidayOverlayIsland disabled={disableHolidayOverlay} />}
+		<Header />
+    {/* {showBanner && (
+			<Banner
+				client:load
+				id="working-on-games"
+				message={message}
+				type="info"
+				closable={true}
+				link="https://github.com/oyuh/games"
+			/>
+    )} */}
+		<main id="main" style="padding-top: calc(var(--header-clearance, 72px) * 0.5);">
+			<slot />
+		</main>
+		<Footer />
+
+		<script>
+			const loadAOS = (() => {
+				let loader: Promise<any> | undefined;
+				return () => {
+					if (!loader) {
+						loader = import('aos').then((mod: any) => mod.default ?? mod);
+					}
+					return loader;
+				};
+			})();
+
+			const initializeAOS = async () => {
+				const AOS = await loadAOS();
+				if (!AOS) {
+					return;
+				}
+				AOS.init({
+					offset: 120,
+					duration: 700,
+					easing: 'ease-out-cubic',
+					once: true,
+					mirror: false,
+				});
+			};
+
+			if (document.readyState === 'loading') {
+				document.addEventListener('DOMContentLoaded', () => void initializeAOS(), { once: true });
+			} else {
+				void initializeAOS();
+			}
+
+			document.addEventListener('astro:page-load', async () => {
+				const AOS = await loadAOS();
+				if (AOS?.refreshHard) {
+					AOS.refreshHard();
+				}
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,37 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+const meta = {
+  title: "Terms of Service",
+  description: "The rules for using this site. Last Updated: April 10, 2025",
+};
+---
+
+<PageLayout meta={meta}>
+  <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Terms of Service</h1>
+
+  <div class="prose prose-base dark:prose-invert max-w-none">
+    <p>Using this site means you agree to these terms. If you do not agree do not use it.</p>
+
+    <h2 class="text-accent-2">Use of the Site</h2>
+    <p>This site is for informational and entertainment purposes. Do not use it for illegal harmful abusive or disruptive activity.</p>
+
+    <h2 class="text-accent-2">Accounts</h2>
+    <p>If you create an account you are responsible for safeguarding credentials. I may remove or restrict accounts that violate these terms.</p>
+
+    <h2 class="text-accent-2">Content</h2>
+    <p>Content belongs to me (Lawson Hart) or appears with permission. Do not copy reuse or redistribute without permission.</p>
+
+    <h2 class="text-accent-2">Privacy</h2>
+    <p>See the <a href="/policy/privacy" class="text-accent hover:underline">Privacy Policy</a> for data handling details.</p>
+
+    <h2 class="text-accent-2">Termination</h2>
+    <p>I may suspend or block access for any reason especially violations.</p>
+
+    <h2 class="text-accent-2">External Links</h2>
+    <p>Linked third party sites are outside my control. I am not responsible for their content or conduct.</p>
+
+    <h2 class="text-accent-2">Changes</h2>
+    <p>Terms may change. The date above updates when they do.</p>
+  </div>
+</PageLayout>

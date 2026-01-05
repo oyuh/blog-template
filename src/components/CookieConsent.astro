@@ -1,0 +1,289 @@
+<!-- Desktop Cookie Consent Banner -->
+<div
+  id="cookie-consent"
+  class="fixed bottom-4 right-4 z-50 w-80 p-5 rounded-2xl shadow-2xl bg-global-bg/80 border border-white/20 backdrop-blur-xl transform translate-y-full opacity-0 transition-all duration-500 ease-out hidden md:block"
+  style="background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2);"
+>
+    <div class="flex flex-col gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                <h3 id="change-this" class="font-semibold text-base text-global-text">Cookie Consent</h3>
+            </div>
+            <p id="main-text" class="text-sm text-global-text/80 leading-relaxed">This website uses cookies to enhance your browsing experience and analyze site traffic.</p>
+            <a href="/policy" class="inline-flex items-center gap-1 text-sm mt-2 text-accent hover:text-accent/80 transition-colors group">
+                <span>Privacy Policy</span>
+                <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+
+        <div class="flex gap-3">
+            <button
+                id="accept-cookies"
+                class="flex-1 px-4 py-2.5 rounded-lg bg-accent/90 text-white font-medium hover:bg-accent transition-all duration-200 hover:scale-[1.02] shadow-lg"
+            >
+                Accept All
+            </button>
+            <button
+                id="decline-cookies"
+                class="flex-1 px-4 py-2.5 rounded-lg border border-white/20 text-global-text font-medium hover:bg-white/10 transition-all duration-200 hover:scale-[1.02] backdrop-blur-sm"
+            >
+                Decline
+            </button>
+        </div>
+        <div id="cookie-message" class="hidden text-sm p-3 text-center rounded-lg bg-white/10 backdrop-blur-sm border border-white/10"></div>
+    </div>
+</div>
+
+<!-- Mobile Cookie Button -->
+<button
+  id="mobile-cookie-button"
+  class="fixed bottom-20 left-6 z-50 flex h-14 w-14 items-center justify-center rounded-2xl bg-global-bg/80 border border-white/20 backdrop-blur-xl shadow-2xl transition-all duration-300 hover:scale-105 hover:bg-white/10 opacity-0 translate-y-full md:hidden"
+  style="background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2);"
+  aria-label="Cookie Consent"
+>
+  <svg class="w-6 h-6 text-accent" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+  </svg>
+</button>
+
+<!-- Mobile Cookie Modal -->
+<div
+  id="mobile-cookie-modal"
+  class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 md:hidden"
+>
+  <div class="bg-global-bg/90 w-full max-w-md mx-4 rounded-2xl shadow-2xl border border-white/20 backdrop-blur-xl transform translate-y-full transition-transform duration-300"
+       style="background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.2);">
+    <div class="p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+          <h3 id="mobile-change-this" class="font-semibold text-lg text-global-text">Cookie Consent</h3>
+        </div>
+        <button
+          id="mobile-close-modal"
+          class="p-2 rounded-lg text-global-text/60 hover:text-global-text hover:bg-white/10 transition-all duration-200"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="mb-6">
+        <p id="mobile-main-text" class="text-sm mb-3 text-global-text/80 leading-relaxed">This website uses cookies to enhance your browsing experience and analyze site traffic.</p>
+        <a href="/policy" class="inline-flex items-center gap-1 text-sm text-accent hover:text-accent/80 transition-colors group">
+          <span>Privacy Policy</span>
+          <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+      <div class="flex gap-3">
+        <button
+          id="mobile-accept-cookies"
+          class="flex-1 px-4 py-3 rounded-lg bg-accent/90 text-white font-medium hover:bg-accent transition-all duration-200 hover:scale-[1.02] shadow-lg"
+        >
+          Accept All
+        </button>
+        <button
+          id="mobile-decline-cookies"
+          class="flex-1 px-4 py-3 rounded-lg border border-white/20 text-global-text font-medium hover:bg-white/10 transition-all duration-200 hover:scale-[1.02] backdrop-blur-sm"
+        >
+          Decline
+        </button>
+      </div>
+
+      <div id="mobile-cookie-message" class="hidden text-sm p-3 mt-4 text-center rounded-lg bg-white/10 backdrop-blur-sm border border-white/10"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Desktop elements
+    const cookieConsent = document.getElementById('cookie-consent');
+    const acceptButton = document.getElementById('accept-cookies');
+    const declineButton = document.getElementById('decline-cookies');
+    const mainText = document.getElementById('main-text');
+    const changeThis = document.getElementById('change-this');
+
+    // Mobile elements
+    const mobileButton = document.getElementById('mobile-cookie-button');
+    const mobileModal = document.getElementById('mobile-cookie-modal');
+    const mobileAcceptButton = document.getElementById('mobile-accept-cookies');
+    const mobileDeclineButton = document.getElementById('mobile-decline-cookies');
+    const mobileMainText = document.getElementById('mobile-main-text');
+    const mobileChangeThis = document.getElementById('mobile-change-this');
+    const mobileCloseModal = document.getElementById('mobile-close-modal');
+
+    if (!cookieConsent || !acceptButton || !declineButton || !mobileButton || !mobileModal) return;
+
+    // Show appropriate UI based on consent status
+    // DISABLED: Cookie consent temporarily disabled
+    /*
+    if (!hasConsented) {
+      // Show desktop banner after delay
+      setTimeout(() => {
+        if (cookieConsent) {
+          cookieConsent.classList.remove('translate-y-full', 'opacity-0');
+        }
+      }, 1000);
+
+      // Show mobile button after delay
+      setTimeout(() => {
+        if (mobileButton) {
+          mobileButton.classList.remove('translate-y-full', 'opacity-0');
+        }
+      }, 1000);
+    }
+    */
+    // Don't show mobile button at all if consent was already given
+
+    function updateMobileButtonState(consentStatus: string) {
+      if (!mobileButton) return;
+
+      if (consentStatus === 'accepted') {
+        // Change to green glassmorphism for accepted state
+        mobileButton.style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.8) 0%, rgba(34, 197, 94, 0.6) 100%)';
+        mobileButton.style.borderColor = 'rgba(34, 197, 94, 0.4)';
+      } else if (consentStatus === 'declined') {
+        // Change to red glassmorphism for declined state
+        mobileButton.style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.8) 0%, rgba(239, 68, 68, 0.6) 100%)';
+        mobileButton.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+      }
+
+      // Show the button even if consent was given
+      mobileButton.classList.remove('translate-y-full', 'opacity-0');
+
+      // Auto-hide the button after 10 seconds when consent is given
+      if (consentStatus === 'accepted' || consentStatus === 'declined') {
+        setTimeout(() => {
+          if (mobileButton) {
+            mobileButton.classList.add('translate-y-full', 'opacity-0');
+          }
+        }, 10000); // 10 seconds
+      }
+    }    function disableButtons(isDesktop: boolean = true) {
+      const buttons = isDesktop ? [acceptButton, declineButton] : [mobileAcceptButton, mobileDeclineButton];
+      buttons.forEach(btn => {
+        if (btn) {
+          (btn as HTMLButtonElement).disabled = true;
+          btn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+      });
+    }
+
+  function showMessage(message: string, background?: string, isDesktop: boolean = true) {
+      const textEl = isDesktop ? mainText : mobileMainText;
+      const titleEl = isDesktop ? changeThis : mobileChangeThis;
+      const containerEl = isDesktop ? cookieConsent : mobileModal?.querySelector('.bg-global-bg\\/90');
+
+      if (textEl) textEl.innerText = '';
+      if (titleEl) titleEl.innerText = message;
+
+      if (containerEl && background) {
+        // Apply glassmorphism styling for success/error states
+        if (background.includes('green')) {
+          (containerEl as HTMLElement).style.background = 'linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(34, 197, 94, 0.1) 100%)';
+          (containerEl as HTMLElement).style.borderColor = 'rgba(34, 197, 94, 0.4)';
+        } else if (background.includes('red')) {
+          (containerEl as HTMLElement).style.background = 'linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%)';
+          (containerEl as HTMLElement).style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        }
+        (containerEl as HTMLElement).style.color = 'var(--theme-text)';
+      }
+    }
+
+    function hideBanner() {
+      if (cookieConsent) {
+        cookieConsent.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => {
+          cookieConsent.remove();
+        }, 300);
+      }
+    }
+
+    function hideMobileModal() {
+      if (mobileModal) {
+        mobileModal.classList.remove('opacity-100');
+        mobileModal.classList.add('opacity-0', 'pointer-events-none');
+        const modalContent = mobileModal.querySelector('.bg-global-bg');
+        if (modalContent) {
+          modalContent.classList.add('translate-y-full');
+        }
+      }
+    }
+
+    function showMobileModal() {
+      if (mobileModal) {
+        mobileModal.classList.remove('opacity-0', 'pointer-events-none');
+        mobileModal.classList.add('opacity-100');
+        const modalContent = mobileModal.querySelector('.bg-global-bg');
+        if (modalContent) {
+          modalContent.classList.remove('translate-y-full');
+        }
+      }
+    }
+
+    // Desktop event listeners
+    acceptButton?.addEventListener('click', () => {
+      localStorage.setItem('cookieConsent', 'accepted');
+      disableButtons(true);
+  showMessage("Lawson's website will save your cookie data.", "linear-gradient(313deg, rgba(29,33,30,1) 0%, rgba(29,30,33,1) 27%)", true);
+      setTimeout(hideBanner, 1500);
+      updateMobileButtonState('accepted');
+    });
+
+    declineButton?.addEventListener('click', () => {
+      disableButtons(true);
+  showMessage("Lawson's website will not save your cookie data.", "linear-gradient(313deg, rgba(33,29,29,1) 0%, rgba(29,30,33,1) 27%)", true);
+      setTimeout(hideBanner, 3500);
+      updateMobileButtonState('declined');
+    });
+
+    // Mobile event listeners
+    mobileButton?.addEventListener('click', () => {
+      const hasConsented = localStorage.getItem('cookieConsent');
+      if (!hasConsented) {
+        showMobileModal();
+      }
+    });
+
+    mobileCloseModal?.addEventListener('click', () => {
+      hideMobileModal();
+    });
+
+    mobileModal?.addEventListener('click', (e) => {
+      if (e.target === mobileModal) {
+        hideMobileModal();
+      }
+    });
+
+    mobileAcceptButton?.addEventListener('click', () => {
+      localStorage.setItem('cookieConsent', 'accepted');
+      disableButtons(false);
+  showMessage("Lawson's website will save your cookie data.", "linear-gradient(313deg, rgba(29,33,30,1) 0%, rgba(29,30,33,1) 27%)", false);
+
+      // Close modal immediately
+      hideMobileModal();
+
+      // Update button state and auto-hide after showing the color briefly
+      updateMobileButtonState('accepted');
+    });
+
+    mobileDeclineButton?.addEventListener('click', () => {
+      disableButtons(false);
+  showMessage("Lawson's website will not save your cookie data.", "linear-gradient(313deg, rgba(33,29,29,1) 0%, rgba(29,30,33,1) 27%)", false);
+
+      // Close modal immediately
+      hideMobileModal();
+
+      // Update button state and auto-hide after showing the color briefly
+      updateMobileButtonState('declined');
+    });
+  });
+</script>

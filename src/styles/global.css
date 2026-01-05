@@ -1,0 +1,639 @@
+/* would like to ignore ./src/pages/og-image/[slug].png.ts */
+@import "tailwindcss";
+/* config for tailwindcss-typography plugin */
+@config "../../tailwind.config.ts";
+
+@tailwind utilities;
+/* use a selector-based strategy for dark mode */
+@variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Animations for holiday toast notification */
+@keyframes slideInRight {
+	from {
+		opacity: 0;
+		transform: translateX(2rem);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes slideOutRight {
+	from {
+		opacity: 1;
+		transform: translateX(0);
+	}
+	to {
+		opacity: 0;
+		transform: translateX(2rem);
+	}
+}
+
+@keyframes shrinkWidth {
+	from {
+		transform: scaleX(1);
+	}
+	to {
+		transform: scaleX(0);
+	}
+}
+
+/* Shared toast styling (used by blog header-copy toast + holiday notifications) */
+.lawson-toast {
+	background: color-mix(in srgb, var(--color-global-bg) 88%, transparent);
+	color: var(--color-global-text);
+	border-radius: 0.75rem;
+	padding: 0.75rem 1.25rem;
+	font-size: 0.875rem;
+	font-weight: 600;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+	box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--color-global-text) 45%, transparent);
+	backdrop-filter: blur(14px);
+	-webkit-backdrop-filter: blur(14px);
+}
+
+/* Toast host animation/positioning (matches BlogPost copy toast) */
+.copy-toast {
+	position: fixed;
+	bottom: 2rem;
+	left: 50%;
+	transform: translateX(-50%) translateY(100px);
+	opacity: 0;
+	transition: opacity 0.2s ease, transform 0.2s ease;
+	pointer-events: none;
+	z-index: 9999;
+}
+
+.copy-toast.show {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0);
+}
+
+.lawson-toast :is(a) {
+	color: inherit;
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.lawson-toast :is(button) {
+	color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
+}
+
+.lawson-toast :is(button):hover {
+	color: var(--color-global-text);
+}
+
+.animate-slideInRight {
+	animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slideOutRight {
+	animation: slideOutRight 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+.animate-shrinkWidth {
+	animation: shrinkWidth 8s linear forwards;
+}
+
+/* you could refactor below to use light-dark(), depending on your target audience */
+@theme {
+	--color-global-bg: oklch(98.48% 0 0);
+	--color-global-text: oklch(26.99% 0.0096 235.05);
+	--color-link: oklch(57.24% 0.1 238.12);
+	--color-accent: oklch(57.24% 0.1 238.12);
+	/* Slightly darker variant of the main blue for badges */
+	--color-accent-dark: oklch(47.24% 0.1 238.12);
+	--color-accent-2: oklch(18.15% 0 0);
+	--color-quote: oklch(57.24% 0.1 238.12);
+}
+
+/* Atkinson Hyperlegible (main font) */
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-Regular-102a.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-Italic-102a.woff2") format("woff2");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-Bold-102a.woff2") format("woff2");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible";
+	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-BoldItalic-102a.woff2") format("woff2");
+	font-weight: 700;
+	font-style: italic;
+	font-display: swap;
+}
+
+/* Atkinson Hyperlegible Mono (code font) */
+@font-face {
+	font-family: "Atkinson Hyperlegible Mono";
+	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Regular.otf") format("opentype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible Mono";
+	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-RegularItalic.otf") format("opentype");
+	font-weight: 400;
+	font-style: italic;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible Mono";
+	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Medium.otf") format("opentype");
+	font-weight: 500;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible Mono";
+	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-SemiBold.otf") format("opentype");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "Atkinson Hyperlegible Mono";
+	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Bold.otf") format("opentype");
+	font-weight: 700;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Set main font */
+html,
+body {
+	font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+}
+
+/* Set code font */
+code,
+pre,
+kbd,
+samp {
+	font-family:
+		"Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Courier New", monospace;
+}
+
+@layer base {
+	html {
+		color-scheme: light dark;
+		accent-color: var(--color-accent);
+
+		&[data-theme="light"] {
+			color-scheme: light;
+		}
+
+		&[data-theme="dark"] {
+			color-scheme: dark;
+			--color-global-bg: oklch(0.24 0.0045 265.31);
+			--color-global-text: oklch(83.54% 0 264);
+			--color-link: oklch(57.24% 0.1 238.12);
+			--color-accent: oklch(57.24% 0.1 238.12);
+			/* Slightly darker variant tuned for dark backgrounds (still readable) */
+			--color-accent-dark: oklch(52% 0.1 238.12);
+			--color-accent-2: oklch(94.66% 0 0);
+			--color-quote: oklch(57.24% 0.1 238.12);
+		}
+	}
+
+	/* Add text selection styles */
+	::selection {
+		background-color: var(--color-accent);
+		color: white;
+	}
+
+	/* For Firefox */
+	::-moz-selection {
+		background-color: var(--color-accent);
+		color: white;
+	}
+
+	/* Dark mode specific selection */
+	[data-theme="dark"] ::selection {
+		background-color: var(--color-accent);
+		color: var(--color-global-bg);
+	}
+
+	[data-theme="dark"] ::-moz-selection {
+		background-color: var(--color-accent);
+		color: var(--color-global-bg);
+	}
+}
+
+@layer components {
+	.lawson-link {
+		@apply hover:decoration-link underline underline-offset-2 hover:decoration-2;
+	}
+
+	.title {
+		@apply text-accent-2 text-2xl font-semibold;
+	}
+
+	.admonition {
+		--admonition-color: var(--tw-prose-quotes);
+		@apply my-4 border-s-2 border-(--admonition-color) py-4 ps-4;
+
+		.admonition-title {
+			@apply my-0! flex items-center gap-2 text-base font-bold text-(--admonition-color) capitalize;
+			&:before {
+				@apply inline-block h-4 w-4 shrink-0 overflow-visible bg-(--admonition-color) align-middle content-[''];
+				mask-size: contain;
+				mask-position: center;
+				mask-repeat: no-repeat;
+			}
+		}
+
+		.admonition-content {
+			> :last-child {
+				@apply mb-0!;
+			}
+		}
+
+		&[data-admonition-type="note"] {
+			--admonition-color: var(--color-blue-400);
+			@apply bg-blue-400/5;
+
+			.admonition-title::before {
+				mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' width='16' height='16' aria-hidden='true'%3E%3Cpath fill='var(--admonitions-color-tip)' d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z'%3E%3C/path%3E%3C/svg%3E");
+			}
+		}
+
+		&[data-admonition-type="tip"] {
+			--admonition-color: var(--color-lime-500);
+			@apply bg-lime-500/5;
+
+			.admonition-title::before {
+				mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' width='16' height='16' aria-hidden='true'%3E%3Cpath d='M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z'%3E%3C/path%3E%3C/svg%3E");
+			}
+		}
+
+		&[data-admonition-type="important"] {
+			--admonition-color: var(--color-purple-400);
+			@apply bg-purple-400/5;
+
+			.admonition-title::before {
+				mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' width='16' height='16' aria-hidden='true'%3E%3Cpath d='M0 1.75C0 .784.784 0 1.75 0h12.5C15.216 0 16 .784 16 1.75v9.5A1.75 1.75 0 0 1 14.25 13H8.06l-2.573 2.573A1.458 1.458 0 0 1 3 14.543V13H1.75A1.75 1.75 0 0 1 0 11.25Zm1.75-.25a.25.25 0 0 0-.25.25v9.5c0 .138.112.25.25.25h2a.75.75 0 0 1 .75.75v2.19l2.72-2.72a.749.749 0 0 1 .53-.22h6.5a.25.25 0 0 0 .25-.25v-9.5a.25.25 0 0 0-.25-.25Zm7 2.25v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 9a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z'%3E%3C/path%3E%3C/svg%3E");
+			}
+		}
+
+		&[data-admonition-type="caution"] {
+			--admonition-color: var(--color-orange-400);
+			@apply bg-orange-400/5;
+
+			.admonition-title::before {
+				mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' width='16' height='16' aria-hidden='true'%3E%3Cpath d='M4.47.22A.749.749 0 0 1 5 0h6c.199 0 .389.079.53.22l4.25 4.25c.141.14.22.331.22.53v6a.749.749 0 0 1-.22.53l-4.25 4.25A.749.749 0 0 1 11 16H5a.749.749 0 0 1-.53-.22L.22 11.53A.749.749 0 0 1 0 11V5c0-.199.079-.389.22-.53Zm.84 1.28L1.5 5.31v5.38l3.81 3.81h5.38l3.81-3.81V5.31L10.69 1.5ZM8 4a.75.75 0 0 1 .75.75v3.5a.75.75 0 0 1-1.5 0v-3.5A.75.75 0 0 1 8 4Zm0 8a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z'%3E%3C/path%3E%3C/svg%3E");
+			}
+		}
+
+		&[data-admonition-type="warning"] {
+			--admonition-color: var(--color-red-500);
+			@apply bg-red-500/5;
+
+			.admonition-title::before {
+				mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' width='16' height='16' aria-hidden='true'%3E%3Cpath d='M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z'%3E%3C/path%3E%3C/svg%3E");
+			}
+		}
+	}
+}
+
+@utility prose {
+	--tw-prose-body: var(--color-global-text);
+	--tw-prose-bold: var(--color-global-text);
+	--tw-prose-bullets: var(--color-global-text);
+	--tw-prose-code: var(--color-global-text);
+	--tw-prose-headings: var(--color-accent-2);
+	--tw-prose-hr: color-mix(in srgb, var(--color-global-text) 30%, transparent);
+	--tw-prose-links: var(--color-global-text);
+	--tw-prose-quotes: var(--color-quote);
+	--tw-prose-th-borders: color-mix(in srgb, var(--color-global-text) 30%, transparent);
+}
+
+/* Add this to your global CSS file */
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+.pulse-animation {
+	animation: pulse 1s;
+}
+
+/* Custom Scrollbar Styles */
+/* Hide scrollbar on blog posts - handled by progress bar */
+body:has(article[data-pagefind-body]) {
+	scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE and Edge */
+	overflow-y: scroll; /* Force scrollbar space */
+}
+
+body:has(article[data-pagefind-body])::-webkit-scrollbar {
+	display: none; /* Chrome, Safari, Opera */
+	width: 0;
+	height: 0;
+	-webkit-appearance: none;
+}
+
+/* Also hide on the html element for blog posts */
+html:has(article[data-pagefind-body]) {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+html:has(article[data-pagefind-body])::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
+	-webkit-appearance: none;
+}
+
+/* For WebKit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+	width: 10px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--color-global-text) 20%, transparent);
+	border-radius: 4px;
+	transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--color-global-text) 35%, transparent);
+}
+
+::-webkit-scrollbar-thumb:active {
+	background: color-mix(in srgb, var(--color-global-text) 45%, transparent);
+}
+
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+
+/* Modern browsers with scrollbar-* properties */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--color-global-text) 20%, transparent) transparent;
+}
+
+/* For dark mode */
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--color-global-text) 25%, transparent);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--color-global-text) 40%, transparent);
+}
+
+[data-theme="dark"] * {
+	scrollbar-color: color-mix(in srgb, var(--color-global-text) 25%, transparent) transparent;
+}
+
+/* Custom scrollbar for GitHubInfo tooltip */
+.custom-scrollbar::-webkit-scrollbar {
+	width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+	border-radius: 2px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+	background: color-mix(in srgb, var(--color-accent) 50%, transparent);
+	border-radius: 2px;
+	transition: all 0.2s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+.custom-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in srgb, var(--color-accent) 50%, transparent) transparent;
+}
+
+/* GitHub Repo Card Styles */
+.github-repo-card {
+	display: block;
+	padding: 1.25rem;
+	margin: 1.5rem 0;
+	border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+	border-radius: 0.75rem;
+	background: color-mix(in srgb, var(--color-accent) 3%, transparent);
+	transition: all 0.3s ease;
+	text-decoration: none !important;
+}
+
+.github-repo-card:hover {
+	border-color: var(--color-accent);
+	background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+	transform: translateY(-2px);
+	box-shadow: 0 8px 16px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.github-repo-card.compact {
+	padding: 0.875rem;
+	margin: 0.75rem 0;
+}
+
+.github-repo-card.loading,
+.github-repo-card.error {
+	padding: 1rem;
+}
+
+/* Link Preview Styles */
+.link-preview-wrapper {
+	position: relative;
+	display: inline-block;
+}
+
+.link-preview-link {
+	color: var(--color-accent);
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+	text-underline-offset: 2px;
+	transition: all 0.2s ease;
+}
+
+.link-preview-link:hover {
+	text-decoration-color: var(--color-accent);
+}
+
+.link-preview-card {
+	display: block;
+	margin: 1.5rem 0;
+	border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
+	border-radius: 0.75rem;
+	overflow: hidden;
+	background: var(--color-global-bg);
+	transition: all 0.3s ease;
+	text-decoration: none !important;
+}
+
+.link-preview-card:hover {
+	border-color: var(--color-accent);
+	transform: translateY(-2px);
+	box-shadow: 0 8px 16px color-mix(in srgb, var(--color-accent) 20%, transparent);
+}
+
+.link-preview-card img {
+	margin: 0 !important;
+}
+
+.link-preview-tooltip {
+	position: absolute;
+	bottom: calc(100% + 0.5rem);
+	left: 50%;
+	transform: translateX(-50%);
+	width: 320px;
+	max-width: 90vw;
+	background: var(--color-global-bg);
+	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+	border-radius: 0.75rem;
+	box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
+	z-index: 1000;
+	opacity: 0;
+	animation: fadeInUp 0.3s ease forwards;
+	pointer-events: none;
+	overflow: hidden;
+}
+
+.link-preview-tooltip img {
+	margin: 0 !important;
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateX(-50%) translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0);
+	}
+}
+
+/* Chart Container Styles */
+.chart-container {
+	margin: 2rem 0;
+	padding: 1.5rem;
+	background: color-mix(in srgb, var(--color-accent) 3%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-accent) 15%, transparent);
+	border-radius: 0.75rem;
+	overflow-x: auto;
+}
+
+.chart-canvas {
+	display: block;
+	max-width: 100%;
+	height: auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+	.link-preview-tooltip {
+		width: 280px;
+	}
+
+	.chart-container {
+		padding: 1rem;
+	}
+}
+
+/* Info Card Styles - Prevent heading chevrons from showing */
+.info-card-container {
+	margin: 1rem 0;
+}
+
+.info-card-emoji::before,
+.info-card-emoji::after {
+	display: none !important;
+	content: none !important;
+}
+
+.info-card-heading::before,
+.info-card-heading::after {
+	display: none !important;
+	content: none !important;
+}
+
+/* Old info-card styles (legacy) */
+.info-card {
+	margin: 1.5rem 0;
+	padding: 1.25rem;
+	border-radius: 0.5rem;
+	border: 1px solid;
+	transition: all 0.3s ease;
+}
+
+.info-card:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.info-card-header {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin-bottom: 0.75rem;
+}
+
+.info-card-icon {
+	font-size: 1.25rem;
+	line-height: 1;
+}
+
+.info-card-icon::before,
+.info-card-icon::after {
+	display: none !important;
+	content: none !important;
+}
+
+.info-card-title {
+	margin: 0 !important;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.info-card-title::before,
+.info-card-title::after {
+	display: none !important;
+	content: none !important;
+}
+
+.info-card-content {
+	font-size: 0.9375rem;
+	line-height: 1.6;
+}
+
+.info-card-content > *:last-child {
+	margin-bottom: 0 !important;
+}

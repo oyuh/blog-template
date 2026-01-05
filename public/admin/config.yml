@@ -1,0 +1,132 @@
+backend:
+  name: github
+  repo: oyuh/blog
+  branch: master
+
+# Use local backend for development
+local_backend: true
+
+# Publish mode - editorial workflow for draft/review/ready states
+publish_mode: editorial_workflow
+
+# Media files will be stored in the repo under public/images
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+# Collections define the structure for the different content types
+collections:
+  # Blog Posts Collection
+  - name: "post"
+    label: "Blog Posts"
+    label_singular: "Post"
+    folder: "src/content/post"
+    create: true
+    slug: "{{slug}}"
+    # Match .md files with standard frontmatter
+    extension: "md"
+    format: "frontmatter"
+    nested:
+      depth: 100
+    preview_path: "posts/{{slug}}"
+    fields:
+      - {
+          label: "Title",
+          name: "title",
+          widget: "string",
+          hint: "Max 60 characters",
+          pattern: ["^.{1,60}$", "Must be between 1 and 60 characters"],
+        }
+      - {
+          label: "Description",
+          name: "description",
+          widget: "string",
+          hint: "Short description of the post",
+        }
+      - {
+          label: "Publish Date",
+          name: "publishDate",
+          widget: "datetime",
+          format: "DD MMM YYYY",
+          date_format: "DD MMM YYYY",
+          time_format: false,
+        }
+      - {
+          label: "Updated Date",
+          name: "updatedDate",
+          widget: "datetime",
+          format: "DD MMM YYYY",
+          date_format: "DD MMM YYYY",
+          time_format: false,
+          required: false,
+        }
+      - {
+          label: "Tags",
+          name: "tags",
+          widget: "list",
+          allow_add: true,
+          default: [],
+          hint: "Add tags for your post",
+        }
+      - {
+          label: "Draft",
+          name: "draft",
+          widget: "boolean",
+          default: false,
+          hint: "Set to true to hide this post",
+        }
+      - label: "Cover Image"
+        name: "coverImage"
+        widget: "object"
+        required: false
+        fields:
+          - { label: "Image", name: "src", widget: "image", required: false }
+          - { label: "Alt Text", name: "alt", widget: "string", required: false }
+      - {
+          label: "OG Image",
+          name: "ogImage",
+          widget: "string",
+          required: false,
+          hint: "Custom Open Graph image URL",
+        }
+      - {
+          label: "Try Link",
+          name: "tryLink",
+          widget: "string",
+          required: false,
+          hint: "External link to try/use the product mentioned in the post",
+        }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+  # Notes Collection
+  - name: "note"
+    label: "Notes"
+    label_singular: "Note"
+    folder: "src/content/note"
+    create: true
+    slug: "{{slug}}"
+    preview_path: "notes/{{slug}}"
+    fields:
+      - {
+          label: "Title",
+          name: "title",
+          widget: "string",
+          hint: "Max 60 characters",
+          pattern: ["^.{1,60}$", "Must be between 1 and 60 characters"],
+        }
+      - { label: "Description", name: "description", widget: "string", required: false }
+      - {
+          label: "Publish Date",
+          name: "publishDate",
+          widget: "datetime",
+          picker_utc: true,
+          hint: "ISO 8601 format with timezone",
+        }
+      - { label: "Body", name: "body", widget: "markdown" }
+
+# Editor settings
+editor:
+  preview: true
+
+# Display URL for the CMS
+display_url: https://lawsonhart.me
+site_url: https://lawsonhart.me

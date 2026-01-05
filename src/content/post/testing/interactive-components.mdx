@@ -1,0 +1,185 @@
+---
+title: "Interactive Components Demo"
+description: "A showcase of interactive components including GitHub repo cards, link previews, and charts for blog posts"
+publishDate: "2025-01-15"
+tags: ["demo", "components", "interactive"]
+draft: true
+---
+
+import LinkPreview from '@/components/blog/LinkPreview.tsx';
+import Chart from '@/components/blog/Chart.tsx';
+import InfoCard from '@/components/blog/InfoCard.tsx';
+import GitHubRepoCardOptional from '@/components/blog/GitHubRepoCardOptional.astro';
+
+This post demonstrates the new interactive components available for blog posts!
+
+## GitHub Repository Cards
+
+You can showcase GitHub repositories with cards that fetch live data. In the template version,
+this is simplified to regular links:
+
+- https://github.com/facebook/react
+- https://github.com/vercel/next.js
+
+Here is the template-safe card wrapper in action:
+
+<GitHubRepoCardOptional repo="withastro/astro" />
+
+## Link Previews
+
+Regular links now show previews on hover! Just use the LinkPreview component:
+
+Regular links now show previews on hover! Just use the LinkPreview component:
+
+<LinkPreview url="https://astro.build" client:load>Check out Astro</LinkPreview>
+
+Or show a full card preview:
+
+<LinkPreview url="https://tailwindcss.com" showPreview client:load />
+
+## Charts and Graphs
+
+You can add interactive charts to visualize data:
+
+### Line Chart
+
+<Chart
+  client:load
+  data={[
+    { x: 'Jan', y: 30 },
+    { x: 'Feb', y: 45 },
+    { x: 'Mar', y: 38 },
+    { x: 'Apr', y: 52 },
+    { x: 'May', y: 65 },
+    { x: 'Jun', y: 58 }
+  ]}
+  type="line"
+  title="Monthly Visitors"
+  xLabel="Month"
+  yLabel="Visitors (thousands)"
+  height={300}
+/>
+
+### Bar Chart
+
+<Chart
+  client:load
+  data={[
+    { x: 'Product A', y: 120 },
+    { x: 'Product B', y: 95 },
+    { x: 'Product C', y: 150 },
+    { x: 'Product D', y: 80 }
+  ]}
+  type="bar"
+  title="Product Sales Comparison"
+  xLabel="Products"
+  yLabel="Sales"
+  height={300}
+/>
+
+### Scatter Plot
+
+<Chart
+  client:load
+  data={[
+    { x: 1, y: 20 },
+    { x: 2, y: 35 },
+    { x: 3, y: 30 },
+    { x: 4, y: 45 },
+    { x: 5, y: 40 },
+    { x: 6, y: 55 },
+    { x: 7, y: 50 },
+    { x: 8, y: 65 }
+  ]}
+  type="scatter"
+  title="Data Distribution"
+  xLabel="X Axis"
+  yLabel="Y Axis"
+  height={300}
+/>
+
+## Usage
+
+### GitHub Repo Links
+
+Use the template-safe wrapper:
+
+```astro
+<GitHubRepoCardOptional repo="owner/repo" />
+<GitHubRepoCardOptional repo="owner/repo" compact />
+```
+
+### Link Preview
+
+```tsx
+// Hover preview (tooltip on hover)
+<LinkPreview url="https://example.com" client:load>Link Text</LinkPreview>
+
+// Always show card
+<LinkPreview url="https://example.com" showPreview client:load />
+```
+
+### Charts
+
+```tsx
+<Chart
+  client:load
+  data={[
+    { x: 'Label 1', y: 10 },
+    { x: 'Label 2', y: 20 }
+  ]}
+  type="line" // or "bar" or "scatter"
+  title="Chart Title"
+  xLabel="X Axis Label"
+  yLabel="Y Axis Label"
+  width={600}
+  height={400}
+/>
+```
+
+## Combining Components
+
+You can combine these components to create rich, interactive posts:
+
+Learn more about Astro at <LinkPreview url="https://docs.astro.build" client:load>the official docs</LinkPreview>!
+
+<Chart
+  client:load
+  data={[
+    { x: 'v1.0', y: 1000, label: 'v1.0' },
+    { x: 'v2.0', y: 5000, label: 'v2.0' },
+    { x: 'v3.0', y: 12000, label: 'v3.0' },
+    { x: 'v4.0', y: 25000, label: 'v4.0' }
+  ]}
+  type="line"
+  title="Astro GitHub Stars Growth"
+  xLabel="Version"
+  yLabel="Stars"
+  height={300}
+/>
+
+These components make your blog posts more engaging and informative!
+
+## Info Cards
+
+Highlight important information with styled cards:
+
+<InfoCard title="Important Note" type="info" client:load>
+This is an informational card that stands out from regular content.
+</InfoCard>
+
+<InfoCard title="Success!" type="success" client:load>
+Your operation completed successfully. Great job!
+</InfoCard>
+
+<InfoCard title="Warning" type="warning" client:load>
+Please be careful when proceeding with this action.
+</InfoCard>
+
+<InfoCard title="Error" type="error" client:load>
+Something went wrong. Please try again.
+</InfoCard>
+
+<InfoCard title="Custom Icon" type="info" icon="🚀" client:load>
+You can even use custom emojis as icons!
+</InfoCard>

@@ -1,0 +1,138 @@
+---
+// Global loading bar for page transitions
+---
+
+<div id="global-loading-bar" class="fixed bottom-0 left-0 right-0 h-1 z-[9999] pointer-events-none">
+    <div class="loading-bar-progress h-full bg-gradient-to-r from-accent via-blue-400 to-accent bg-[length:200%_100%]"></div>
+</div>
+
+<style>
+    #global-loading-bar {
+        opacity: 0;
+        transition: opacity 0.2s ease-out;
+    }
+
+    #global-loading-bar.loading {
+        opacity: 1;
+    }
+
+    .loading-bar-progress {
+        width: 0%;
+        transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 10px rgba(87, 130, 255, 0.5);
+        animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0;
+        }
+        100% {
+            background-position: -200% 0;
+        }
+    }
+
+    #global-loading-bar.loading .loading-bar-progress {
+        width: 100%;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .loading-bar-progress {
+            animation: none;
+            background: var(--color-accent);
+        }
+    }
+</style>
+
+<script>
+    // Loading bar functionality for Astro page transitions
+    let loadingBar: HTMLElement | null = null;
+    let progressBar: HTMLElement | null = null;
+    let loadingTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    function initLoadingBar() {
+        loadingBar = document.getElementById('global-loading-bar');
+        progressBar = loadingBar?.querySelector('.loading-bar-progress') as HTMLElement;
+    }
+
+    function showLoadingBar() {
+        if (!loadingBar || !progressBar) return;
+
+        // Clear any existing timeout
+        if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+        }
+
+        // Reset and show
+        progressBar.style.transition = 'none';
+        progressBar.style.width = '0%';
+        loadingBar.classList.add('loading');
+
+        // Force reflow
+        void progressBar.offsetWidth;
+
+        // Start progress
+        progressBar.style.transition = 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+        progressBar.style.width = '70%'; // Go to 70% quickly
+
+        // Then slow down to 90% over the next second
+        loadingTimeout = setTimeout(() => {
+            if (progressBar) {
+                progressBar.style.transition = 'width 1s cubic-bezier(0.4, 0, 0.2, 1)';
+                progressBar.style.width = '90%';
+            }
+        }, 300);
+    }
+
+    function hideLoadingBar() {
+        if (!loadingBar || !progressBar) return;
+
+        // Clear any existing timeout
+        if (loadingTimeout) {
+            clearTimeout(loadingTimeout);
+        }
+
+        // Complete the bar quickly
+        progressBar.style.transition = 'width 0.2s cubic-bezier(0.4, 0, 0.2, 1)';
+        progressBar.style.width = '100%';
+
+        // Hide after completion
+        setTimeout(() => {
+            if (loadingBar) {
+                loadingBar.classList.remove('loading');
+                // Reset for next time
+                setTimeout(() => {
+                    if (progressBar) {
+                        progressBar.style.width = '0%';
+                    }
+                }, 200);
+            }
+        }, 200);
+    }
+
+    // Initialize on load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initLoadingBar);
+    } else {
+        initLoadingBar();
+    }
+
+    // Listen for Astro page transitions
+    document.addEventListener('astro:before-preparation', showLoadingBar);
+    document.addEventListener('astro:page-load', hideLoadingBar);
+
+    // Re-initialize after page transitions
+    document.addEventListener('astro:page-load', initLoadingBar);
+
+    // Dev mode: expose function to console for testing
+    (window as any).testLoadingBar = () => {
+        console.log('Testing loading bar animation...');
+        showLoadingBar();
+        // Auto-hide after 2 seconds
+        setTimeout(() => {
+            hideLoadingBar();
+        }, 2000);
+    };
+
+    //console.log('💡 Use testLoadingBar() to test the loading animation');
+</script>

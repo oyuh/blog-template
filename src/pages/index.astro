@@ -1,0 +1,198 @@
+---
+import type { CollectionEntry } from "astro:content";
+import SocialList from "@/components/SocialList.astro";
+import PostPreview from "@/components/blog/PostPreview.astro";
+import { getAllPosts } from "@/data/post";
+import PageLayout from "@/layouts/Base.astro";
+import { collectionDateSort } from "@/utils/date";
+
+// Posts
+const MAX_POSTS = 10;
+const allPosts = await getAllPosts();
+const allPostsByDate = allPosts
+	.sort(collectionDateSort)
+	.slice(0, MAX_POSTS) as CollectionEntry<"post">[];
+---
+
+<PageLayout meta={{ title: "Home" }}>
+    <section class="relative index-content">
+        <div class="relative z-10 py-6">
+            <div class="mb-6">
+                <h1 class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
+                    Howdy!
+                    <span class="inline-block origin-bottom-right animate-wave">👋</span>
+                </h1>
+            </div>
+
+            <div class="max-w-full mb-6">
+                <div class="mb-6">
+                    <p class="text-lg text-global-text leading-relaxed mb-4">
+                        I'm a <span class="font-semibold text-accent-2">computer science based full-stack developer/ software engineer</span>.
+                        I enjoy building things that make people's lives a little better.
+                    </p>
+
+
+                    <p class="text-base text-global-text/80 flex items-center gap-2">
+                        <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                        </svg>
+                        Located in the Dallas–Fort Worth Metroplex
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                <a
+                    href="/about"
+                    class="cta-button group relative inline-flex items-center justify-center gap-2 font-medium px-6 py-3 rounded-lg
+                           transition-all duration-300 ease-out
+                           bg-accent text-white border-2 border-accent
+                           hover:bg-accent/90 hover:border-accent hover:-translate-y-0.5 hover:shadow-lg
+                           active:translate-y-0 active:shadow-md
+                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                >
+                    <span>Learn More About Me</span>
+                    <svg class="w-4 h-4 transition-all duration-300 group-hover:translate-x-1 animate-bounce-x" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Social links with enhanced styling -->
+            <div class="border-t border-zinc-400 pt-4">
+                <p class="text-sm font-medium text-global-text/70 mb-3">Connect with me:</p>
+                <SocialList />
+            </div>
+        </div>
+    </section>
+
+    <div class="my-16 relative">
+    </div>
+
+	<section class="index-content">
+		<div class="flex items-center justify-between mb-8">
+            <h2 class="text-2xl md:text-3xl font-bold text-accent-2">
+                <a href="/posts/" class="hover:text-accent transition-colors duration-300">
+                    Posts & Projects
+                </a>
+            </h2>
+            <a
+                href="/posts/"
+                class="text-sm font-medium text-accent hover:text-accent/80 transition-colors duration-300 flex items-center gap-1"
+            >
+                View All
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+            </a>
+        </div>
+		<ul class="space-y-4" role="list">
+			{
+				allPostsByDate.map((p) => (
+					<li class="w-full">
+						<PostPreview post={p} as="h3" />
+					</li>
+				))
+			}
+		</ul>
+	</section>
+</PageLayout>
+
+<style>
+    .bg-grid-pattern {
+        background-image: radial-gradient(circle, rgba(87, 130, 255, 0.1) 1px, transparent 1px);
+        background-size: 20px 20px;
+    }
+
+    /* CTA Button - Arrow bounce animation */
+    @keyframes bounce-x {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        50% {
+            transform: translateX(4px);
+        }
+    }
+
+    .animate-bounce-x {
+        animation: bounce-x 2s ease-in-out infinite;
+    }
+
+    .cta-button:hover .animate-bounce-x {
+        animation: none;
+    }
+
+    /* Waving hand animation */
+    @keyframes wave {
+        0%, 100% {
+            transform: rotate(-10deg);
+        }
+        50% {
+            transform: rotate(10deg);
+        }
+    }
+
+    .animate-wave {
+        animation: wave 1.5s ease-in-out infinite;
+        transform-origin: 70% 70%;
+    }
+
+    /* Loading Animation Styles */
+    .index-content {
+        opacity: 0;
+        animation: fizzleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+    }
+
+    /* Stagger the second section slightly */
+    section.index-content:nth-of-type(2) {
+        animation-delay: 0.45s;
+    }
+
+    @keyframes fizzleIn {
+        0% {
+            opacity: 0;
+            transform: translateY(30px) scale(0.96);
+            filter: blur(6px) brightness(1.2);
+        }
+        50% {
+            filter: blur(2px) brightness(1.1);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            filter: blur(0) brightness(1);
+        }
+    }
+
+    /* Disable animations if user has seen the page this session */
+    body.no-intro-animation .index-content {
+        animation: none;
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .index-content {
+            animation: none !important;
+            opacity: 1;
+            transform: none;
+            filter: none;
+        }
+    }
+</style>
+
+<script>
+    // Check if user has already seen the intro animation this session
+    const hasSeenIntro = sessionStorage.getItem('hasSeenIndexIntro');
+
+    if (hasSeenIntro) {
+        document.body.classList.add('no-intro-animation');
+    } else {
+        // Mark as seen for this session
+        sessionStorage.setItem('hasSeenIndexIntro', 'true');
+    }
+
+    // Mark body as index page for header animation timing
+    document.body.classList.add('index-page');
+</script>

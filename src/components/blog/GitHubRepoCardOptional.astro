@@ -1,0 +1,26 @@
+---
+// SOFT IMPORT (template-safe): the public template repo may omit the GitHub repo card.
+// This wrapper prevents MDX/pages from hard-importing it and breaking the build.
+
+type Props = {
+	repo: string; // "owner/repo"
+	compact?: boolean;
+};
+
+const { repo, compact } = Astro.props;
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+const modules = import.meta.glob("./GitHubRepoCardIsland.astro", { eager: true });
+const GitHubRepoCardIsland =
+	(modules["./GitHubRepoCardIsland.astro"] as unknown as { default?: AstroComponent })?.default;
+
+const href = `https://github.com/${repo}`;
+---
+
+{GitHubRepoCardIsland ? (
+	<GitHubRepoCardIsland repo={repo} compact={compact} />
+) : (
+	<a class="lawson-link" href={href} target="_blank" rel="noreferrer">
+		{repo}
+	</a>
+)}

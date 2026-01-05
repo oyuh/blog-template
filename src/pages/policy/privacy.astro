@@ -1,0 +1,42 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+const meta = {
+  title: "Privacy Policy",
+  description: "How I handle your data and privacy. Last Updated: April 10, 2025",
+};
+---
+
+<PageLayout meta={meta}>
+  <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Privacy Policy</h1>
+
+  <div class="prose prose-base dark:prose-invert max-w-none">
+    <p>I collect limited personal data to operate and improve the site. Using the site means you agree to this policy.</p>
+
+    <h2 class="text-accent-2">What I Collect</h2>
+    <ul class="list-disc ms-5">
+      <li>Email (only if you submit it in a form)</li>
+      <li>Usage data (IP, browser info, visit duration)</li>
+    </ul>
+
+    <h2 class="text-accent-2">Why I Collect It</h2>
+    <ul class="list-disc ms-5">
+      <li>Understand usage</li>
+      <li>Respond to inquiries</li>
+      <li>Maintain security and performance</li>
+    </ul>
+
+
+    <h2 class="text-accent-2">Your Rights</h2>
+    <p>You can request deletion or correction of your data. I will comply where legally required.</p>
+
+    <h2 class="text-accent-2">Third Party Services</h2>
+    <p>Some usage data may go to trusted providers for analytics or infrastructure. No data is sold.</p>
+
+    <h2 class="text-accent-2">Children</h2>
+    <p>This site is not for users under 13. If a child’s data was submitted contact me.</p>
+
+    <h2 class="text-accent-2">Changes</h2>
+    <p>This policy may change. The date above updates when it does. Check back for the latest version.</p>
+  </div>
+</PageLayout>

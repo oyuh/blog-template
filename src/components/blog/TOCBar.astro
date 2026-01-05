@@ -1,0 +1,244 @@
+---
+import { generateToc } from "@/utils/generateToc";
+import type { MarkdownHeading } from "astro";
+import TOCHeading from "./TOCHeading.astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const toc = generateToc(headings);
+---
+
+{toc.length > 0 && (
+  <aside
+    class="hidden lg:block lg:sticky lg:order-2 lg:self-start lg:basis-80"
+    style={{ top: "var(--header-clearance, 72px)" }}
+    id="toc-aside"
+  >
+    <div class="rounded-xl bg-global-bg/60 ring-1 ring-white/10 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 ease-out hover:shadow-[0_8px_20px_-12px_rgba(0,0,0,0.4)] hover:ring-white/15" id="toc-container">
+      <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10">
+        <div class="text-sm font-semibold text-accent-2 tracking-wide">On this page</div>
+        <button
+          type="button"
+          id="toc-toggle"
+          class="group inline-flex h-8 w-8 items-center justify-center rounded-lg text-global-text hover:text-accent hover:bg-accent/10 transition-all duration-200 hover:scale-105"
+          aria-expanded="true"
+          aria-controls="toc-content"
+          title="Toggle table of contents"
+        >
+          <svg class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+      </div>
+      <div id="toc-content" class="max-h-[60vh] overflow-auto py-3 transition-all duration-300 ease-out">
+        <nav class="px-2">
+          <ol class="space-y-1" id="toc-list">
+            {toc.map((heading) => <TOCHeading heading={heading} />)}
+          </ol>
+        </nav>
+      </div>
+    </div>
+
+		<slot />
+  </aside>
+)}
+
+<script>
+  // Collapse/expand persistence per page
+  const key = `toc-collapsed:${location.pathname}`;
+  const toggleBtn = document.getElementById('toc-toggle') as HTMLButtonElement | null;
+  const content = document.getElementById('toc-content') as HTMLDivElement | null;
+  const list = document.getElementById('toc-list') as HTMLOListElement | null;
+
+  const setCollapsed = (collapsed: boolean) => {
+    if (!toggleBtn || !content) return;
+    const container = document.getElementById('toc-container');
+
+    toggleBtn.setAttribute('aria-expanded', String(!collapsed));
+
+    // Enhanced rotation animation for the chevron with scale effect
+    const chevron = toggleBtn.querySelector('svg');
+    if (chevron) {
+      chevron.style.transform = collapsed ? 'rotate(180deg) scale(0.9)' : 'rotate(0deg) scale(1)';
+    }
+
+    // Add subtle container effects
+    if (container) {
+      if (collapsed) {
+        container.style.transform = 'scale(0.98)';
+        container.style.opacity = '0.7';
+      } else {
+        container.style.transform = 'scale(1)';
+        container.style.opacity = '1';
+      }
+    }
+
+    if (collapsed) {
+      // Smooth collapse with better timing
+      content.style.maxHeight = '0';
+      content.style.opacity = '0';
+      content.style.paddingTop = '0';
+      content.style.paddingBottom = '0';
+      content.style.marginTop = '-0.5rem';
+
+      setTimeout(() => {
+        content.style.visibility = 'hidden';
+      }, 300);
+    } else {
+      // Smooth expand
+      content.style.visibility = 'visible';
+      content.style.maxHeight = '60vh';
+      content.style.opacity = '1';
+      content.style.paddingTop = '0.75rem';
+      content.style.paddingBottom = '0.75rem';
+      content.style.marginTop = '0';
+    }
+
+    try { localStorage.setItem(key, String(collapsed)); } catch {}
+  };
+
+  const initCollapsed = () => {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw === 'true') setCollapsed(true);
+    } catch {}
+  };
+
+  toggleBtn?.addEventListener('click', () => {
+    const expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+    setCollapsed(expanded);
+  });
+
+  // Scrollspy highlighting
+  const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
+  const anchorMap = new Map<string, HTMLAnchorElement>();
+  list?.querySelectorAll('a[data-toc-link]').forEach((a) => {
+    const id = (a.getAttribute('href') || '').slice(1);
+    if (id) anchorMap.set(id, a as HTMLAnchorElement);
+  });
+
+  let activeId: string | null = null;
+  const setActive = (id: string | null) => {
+    if (activeId === id) return;
+
+    // Remove active styles from previous element
+    if (activeId && anchorMap.has(activeId)) {
+      const prevEl = anchorMap.get(activeId)!;
+      prevEl.classList.remove('text-accent', 'bg-accent/10', 'font-medium');
+      // Reset text color based on depth
+      const depth = parseInt(prevEl.getAttribute('data-depth') || '1');
+      if (depth === 1) {
+        prevEl.classList.add('text-accent-2');
+      } else {
+        prevEl.classList.add('text-global-text');
+      }
+    }
+
+    activeId = id;
+
+    // Add active styles to new element
+    if (activeId && anchorMap.has(activeId)) {
+      const el = anchorMap.get(activeId)!;
+      // Remove default text color and add active styles
+      el.classList.remove('text-global-text', 'text-accent-2');
+      el.classList.add('text-accent', 'bg-accent/10', 'font-medium');
+
+      // Ensure visible in TOC
+      el.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  };
+
+  const io = new IntersectionObserver((_entries) => {
+    // Get current scroll position with header offset
+    const headerOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-clearance')) || 72;
+    const scrollTop = window.scrollY + headerOffset + 20; // Small buffer for better accuracy
+
+    // Create a map of all headings with their positions
+    const headingPositions = headings.map(h => ({
+      element: h,
+      id: h.getAttribute('id'),
+      top: h.getBoundingClientRect().top + window.scrollY,
+      level: parseInt(h.tagName.charAt(1)) // Extract heading level (1-6)
+    })).filter(h => h.id); // Only headings with IDs
+
+    // Sort by position
+    headingPositions.sort((a, b) => a.top - b.top);
+
+    // Find the most appropriate heading
+    let activeHeading = null;
+
+    // Find the closest heading that's above or at the current scroll position
+    for (let i = headingPositions.length - 1; i >= 0; i--) {
+      const heading = headingPositions[i];
+      if (heading && heading.top <= scrollTop + 10) { // Small tolerance
+        activeHeading = heading;
+        break;
+      }
+    }
+
+    // If we're near the top and no heading is above scroll position, use the first heading
+    if (!activeHeading && headingPositions.length > 0) {
+      activeHeading = headingPositions[0];
+    }
+
+    // More sophisticated approach for subsections
+    if (activeHeading) {
+      const currentLevel = activeHeading.level;
+      const currentIndex = headingPositions.findIndex(h => h.id === activeHeading!.id);
+
+      // Look ahead to see if we're closer to the next heading of the same or higher level
+      for (let i = currentIndex + 1; i < headingPositions.length; i++) {
+        const nextHeading = headingPositions[i];
+        if (nextHeading) {
+          const nextLevel = nextHeading.level;
+
+          // If we find a heading at the same level or higher (lower number = higher level)
+          if (nextLevel <= currentLevel) {
+            // Check if we're closer to this next heading
+            const distanceToNext = Math.abs(nextHeading.top - scrollTop);
+            const distanceToCurrent = Math.abs(activeHeading!.top - scrollTop);
+
+            // If we're significantly closer to the next heading (and it's within reasonable distance)
+            if (distanceToNext < distanceToCurrent && distanceToNext < 200) {
+              activeHeading = nextHeading;
+            }
+            break; // Stop at the next heading of same or higher level
+          }
+        }
+      }
+    }
+
+    if (activeHeading?.id) {
+      setActive(activeHeading.id);
+    }
+  }, {
+    rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--header-clearance') || '72px'} 0px -70% 0px`,
+    threshold: [0, 0.1, 0.5, 0.9, 1] // More threshold points for better accuracy
+  });
+
+  const init = () => {
+    initCollapsed();
+    headings.forEach((h) => io.observe(h));
+  };
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(init, 0);
+  } else {
+    document.addEventListener('DOMContentLoaded', init);
+  }
+
+  // Update on client-side navigation
+  document.addEventListener('astro:page-load', () => {
+    io.disconnect();
+    anchorMap.clear();
+    list?.querySelectorAll('a[data-toc-link]').forEach((a) => {
+      const id = (a.getAttribute('href') || '').slice(1);
+      if (id) anchorMap.set(id, a as HTMLAnchorElement);
+    });
+    const newHeads = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
+    newHeads.forEach((h) => io.observe(h));
+  });
+</script>

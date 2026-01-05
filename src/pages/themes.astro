@@ -1,0 +1,227 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+// SOFT IMPORT (template-safe): the holiday system is an optional feature.
+// If the public template repo removes `HolidayList.ts`, the page still builds.
+const holidayListModules = import.meta.glob("../components/HolidayList.ts", { eager: true });
+type Holiday = {
+  id: string;
+  name: string;
+  dateRange: { start: string; end: string };
+  particles: string[];
+  colors: string[];
+  description?: string;
+};
+const holidays =
+  (holidayListModules["../components/HolidayList.ts"] as unknown as { holidays?: Holiday[] })?.holidays ??
+  [];
+
+const meta = {
+  title: "Holiday Themes",
+  description: "Interactive holiday overlay system with dynamic themes and animated particles",
+};
+---
+
+<PageLayout meta={meta}>
+  <section class="relative">
+    <div class="relative z-10 py-6">
+      <!-- Heading + divider -->
+      <div class="mb-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
+          Holiday Themes <span class="inline-block"></span>
+        </h1>
+        <div class="w-16 h-0.5 bg-gradient-to-r from-accent to-accent/60 rounded-full mb-4"></div>
+      </div>
+
+      <!-- Introduction -->
+      <div class="max-w-full space-y-4 mb-8">
+        <p class="text-lg text-global-text leading-relaxed">
+          This is a<span class="font-semibold text-accent-2">holiday overlay/theme system</span>
+          that automatically detects holidays and displays themed animations with particles, colors, and effects.
+        </p>
+        <p class="text-base text-global-text leading-relaxed">
+          The system is completely <span class="font-semibold text-accent-2">interactive</span> and you can control it
+          with browser console commands.
+        </p>
+      </div>
+
+      <!-- Holiday Control Panel -->
+      <div class="mb-12">
+        <div class="bg-global-bg/50 backdrop-blur-sm rounded-xl p-6 ring-1 ring-white/5">
+          <h2 class="text-xl font-semibold text-accent-2 mb-4">Holiday Controls</h2>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+            <button
+              id="detect-auto"
+              class="p-3 bg-blue-600/20 hover:bg-blue-600/30 text-blue-200 rounded-lg transition-all duration-200 text-sm font-medium border border-blue-500/20 hover:border-blue-500/40"
+            >
+              Detect Current Holidays
+              <div class="text-xs opacity-75 mt-1">holiday.enableHoliday()</div>
+            </button>
+
+            <button
+              id="disable-all"
+              class="p-3 bg-red-600/20 hover:bg-red-600/30 text-red-200 rounded-lg transition-all duration-200 text-sm font-medium border border-red-500/20 hover:border-red-500/40"
+            >
+              Disable All Effects
+              <div class="text-xs opacity-75 mt-1">holiday.disableHoliday()</div>
+            </button>
+
+            <button
+              id="list-holidays"
+              class="p-3 bg-purple-600/20 hover:bg-purple-600/30 text-purple-200 rounded-lg transition-all duration-200 text-sm font-medium border border-purple-500/20 hover:border-purple-500/40"
+            >
+              List All Holidays
+              <div class="text-xs opacity-75 mt-1">holiday.listHolidays()</div>
+            </button>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-sm font-medium text-accent-2 mb-2">Enable Specific Holiday:</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2" id="holiday-buttons">
+              {holidays.map((holiday: Holiday) => (
+                <button
+                  class="holiday-btn group p-3 bg-global-bg/40 hover:bg-accent/10 text-global-text hover:text-accent rounded-md transition-colors duration-150 text-[11px] font-medium border border-white/5 hover:border-accent/40 flex flex-col items-stretch justify-start text-left leading-tight min-h-[88px]"
+                  data-holiday-id={holiday.id}
+                  aria-label={`Enable holiday theme ${holiday.name}`}
+                >
+                  <span class="truncate font-medium text-[11px]">{holiday.name}</span>
+                  <code class="mt-1 block w-full text-[10px] font-mono text-global-text/55 whitespace-pre-wrap break-words pr-1 leading-snug">holiday.enableHoliday('{holiday.id}')</code>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Holiday List -->
+      <div class="mb-12">
+        <h2 class="text-xl font-semibold text-accent-2 mb-6">Available Holidays ({holidays.length})</h2>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {holidays.map((holiday: Holiday) => (
+            <div class="bg-global-bg/30 backdrop-blur-sm rounded-lg p-4 ring-1 ring-white/5 hover:ring-white/10 transition-all duration-200">
+              <div class="flex items-start justify-between mb-2">
+                <h3 class="font-medium text-accent-2 text-sm">{holiday.name}</h3>
+                <div class="text-xs text-global-text/70">{holiday.dateRange.start} - {holiday.dateRange.end}</div>
+              </div>
+
+              <div class="flex flex-wrap gap-1 mb-3">
+                {holiday.particles.slice(0, 6).map((particle: string) => (
+                  <span class="text-base">{particle}</span>
+                ))}
+              </div>
+
+              <div class="flex gap-1 mb-3">
+                {holiday.colors.slice(0, 4).map((color: string) => (
+                  <div
+                    class="w-4 h-4 rounded-full ring-1 ring-white/20"
+                    style={`background-color: ${color}`}
+                  ></div>
+                ))}
+              </div>
+
+              {holiday.description && (
+                <p class="text-xs text-global-text/80 leading-relaxed">{holiday.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <!-- Credits -->
+      <div class="bg-global-bg/20 backdrop-blur-sm rounded-lg p-6 ring-1 ring-white/5">
+        <h2 class="text-lg font-semibold text-accent-2 mb-3">Made by Lawson Hart</h2>
+        <p class="text-sm text-global-text/80 leading-relaxed mb-4">
+          This holiday theme system was designed and implemented by me as part of my personal website.
+          The code isn't open source but if you're interested please contact me!
+        </p>
+      </div>
+    </div>
+  </section>
+</PageLayout>
+
+<script>
+  // Holiday control panel functionality
+  document.addEventListener('DOMContentLoaded', function() {
+  // Access global holiday API (defined by overlay script)
+  const holidayAPI = (window as unknown as Record<string, any>)['holiday'];
+
+    // Auto-detect button
+    const detectBtn = document.getElementById('detect-auto');
+    if (detectBtn) {
+      detectBtn.addEventListener('click', function() {
+        if (holidayAPI) {
+          holidayAPI.enableHoliday();
+        } else {
+          /* Holiday system not yet loaded */
+        }
+      });
+    }
+
+    // Disable all button
+    const disableBtn = document.getElementById('disable-all');
+    if (disableBtn) {
+      disableBtn.addEventListener('click', function() {
+        if (holidayAPI) {
+          holidayAPI.disableHoliday();
+        } else {
+          /* Holiday system not yet loaded */
+        }
+      });
+    }
+
+    // List holidays button
+    const listBtn = document.getElementById('list-holidays');
+    if (listBtn) {
+      listBtn.addEventListener('click', function() {
+        if (holidayAPI) {
+          holidayAPI.listHolidays();
+        } else {
+          /* Holiday system not yet loaded */
+        }
+      });
+    }
+
+    // Individual holiday buttons
+    const holidayBtns = document.querySelectorAll<HTMLButtonElement>('.holiday-btn');
+    holidayBtns.forEach((btn) => {
+      if (!btn) return;
+      btn.addEventListener('click', function() {
+        const holidayId = btn.getAttribute('data-holiday-id');
+        if (holidayAPI && holidayId) {
+          holidayAPI.enableHoliday(holidayId);
+        } else {
+          /* Holiday system not yet loaded or invalid ID */
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  /* Add some custom styling for code blocks */
+  pre {
+    font-family: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  }
+
+  /* Horizontal scroll styling for command code inside buttons */
+  .holiday-btn code::-webkit-scrollbar {
+    height: 4px;
+  }
+  .holiday-btn code::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .holiday-btn code::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+  }
+  .holiday-btn code {
+    scrollbar-width: thin;
+  }
+
+  /* Smooth scrolling for hash links */
+  html {
+    scroll-behavior: smooth;
+  }
+</style>

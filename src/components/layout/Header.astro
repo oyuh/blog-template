@@ -1,0 +1,584 @@
+﻿---
+import Search from "@/components/Search.astro";
+import ThemeToggleOptional from "@/components/ThemeToggleOptional.astro";
+import HeaderMobile from "@/components/layout/HeaderMobile.astro";
+import { menuLinks } from "@/site.config";
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+
+// SOFT IMPORT (template-safe): This component exists in my private site repo,
+// but may be removed from the public template repo. Using `import.meta.glob`
+// keeps builds working when the file is deleted.
+const holidayStatusModules = import.meta.glob("../HolidayStatusIsland.astro", { eager: true });
+const HolidayStatusIsland = (holidayStatusModules["../HolidayStatusIsland.astro"] as unknown as { default?: AstroComponent })?.default;
+
+// SOFT IMPORT (template-safe): see note above.
+const spotifyIslandModules = import.meta.glob("../SpotifyStatusIsland.astro", { eager: true });
+const SpotifyStatusIsland = (spotifyIslandModules["../SpotifyStatusIsland.astro"] as unknown as { default?: AstroComponent })?.default;
+
+// Path helper for active link highlighting
+const pathname = Astro.url.pathname;
+---
+
+<!-- Mobile Header (shown only on mobile) -->
+<div class="block sm:hidden">
+    <HeaderMobile />
+</div>
+
+<!-- Desktop Header (shown only on desktop) -->
+<header class="hidden sm:block sticky top-[7px] sm:top-4 z-40 transition-transform duration-500 ease-in-out" id="site-header" data-header-state="visible">
+    <div class="w-full">
+            <div
+                class="flex h-12 sm:h-14 items-center rounded-xl px-2 sm:px-3 relative left-1/2 -translate-x-1/2 w-[min(100vw-1rem,calc(100%+5%))] justify-between sm:justify-between transition-all duration-300 ease-out"
+            id="main-header"
+            data-scroll-background="0"
+        >
+            <!-- Three-column layout: Nav left, Logo center, Icons right -->
+
+            <!-- Left side: Desktop navigation -->
+            <div class="flex items-center gap-0.5 sm:gap-1 flex-1" id="primary-nav-group" data-search-hide>
+                <!-- Desktop navigation -->
+                <nav
+                    aria-label="Main menu"
+                    class="hidden md:flex items-center gap-0.5 sm:gap-1"
+                    id="desktop-navigation-menu"
+                >
+                    {
+                        menuLinks.map((link, index) => {
+                            const active = pathname === link.path || pathname.startsWith(link.path);
+                            const shimmerPaused = active && (link.path === "/about/" || link.path.startsWith("/posts"));
+                            const shimmerDelay = `${index * 2}s`;
+                            return (
+                                <>
+                                    <a
+                                        href={link.path}
+                                        aria-current={active ? "page" : false}
+                                        data-astro-prefetch
+                                        class={`group relative px-2 py-2 text-base font-semibold tracking-wide rounded-md transition-all duration-200 hover:bg-accent/5 hover:text-accent ${
+                                            active ? "text-accent" : "text-global-text"
+                                        }`}
+                                    >
+										{link.title}
+                                    </a>
+                                    {index < menuLinks.length - 1 && (
+                                        <div class="h-4 w-px bg-zinc-300/60 dark:bg-zinc-600/60 mx-1"></div>
+                                    )}
+                                </>
+                            );
+                        })
+                    }
+                </nav>
+            </div>
+
+            <!-- Center: Logo with decorative elements -->
+            <div class="flex items-center justify-center gap-3 sm:gap-4" data-search-hide>
+
+
+                <!-- Logo -->
+                <a
+                    href="/"
+                    aria-current={Astro.url.pathname === "/" ? "page" : false}
+                    class="group inline-flex items-center justify-center rounded-md relative"
+                    id="logo-link"
+                >
+                    <!-- Subtle background glow -->
+                    <div class="absolute inset-0 rounded-md bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm scale-110"></div>
+
+                    <img
+                        src="/logo.svg"
+                        alt="Lawson Hart Logo"
+                        class="h-7 w-auto sm:h-9 transition-all duration-300 group-hover:drop-shadow-[0_0_12px_rgba(87,130,255,0.4)] relative z-10"
+                        id="logo-image"
+                    />
+                    <span class="sr-only">Lawson Hart</span>
+                </a>
+
+
+            </div>
+
+            <!-- Right side: Icons and Search -->
+            <div class="flex items-center gap-1 sm:gap-2 flex-1 justify-end" data-search-hide>
+
+                <!-- All buttons (visible on desktop, some hidden on mobile) -->
+                <div class="flex items-center gap-2 sm:gap-3" id="header-icons">
+                    <ThemeToggleOptional />
+                    {HolidayStatusIsland && <HolidayStatusIsland />}
+                    {SpotifyStatusIsland && <SpotifyStatusIsland />}
+                    <!-- Search button -->
+                    <Search />
+                </div>
+            </div>
+        </div>
+
+                <div class="hidden sm:block sm:mb-8"></div>
+
+    </div>
+</header>
+
+<div
+    id="header-hover-zone"
+    class="hidden sm:block fixed top-0 left-0 right-0 h-12 z-[60] transition-all duration-500 ease-out"
+    style="display: none; opacity: 0;"
+>
+    <div
+        id="header-lip"
+        class="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-6 bg-global-bg/60 backdrop-blur-md ring-1 ring-white/10 rounded-b-lg shadow-[0_4px_12px_-6px_rgba(0,0,0,0.35)] cursor-pointer transition-all duration-300 hover:bg-global-bg/70 hover:ring-white/15 hover:-translate-y-1"
+    >
+        <div class="absolute inset-0 flex items-center justify-center">
+            <svg
+                class="w-3 h-3 text-accent transition-transform duration-300 hover-flip"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+            >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+            </svg>
+        </div>
+    </div>
+    <div class="absolute inset-0 cursor-pointer"></div>
+</div>
+
+<script>
+    const header = document.getElementById('site-header');
+    const mainHeader = document.getElementById('main-header');
+    const hoverZone = document.getElementById('header-hover-zone');
+    const desktopMedia = window.matchMedia('(min-width: 640px)');
+    const isDesktopView = () => desktopMedia.matches;
+
+    const isBlogPost = document.querySelector('article[data-pagefind-body]') !== null;
+    //console.log('🔍 Is blog post page?', isBlogPost);
+    //console.log('📄 Found article element:', document.querySelector('article[data-pagefind-body]'));
+    //console.log('🎯 Header element:', header);
+    //console.log('🔥 Hover zone element:', hoverZone);
+
+    let isHeaderHidden = false;
+    let lastScrollY = window.scrollY;
+    let scrollTimeout: ReturnType<typeof setTimeout>;
+
+    const updateHeaderClearance = () => {
+        if (!header || !mainHeader) return;
+        const cs = getComputedStyle(header);
+        const topPx = parseFloat(cs.top || '0') || 0; // sticky offset
+        const h = mainHeader.getBoundingClientRect().height || 0; // bar height
+        const gap = 8; // a small breathing room
+        const total = Math.ceil(topPx + h + gap);
+        document.documentElement.style.setProperty('--header-clearance', `${total}px`);
+    };
+
+    // Update header background based on scroll
+    const updateHeaderBackground = () => {
+        if (!mainHeader) return;
+
+        const scrollY = window.scrollY;
+        const maxScroll = 100; // Distance to scroll for full background
+        const scrollProgress = Math.min(scrollY / maxScroll, 1);
+
+        // Calculate opacity values
+        const bgOpacity = scrollProgress * 0.5; // Max 50% background opacity
+        const blurAmount = scrollProgress * 16; // Max 16px blur
+        const shadowOpacity = scrollProgress * 0.35; // Max 35% shadow opacity
+        const ringOpacity = scrollProgress * 0.05; // Max 5% ring opacity
+
+        // Apply styles
+        mainHeader.style.background = `rgba(var(--color-global-bg-rgb, 255, 255, 255), ${bgOpacity})`;
+        mainHeader.style.backdropFilter = `blur(${blurAmount}px)`;
+        mainHeader.style.boxShadow = `0 6px 16px -10px rgba(0, 0, 0, ${shadowOpacity})`;
+        mainHeader.style.borderColor = `rgba(255, 255, 255, ${ringOpacity})`;
+        mainHeader.setAttribute('data-scroll-background', scrollProgress.toFixed(2));
+    };
+
+    const hideHeader = () => {
+    if (!isBlogPost || isHeaderHidden || !header || !isDesktopView()) return;
+        //console.log('🙈 Hiding header...');
+        isHeaderHidden = true;
+        header.style.transform = 'translateY(-100%)';
+        header.dataset.headerState = 'hidden';
+
+        // Show the lip with smooth fade-in
+        if (hoverZone) {
+            //console.log('👀 Showing lip...');
+            hoverZone.style.display = 'block';
+            // Force reflow then fade in
+            hoverZone.offsetHeight;
+            hoverZone.style.opacity = '1';
+            hoverZone.style.pointerEvents = 'auto';
+        }
+    };
+
+    const showHeader = () => {
+    if (!isHeaderHidden || !header || !isDesktopView()) return;
+        //console.log('👋 Showing header...');
+        isHeaderHidden = false;
+        header.style.transform = 'translateY(0)';
+        header.dataset.headerState = 'visible';
+
+        // Hide the lip with smooth fade-out
+        if (hoverZone) {
+            //console.log('🫥 Hiding lip...');
+            hoverZone.style.opacity = '0';
+            hoverZone.style.pointerEvents = 'none';
+            // Wait for fade-out animation to complete before hiding
+            setTimeout(() => {
+                hoverZone.style.display = 'none';
+            }, 500);
+        }
+    };
+
+    // Handle scroll for background fade and auto-hide on blog posts
+    const handleScroll = () => {
+    if (!isDesktopView()) return;
+
+    // Always update background fade
+        updateHeaderBackground();
+
+        // Only do auto-hide on blog posts
+        if (!isBlogPost) return;
+
+        const currentScrollY = window.scrollY;
+        const scrollingDown = currentScrollY > lastScrollY;
+        const scrolledPastHeader = currentScrollY > 200; // Increased threshold
+        const scrollDelta = Math.abs(currentScrollY - lastScrollY);
+
+        //console.log('📜 Scroll event:', {
+        //    currentScrollY,
+        //    scrollingDown,
+        //    scrolledPastHeader,
+        //    scrollDelta,
+        //    isHeaderHidden
+        //});
+
+        // Only react to significant scroll movements to reduce jerkiness
+        if (scrollDelta < 5) return;
+
+        if (scrollingDown && scrolledPastHeader && !isHeaderHidden) {
+            //console.log('⬇️ Should hide header');
+            // Clear any existing timeout
+            clearTimeout(scrollTimeout);
+            // Hide header after a longer delay for smoother experience
+            scrollTimeout = setTimeout(hideHeader, 300);
+        } else if (!scrollingDown && isHeaderHidden && scrollDelta > 10) {
+            //console.log('⬆️ Should show header');
+            clearTimeout(scrollTimeout);
+            showHeader();
+        }
+
+        lastScrollY = currentScrollY;
+    };
+
+    // Handle hover zone interactions
+    if (hoverZone && isBlogPost) {
+        const lip = hoverZone.querySelector('#header-lip');
+        const arrow = lip?.querySelector('svg');
+
+        // Add hover listeners to the entire hover zone
+        hoverZone.addEventListener('mouseenter', () => {
+            if (!isDesktopView()) return;
+            //console.log('Mouse entered hover zone');
+            clearTimeout(scrollTimeout);
+            // Flip arrow down and slide lip up slightly
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+            showHeader();
+        });
+
+        hoverZone.addEventListener('mouseleave', () => {
+            if (!isDesktopView()) return;
+            // Reset arrow to up position
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        });
+
+        hoverZone.addEventListener('click', () => {
+            if (!isDesktopView()) return;
+            //console.log('Hover zone clicked');
+            showHeader();
+        });
+    }
+
+    // Handle header hover when visible to keep it shown
+    if (header && isBlogPost) {
+        let headerHideTimeout: ReturnType<typeof setTimeout>;
+
+        header.addEventListener('mouseenter', () => {
+            if (!isDesktopView()) return;
+            //console.log('Mouse entered header');
+            clearTimeout(scrollTimeout);
+            clearTimeout(headerHideTimeout);
+        });
+
+        header.addEventListener('mouseleave', () => {
+            if (!isDesktopView()) return;
+            //console.log('Mouse left header');
+            // Hide after 5 seconds as requested
+            if (window.scrollY > 200) {
+                headerHideTimeout = setTimeout(() => {
+                    //console.log('Auto-hiding header after 5 seconds');
+                    hideHeader();
+                }, 5000);
+            }
+        });
+    }
+
+    // Initialize and watch for changes
+    updateHeaderClearance();
+    updateHeaderBackground(); // Set initial background state
+    window.addEventListener('resize', updateHeaderClearance);
+
+    const onDesktopChange = (event: MediaQueryListEvent | MediaQueryList) => {
+        const matches = 'matches' in event ? event.matches : desktopMedia.matches;
+        if (!matches && hoverZone) {
+            hoverZone.style.display = 'none';
+            hoverZone.style.opacity = '0';
+            hoverZone.style.pointerEvents = 'none';
+        }
+    };
+
+    if ('addEventListener' in desktopMedia) {
+        desktopMedia.addEventListener('change', onDesktopChange);
+    } else {
+        (desktopMedia as any).addListener(onDesktopChange);
+    }
+
+    onDesktopChange(desktopMedia);
+
+    // Add scroll listener for background fade (always) and auto-hide (blog posts only)
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    const ro = new ResizeObserver(updateHeaderClearance);
+    if (mainHeader) ro.observe(mainHeader);
+</script>
+
+<style>
+    /* Respect reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+        #main-header { transition: none !important; }
+    }
+
+    /* Header background fade variables */
+    :root {
+        --color-global-bg-rgb: 251, 251, 249; /* Light mode background as RGB */
+    }
+
+    :root[data-theme="dark"] {
+        --color-global-bg-rgb: 23, 23, 23; /* Dark mode background as RGB */
+    }
+
+    /* Header starts transparent, gets background on scroll */
+    #main-header {
+        background: transparent;
+        backdrop-filter: blur(0px);
+        box-shadow: none;
+        border: 1px solid transparent;
+        transition: all 0.3s ease-out;
+    }
+
+    /* Ensure ring styles work properly */
+    #main-header {
+        border-radius: 0.75rem; /* rounded-xl */
+    }
+
+    #logo-link::after {
+        content: "";
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 12px;
+        height: 12px;
+        opacity: 0;
+        border-radius: 9999px;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+    }
+
+    :global(.holiday-user-disabled.holiday-has-active) #logo-link::after {
+        opacity: 1;
+        background: radial-gradient(circle at 30% 30%, #fca5a5 0%, #f87171 55%, #dc2626 100%);
+        border: 2px solid rgba(15, 23, 42, 0.92);
+        box-shadow: 0 0 14px rgba(248, 113, 113, 0.55);
+    }
+
+    /* Center logo adjustment */
+    #logo-image {
+        transform: translateY(5%);
+    }
+
+    /* Logo decorative elements */
+    @keyframes breathe {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Staggered breathing animation for decorative dots */
+    .logo-decoration-dot {
+        animation: breathe 3s ease-in-out infinite;
+    }
+
+    .logo-decoration-dot:nth-child(1) { animation-delay: 0s; }
+    .logo-decoration-dot:nth-child(2) { animation-delay: 0.3s; }
+    .logo-decoration-dot:nth-child(3) { animation-delay: 0.6s; }
+
+    /* Enhanced logo hover effects */
+    #logo-link:hover .logo-decoration-dot {
+        animation-duration: 1.5s;
+    }
+
+    /* Subtle gradient lines animation */
+    @keyframes gradientPulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.7; }
+    }
+
+    .logo-gradient-line {
+        animation: gradientPulse 4s ease-in-out infinite;
+    }
+
+    /* Make header icons bolder and add spacing */
+    #header-icons {
+        gap: 0.75rem; /* Increased gap between icons */
+    }
+
+    /* Target icon buttons and SVGs to make them bolder */
+    #header-icons button,
+    #header-icons a {
+        font-weight: 600;
+    }
+
+    #header-icons svg {
+        stroke-width: 2.2px; /* Make SVG strokes slightly bolder */
+        font-weight: 600;
+    }
+
+    .nav-label {
+        position: relative;
+        display: inline-block;
+        isolation: isolate;
+    }
+
+    .nav-label::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        color: transparent;
+        background: linear-gradient(90deg,
+            rgba(156, 163, 175, 0.3) 0%,
+            rgba(156, 163, 175, 0.5) 35%,
+            rgba(255, 255, 255, 0.95) 50%,
+            rgba(156, 163, 175, 0.5) 65%,
+            rgba(156, 163, 175, 0.3) 100%);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        animation: nav-text-shimmer 6s linear infinite;
+        animation-delay: var(--shimmer-delay, 0s);
+        opacity: 0;
+    }
+
+    .nav-label--paused::after {
+        animation: none !important;
+        opacity: 0 !important;
+    }
+
+    /* Prevent any hover interference with shimmer */
+    .nav-label:hover::after,
+    .nav-label:focus::after,
+    .nav-label:focus-visible::after,
+    .nav-label:active::after {
+        animation: nav-text-shimmer 6s linear infinite !important;
+        animation-delay: var(--shimmer-delay, 0s) !important;
+        opacity: 0 !important;
+    }
+
+    @keyframes nav-text-shimmer {
+        0% {
+            background-position: -200% 0;
+            opacity: 0;
+        }
+        5% {
+            opacity: 1;
+        }
+        15% {
+            background-position: 200% 0;
+            opacity: 1;
+        }
+        20% {
+            opacity: 0;
+        }
+        100% {
+            background-position: 200% 0;
+            opacity: 0;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .nav-label::after {
+            animation: none;
+            opacity: 0;
+        }
+    }
+
+    /* Ensure proper spacing on mobile too */
+    @media (min-width: 640px) {
+        #header-icons {
+            gap: 1rem; /* Even more spacing on larger screens */
+        }
+    }
+
+    /* Logo flash animation */
+    @keyframes logoColorFlash {
+        0% {
+            filter: brightness(2) saturate(0.7);
+        }
+        50% {
+            filter: brightness(0.4) saturate(1.5);
+        }
+        100% {
+            filter: brightness(1) saturate(1);
+        }
+    }
+
+    .logo-flash {
+        animation: logoColorFlash 0.6s ease-in-out 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .logo-flash {
+            animation: none;
+        }
+    }
+</style>
+
+<script>
+    // Trigger logo flash animation on page load
+    const logoImage = document.getElementById('logo-image');
+
+    // Dev mode: expose function to console for testing
+    (window as any).testLogoFlash = () => {
+        if (logoImage) {
+            //console.log('Testing logo flash animation...');
+            logoImage.classList.remove('logo-flash');
+            // Force reflow to restart animation
+            void logoImage.offsetWidth;
+            logoImage.classList.add('logo-flash');
+        }
+    };
+
+    if (logoImage) {
+        // Check if we should play the animation
+        const hasFlashed = sessionStorage.getItem('logo-flashed');
+
+        //console.log('Logo flash check:', { hasFlashed, logoImage });
+
+        if (!hasFlashed) {
+            //console.log('Playing logo flash animation...');
+            // Add the flash class after a brief delay for better effect
+            setTimeout(() => {
+                logoImage.classList.add('logo-flash');
+                // Mark as flashed in sessionStorage
+                sessionStorage.setItem('logo-flashed', 'true');
+                //console.log('Logo flash animation triggered');
+            }, 100);
+        } else {
+            //console.log('Logo flash already played this session. Call testLogoFlash() to test it.');
+        }
+    }
+</script>
+<!-- End Desktop Header -->

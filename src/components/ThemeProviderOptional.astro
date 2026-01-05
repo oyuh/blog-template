@@ -1,0 +1,13 @@
+---
+// SOFT IMPORT (template-safe): `ThemeProvider.astro` exists in my private site repo,
+// but may be omitted from the public template repo. Using `import.meta.glob`
+// keeps builds working when the file is deleted.
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+
+const themeProviderModules = import.meta.glob("./ThemeProvider.astro", { eager: true });
+const ThemeProvider = (themeProviderModules["./ThemeProvider.astro"] as unknown as { default?: AstroComponent })
+	?.default;
+---
+
+{ThemeProvider && <ThemeProvider {...Astro.props} />}

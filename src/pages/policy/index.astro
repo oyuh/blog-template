@@ -1,0 +1,71 @@
+---
+import PageLayout from "@/layouts/Base.astro";
+
+const meta = {
+  title: "Policy Info",
+  description: "Clarifications on terminology and scope used in our Privacy Policy and Terms of Service.",
+};
+---
+
+<PageLayout meta={meta}>
+  <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Policy Information</h1>
+
+  <div class="prose prose-base dark:prose-invert max-w-none">
+    <p class="leading-relaxed">
+      This page defines terms used in the Privacy Policy and Terms of Service. If you want clarity on what <em>Service</em> or <em>Website</em> means here is where you check.
+    </p>
+
+    <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-sm font-medium tracking-tight shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
+      <span class="text-accent-2">Last Updated</span>
+      <span class="text-global-text/80">September 19, 2025</span>
+      <span class="hidden sm:inline text-global-text/50">(Privacy Policy & Terms)</span>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-3 mt-6">
+      <a href="/policy/tos" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-global-text hover:text-accent hover:bg-global-bg/75 transition shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
+        Terms of Service
+      </a>
+      <a href="/policy/privacy" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-global-text hover:text-accent hover:bg-global-bg/75 transition shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
+        Privacy Policy
+      </a>
+    </div>
+
+    <h2 class="text-accent-2">Domains I Operate</h2>
+    <ul class="not-prose grid gap-1 mt-2">
+      <li><code>*.lawsonhart.me</code></li>
+      <li><code>*.jamlog.lol</code></li>
+      <li><code>*.smphub.us</code></li>
+    </ul>
+
+    <h2 class="text-accent-2">Defined Terms</h2>
+    <ul class="space-y-1">
+      <li><strong>We / I</strong>: Lawson Hart personally and where applicable partners or collaborators operating or maintaining the Website.</li>
+      <li><strong>Service</strong>: The website, apps, features, tools, and content provided under any listed domain.</li>
+      <li><strong>Website</strong>: Any page under a Lawson Hart operated domain (same scope as Service).</li>
+      <li><strong>You</strong>: The individual accessing the Website or an entity acting through an individual.</li>
+      <li><strong>Account</strong>: A profile that may be created to access specific parts of the Service.</li>
+      <li><strong>Content</strong>: Text, images, code, or media on the site.</li>
+      <li><strong>Device</strong>: Hardware you use to access the site (computer, phone, tablet and so on).</li>
+      <li><strong>Personal Data</strong>: Data that can identify you (email, IP address).</li>
+      <li><strong>Usage Data</strong>: Automatically collected info like visit time, browser, actions.</li>
+      <li><strong>Service Provider</strong>: Third parties that help deliver, analyze, or support the Website.</li>
+      <li><strong>Affiliates</strong>: Related entities (subsidiaries, joint ventures).</li>
+      <li><strong>Business Partners</strong>: External entities collaborating on services, features, or offers.</li>
+      <li><strong>Data</strong>: Refers to both Personal Data and Usage Data.</li>
+      <li><strong>Consent</strong>: Agreement to policies by using the Service.</li>
+      <li><strong>Termination</strong>: Restricting or revoking access to an account or the Website.</li>
+      <li><strong>External Links</strong>: Links to non operated sites; their content and policies are outside our control.</li>
+    </ul>
+
+    <h2 class="text-accent-2">Information Provided on the Site</h2>
+    <ul class="list-disc ms-5">
+      <li>Personal posts</li>
+      <li>Project showcases</li>
+      <li>Software tools or experimental pages</li>
+      <li>Links to third party resources or repositories</li>
+    </ul>
+
+  <h2 class="text-accent-2">Legal Contact</h2>
+  <p>Questions or clarifications: <a href="mailto:me@lawsonhart.me?subject=lawsonhart.me%20Policy%20Question" class="text-accent hover:underline"><code>me@lawsonhart.me</code></a></p>
+  </div>
+</PageLayout>

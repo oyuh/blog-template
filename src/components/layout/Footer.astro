@@ -1,0 +1,113 @@
+---
+import { menuLinks, siteConfig } from "@/site.config";
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+// SOFT IMPORT (template-safe): GitHub footer widget exists on my private site,
+// but can be removed from the public template repo without breaking builds.
+const gitHubInfoModules = import.meta.glob("../GitHubInfo.astro", { eager: true });
+const GitHubInfo = (gitHubInfoModules["../GitHubInfo.astro"] as unknown as { default?: AstroComponent })?.default;
+
+const year = new Date().getFullYear();
+---
+
+<footer class="mt-auto w-full pt-6 pb-3 sm:pt-16 sm:pb-6">
+	<div class="text-zinc-500 dark:text-zinc-400 space-y-4 text-sm">
+		<div class="sm:hidden flex flex-col items-center gap-2 text-center">
+			<img src="/logo.svg" alt="Lawson Hart Logo" class="h-8 w-auto" />
+			<span class="text-sm font-medium leading-relaxed">&copy; {siteConfig.author} {year}</span>
+		</div>
+		<!-- Main content: Nav links separated by logo -->
+		<div class="hidden sm:flex items-center justify-center flex-wrap gap-y-4">
+			<!-- Combined top row for better centering -->
+			<div class="w-full flex items-center justify-center gap-6">
+				<!-- Left side: Copyright & Policies -->
+				<div class="flex items-center gap-2 sm:gap-3">
+					<span>&copy; {siteConfig.author} {year}</span>
+					<span class="text-zinc-300 dark:text-zinc-600">•</span>
+					<a class="hover:text-accent transition-colors duration-200" href="/policy/">
+						Policies
+					</a>
+				</div>
+
+			<!-- Center: Logo with decorative elements -->
+			<div class="flex items-center justify-center relative">
+
+				<!-- Subtle gradient background -->
+				<div class="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-200/5 dark:via-zinc-700/5 to-transparent rounded-lg"></div>
+
+				<a href="/" class="block shrink-0 group relative z-10" style="transform: translateY(8.25%);">
+					<img
+						src="/logo.svg"
+						alt="Lawson Hart Logo"
+						class="h-8 w-auto transition-all duration-300 grayscale group-hover:grayscale-0 group-hover:drop-shadow-[0_0_8px_rgba(87,130,255,0.35)] group-hover:scale-110"
+					/>
+				</a>
+			</div>
+				<!-- Right side: Navigation Links -->
+				<div class="flex items-center gap-2 sm:gap-3">
+					{
+						menuLinks.map((link, index) => (
+							<>
+								<a class="hover:text-accent transition-colors duration-200" href={link.path}>
+									{link.title}
+								</a>
+								{index < menuLinks.length - 1 && (
+									<span class="text-zinc-300 dark:text-zinc-600">•</span>
+								)}
+							</>
+						))
+					}
+				</div>
+			</div>
+		</div>
+
+		<!-- Bottom: GitHub info -->
+		<div class="hidden sm:flex w-full items-center justify-center pt-2 text-center">
+			{GitHubInfo && <GitHubInfo />}
+		</div>
+	</div>
+</footer>
+
+<style>
+	@keyframes flash {
+		0%, 50% {
+			opacity: 0.3;
+		}
+		25% {
+			opacity: 1;
+		}
+		75%, 100% {
+			opacity: 0.3;
+		}
+	}
+
+	.animate-flash {
+		animation: flash 4.8s ease-in-out infinite;
+	}
+
+	@keyframes footerFloat {
+		0%, 100% {
+			transform: translateY(0);
+		}
+		50% {
+			transform: translateY(-6%);
+		}
+	}
+
+	@keyframes footerGlowPulse {
+		0%, 100% {
+			box-shadow: 0 18px 36px -24px rgba(56, 119, 237, 0.35);
+		}
+		50% {
+			box-shadow: 0 20px 44px -24px rgba(56, 119, 237, 0.55);
+		}
+	}
+
+	.footer-logo-float {
+		animation: footerFloat 6s ease-in-out infinite;
+	}
+
+	.footer-logo-glow {
+		animation: footerGlowPulse 5.5s ease-in-out infinite;
+	}
+</style>

@@ -1,0 +1,35 @@
+---
+title: "GitHub & Charts Example"
+description: "Quick example showing GitHub repo cards and charts"
+publishDate: "2025-01-16"
+tags: ["github", "charts", "demo"]
+draft: true
+---
+
+import Chart from '@/components/blog/Chart.tsx';
+
+## GitHub Projects
+
+Here are some cool projects:
+
+- https://github.com/withastro/astro
+- https://github.com/tailwindlabs/tailwindcss
+
+## Performance Data
+
+<Chart
+  client:load
+  data={[
+    { x: 'Q1', y: 65 },
+    { x: 'Q2', y: 78 },
+    { x: 'Q3', y: 82 },
+    { x: 'Q4', y: 95 }
+  ]}
+  type="bar"
+  title="Quarterly Performance"
+  xLabel="Quarter"
+  yLabel="Score"
+  height={300}
+/>
+
+You can also check out [React](https://github.com/facebook/react) - GitHub links are automatically enhanced with icons!

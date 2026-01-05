@@ -1,0 +1,400 @@
+---
+import { generateToc } from "@/utils/generateToc";
+import type { MarkdownHeading } from "astro";
+import TOCHeading from "./TOCHeading.astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const toc = generateToc(headings);
+---
+
+{toc.length > 0 && (
+  <>
+    <div id="mobile-toc-actions" class="fixed bottom-6 left-6 z-40 lg:hidden flex items-center gap-3">
+      <!-- Mobile TOC Button - matches site theme -->
+      <button
+        id="mobile-toc-btn"
+        class="flex items-center gap-2 px-4 py-3 min-h-[48px] bg-global-bg/50 ring-1 ring-white/5 text-global-text rounded-xl shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 hover:text-accent hover:bg-global-bg/70 focus:outline-none focus:ring-2 focus:ring-accent/50 touch-manipulation"
+        aria-label="Open table of contents"
+        title="Table of Contents"
+      >
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
+        </svg>
+        <div class="flex flex-col items-start">
+          <span class="text-sm font-medium leading-tight">Contents</span>
+          <span id="toc-progress" class="text-xs text-global-text/70 leading-tight">0/0</span>
+        </div>
+      </button>
+
+      <button
+        id="mobile-comments-btn"
+        class="flex items-center justify-center min-h-[48px] min-w-[48px] bg-global-bg/50 ring-1 ring-white/5 text-global-text rounded-xl shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 hover:text-accent hover:bg-global-bg/70 focus:outline-none focus:ring-2 focus:ring-accent/50 touch-manipulation"
+        aria-label="Open comments"
+        title="Comments"
+        type="button"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m-6 8l-4 2V6a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H7z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile TOC Modal -->
+    <div
+      id="mobile-toc-modal"
+      class="fixed inset-0 bg-global-bg/20 backdrop-blur-sm z-50 lg:hidden opacity-0 pointer-events-none transition-all duration-300"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mobile-toc-title"
+    >
+      <!-- Modal Content -->
+      <div
+        id="mobile-toc-content"
+        class="fixed bottom-0 left-0 right-0 bg-global-bg/95 ring-1 ring-white/5 rounded-t-2xl shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transform translate-y-full transition-transform duration-300 max-h-[70vh] overflow-hidden safe-area-padding-bottom"
+      >
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3 border-b border-white/5">
+          <h2 id="mobile-toc-title" class="text-base font-medium text-accent-2">Contents</h2>
+          <button
+            id="mobile-toc-close"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-global-text hover:text-accent hover:bg-accent/5 transition-colors"
+            aria-label="Close table of contents"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- TOC Content -->
+        <div class="overflow-y-auto px-3 py-2" style="max-height: calc(70vh - 64px);">
+          <nav class="ms-1">
+            <ol class="space-y-1" id="mobile-toc-list">
+              {toc.map((heading) => <TOCHeading heading={heading} />)}
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </>
+)}
+
+<script>
+  // Mobile TOC functionality
+  const btn = document.getElementById('mobile-toc-btn') as HTMLButtonElement | null;
+  const commentsBtn = document.getElementById('mobile-comments-btn') as HTMLButtonElement | null;
+  const modal = document.getElementById('mobile-toc-modal') as HTMLDivElement | null;
+  const content = document.getElementById('mobile-toc-content') as HTMLDivElement | null;
+  const closeBtn = document.getElementById('mobile-toc-close') as HTMLButtonElement | null;
+  const list = document.getElementById('mobile-toc-list') as HTMLOListElement | null;
+  const progressEl = document.getElementById('toc-progress') as HTMLSpanElement | null;
+
+  if (!btn || !modal || !content || !closeBtn || !progressEl) {
+    console.warn('Mobile TOC elements not found');
+  } else {
+    // Improve click handling with larger touch target
+    const btnClickHandler = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openModal();
+    };
+
+    // Add multiple event listeners for better touch handling
+    btn.addEventListener('click', btnClickHandler);
+    btn.addEventListener('touchend', btnClickHandler);
+
+    const openModal = () => {
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+      content.classList.remove('translate-y-full');
+      content.classList.add('translate-y-0');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeModal = () => {
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      content.classList.add('translate-y-full');
+      content.classList.remove('translate-y-0');
+      document.body.style.overflow = '';
+    };
+
+    // When comments open, ensure TOC is closed.
+    window.addEventListener('comments:open', () => {
+      if (!modal.classList.contains('opacity-0')) closeModal();
+    });
+
+    // Event listeners
+    closeBtn.addEventListener('click', closeModal);
+
+    const openCommentsHandler = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      window.dispatchEvent(new CustomEvent('comments:open'));
+    };
+    commentsBtn?.addEventListener('click', openCommentsHandler);
+    commentsBtn?.addEventListener('touchend', openCommentsHandler);
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeModal();
+      }
+    });
+
+    // Close on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.classList.contains('opacity-0')) {
+        closeModal();
+      }
+    });
+
+    // Close modal when clicking TOC links
+    list?.addEventListener('click', (e) => {
+      if (e.target instanceof HTMLAnchorElement && e.target.href.includes('#')) {
+        setTimeout(closeModal, 100); // Small delay to allow navigation
+      }
+    });
+
+    // Scrollspy highlighting for mobile TOC
+    const headings = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
+    const anchorMap = new Map<string, HTMLAnchorElement>();
+    let totalSections = 0;
+    let currentSectionIndex = 0;
+
+    type HeadingPosition = {
+      element: HTMLElement;
+      id: string;
+      top: number;
+      level: number;
+    };
+
+    const getHeadingPositions = (): HeadingPosition[] =>
+      headings
+        .map((h) => ({
+          element: h,
+          id: h.getAttribute('id'),
+          top: h.getBoundingClientRect().top + window.scrollY,
+          level: Number.parseInt(h.tagName.charAt(1), 10),
+        }))
+        .filter((h): h is HeadingPosition => Boolean(h.id));
+
+    const updateAnchorMap = () => {
+      anchorMap.clear();
+      totalSections = 0;
+      list?.querySelectorAll('a[href^="#"]').forEach((a) => {
+        const id = (a.getAttribute('href') || '').slice(1);
+        if (id) {
+          anchorMap.set(id, a as HTMLAnchorElement);
+          totalSections++;
+        }
+      });
+      updateProgress();
+    };
+
+    const updateProgress = () => {
+      if (progressEl) {
+        progressEl.textContent = `${currentSectionIndex}/${totalSections}`;
+      }
+    };
+
+    let activeId: string | null = null;
+    const setActive = (id: string | null) => {
+      if (activeId === id) return;
+      if (activeId && anchorMap.has(activeId)) {
+        const el = anchorMap.get(activeId)!;
+        el.classList.remove('text-accent', 'bg-accent/5', 'border-accent/20');
+      }
+      activeId = id;
+      if (activeId && anchorMap.has(activeId)) {
+        const el = anchorMap.get(activeId)!;
+        el.classList.add('text-accent', 'bg-accent/5', 'border-accent/20');
+
+        // Update current section index
+        const allIds = Array.from(anchorMap.keys());
+        currentSectionIndex = Math.max(1, allIds.indexOf(activeId) + 1);
+        updateProgress();
+      }
+    };
+
+    const io = new IntersectionObserver(() => {
+      // Get current scroll position with header offset
+      const headerOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-clearance')) || 72;
+      const scrollTop = window.scrollY + headerOffset + 20; // Small buffer for better accuracy
+
+      // Create a map of all headings with their positions
+      const headingPositions = getHeadingPositions();
+
+      // Sort by position
+      headingPositions.sort((a, b) => a.top - b.top);
+
+      // Find the most appropriate heading
+  let activeHeading: HeadingPosition | null = null;
+
+      // Method 1: Find the closest heading that's above or at the current scroll position
+      for (let i = headingPositions.length - 1; i >= 0; i--) {
+        const heading = headingPositions[i];
+        if (!heading) continue;
+        if (heading.top <= scrollTop + 10) { // Small tolerance
+          activeHeading = heading;
+          break;
+        }
+      }
+
+      // Method 2: If we're near the top and no heading is above scroll position,
+      // use the first heading
+      if (!activeHeading && headingPositions.length > 0) {
+        activeHeading = headingPositions[0] as HeadingPosition;
+      }
+
+      // Method 3: More sophisticated approach for subsections
+      if (activeHeading) {
+        const currentLevel = activeHeading.level;
+        const currentIndex = headingPositions.findIndex((h) => h.id === activeHeading?.id);
+
+        // Look ahead to see if we're closer to the next heading of the same or higher level
+        for (let i = currentIndex + 1; i < headingPositions.length; i++) {
+          const nextHeading = headingPositions[i];
+          if (!nextHeading) continue;
+          const nextLevel = nextHeading.level;
+
+          // If we find a heading at the same level or higher (lower number = higher level)
+          if (nextLevel <= currentLevel) {
+            // Check if we're closer to this next heading
+            const distanceToNext = Math.abs(nextHeading.top - scrollTop);
+            const distanceToCurrent = Math.abs(activeHeading.top - scrollTop);
+
+            // If we're significantly closer to the next heading (and it's within reasonable distance)
+            if (distanceToNext < distanceToCurrent && distanceToNext < 200) {
+              activeHeading = nextHeading;
+            }
+            break; // Stop at the next heading of same or higher level
+          }
+        }
+      }
+
+      if (activeHeading?.id) {
+        setActive(activeHeading.id);
+      }
+    }, {
+      rootMargin: `-${getComputedStyle(document.documentElement).getPropertyValue('--header-clearance') || '72px'} 0px -70% 0px`,
+      threshold: [0, 0.1, 0.5, 0.9, 1] // More threshold points for better accuracy
+    });
+
+    // Add scroll event listener for more responsive tracking
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    const handleScroll = () => {
+      if (scrollTimeout !== null) {
+        clearTimeout(scrollTimeout);
+      }
+      scrollTimeout = window.setTimeout(() => {
+        // Manual check when scrolling stops
+        const headerOffset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--header-clearance')) || 72;
+        const scrollTop = window.scrollY + headerOffset + 20;
+
+        const headingPositions = getHeadingPositions();
+
+        headingPositions.sort((a, b) => a.top - b.top);
+
+        let activeHeading: HeadingPosition | null = null;
+        for (let i = headingPositions.length - 1; i >= 0; i--) {
+          const heading = headingPositions[i];
+          if (heading && heading.top <= scrollTop + 5) {
+            activeHeading = heading;
+            break;
+          }
+        }
+
+        if (!activeHeading && headingPositions.length > 0) {
+          activeHeading = headingPositions[0] as HeadingPosition;
+        }
+
+        if (activeHeading?.id) {
+          setActive(activeHeading.id);
+        }
+      }, 50) as unknown as ReturnType<typeof setTimeout>; // Small delay to avoid too frequent updates
+    };
+
+    const init = () => {
+      updateAnchorMap();
+      headings.forEach((h) => io.observe(h));
+      window.addEventListener('scroll', handleScroll, { passive: true });
+
+      // Initialize progress counter
+      if (totalSections > 0) {
+        currentSectionIndex = 0;
+        updateProgress();
+      }
+    };
+
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(init, 0);
+    } else {
+      document.addEventListener('DOMContentLoaded', init);
+    }
+
+    // Update on client-side navigation
+    document.addEventListener('astro:page-load', () => {
+      io.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      updateAnchorMap();
+      const newHeads = Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6')) as HTMLElement[];
+      newHeads.forEach((h) => io.observe(h));
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    });
+  }
+</script>
+
+<style>
+  /* Ensure smooth scrolling for TOC links */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Improve touch target for mobile TOC button */
+  #mobile-toc-btn {
+    /* Ensure minimum touch target size */
+    min-width: 48px;
+    min-height: 48px;
+    /* Add padding for better touch area */
+    touch-action: manipulation;
+    /* Prevent text selection on touch */
+    user-select: none;
+    -webkit-user-select: none;
+    /* Ensure button stays above other content */
+    isolation: isolate;
+  }
+
+  /* Add pseudo-element for larger touch target */
+  #mobile-toc-btn::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: -8px;
+    bottom: -8px;
+    /* This creates a larger invisible touch area */
+  }
+
+  /* Custom scrollbar for mobile TOC */
+  #mobile-toc-content ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  #mobile-toc-content ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  #mobile-toc-content ::-webkit-scrollbar-thumb {
+    background: rgb(156 163 175 / 0.5);
+    border-radius: 2px;
+  }
+
+  #mobile-toc-content ::-webkit-scrollbar-thumb:hover {
+    background: rgb(156 163 175 / 0.7);
+  }
+</style>

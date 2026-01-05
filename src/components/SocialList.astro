@@ -1,0 +1,77 @@
+---
+import { Icon } from "astro-icon/components";
+
+/**
+	Uses https://www.astroicon.dev/getting-started/
+	Find icons via guide: https://www.astroicon.dev/guides/customization/#open-source-icon-sets
+	Only installed pack is: @iconify-json/mdi
+*/
+const socialLinks: {
+	friendlyName: string;
+	link: string;
+	name: string;
+}[] = [
+    {
+		friendlyName: "Twitter/X",
+		link: "https://x.com/sumboutlaw/",
+		name: "mdi:twitter",
+	},
+    {
+		friendlyName: "LinkedIn",
+		link: "https://www.linkedin.com/in/lawson-hart/",
+		name: "mdi:linkedin",
+	},
+    {
+		friendlyName: "Discord",
+		link: "https://discordapp.com/users/527167786200465418",
+		name: "mdi:discord",
+	},
+    {
+		friendlyName: "Instagram",
+		link: "https://www.instagram.com/lawsonwtf/",
+		name: "mdi:instagram",
+	},
+    {
+		friendlyName: "Email",
+		link: "mailto:me@lawsonhart.me",
+		name: "mdi:email",
+	},
+    {
+		friendlyName: "Buy Me A Coffee",
+		link: "https://www.buymeacoffee.com/lawsonhart",
+		name: "mdi:coffee",
+	},
+];
+---
+
+<div class="flex flex-wrap items-end gap-x-2">
+	<p></p>
+	<ul class="flex flex-1 items-center gap-x-2 sm:flex-initial">
+    <li class="flex">
+      <a
+        class="hover:text-link inline-block"
+        href=https://github.com/oyuh/
+        rel="noreferrer"
+        target="_blank"
+      >
+        <Icon aria-hidden="true" class="h-8 w-8" focusable="false" name=mdi:github />
+        <span class="sr-only">GitHub</span>
+      </a>
+    </li>
+    {
+			socialLinks.map(({ friendlyName, link, name }) => (
+				<li class="flex">
+					<a
+						class="hover:text-link inline-block"
+						href={link}
+						rel="noreferrer"
+						target="_blank"
+					>
+						<Icon aria-hidden="true" class="h-8 w-8" focusable="false" name={name} />
+						<span class="sr-only">{friendlyName}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>

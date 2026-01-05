@@ -1,0 +1,176 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "@/components/FormattedDate.astro";
+import { type TocItem, generateToc } from "@/utils/generateToc";
+import type { HTMLTag, Polymorphic } from "astro/types";
+
+type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
+	post: CollectionEntry<"post">;
+	withDesc?: boolean;
+};
+
+const { post} = Astro.props;
+
+// Get table of contents for preview and reading time
+interface TocDisplayItem {
+    depth: number;
+    text: string;
+    slug: string;
+    children: TocDisplayItem[];
+}
+
+const buildDisplayToc = (items: TocItem[]): TocDisplayItem[] =>
+    items.map((item) => {
+        const heading = item as unknown as {
+            depth?: number;
+            text?: string;
+            slug: string;
+            children?: TocItem[];
+        };
+
+        return {
+            depth: heading.depth ?? 2,
+            text: heading.text ?? heading.slug,
+            slug: heading.slug,
+            children: buildDisplayToc(heading.children ?? []),
+        };
+    });
+
+let toc: TocItem[] = [];
+let displayToc: TocDisplayItem[] = [];
+let readingTime = "";
+
+try {
+	const rendered = await post.render();
+	const { headings, remarkPluginFrontmatter } = rendered;
+	toc = generateToc(headings);
+	readingTime = remarkPluginFrontmatter?.readingTime || "";
+
+	// Fallback: estimate reading time if not available
+	if (!readingTime) {
+		// Simple word count estimation from post body
+		const wordCount = post.body.split(/\s+/).length;
+		const minutes = Math.ceil(wordCount / 200); // 200 words per minute
+		readingTime = `${minutes} min read`;
+	}
+} catch (e) {
+	// If we can't get headings or reading time, use fallback
+	toc = [];
+	try {
+		const wordCount = post.body.split(/\s+/).length;
+		const minutes = Math.ceil(wordCount / 200);
+		readingTime = `${minutes} min read`;
+    } catch {
+        readingTime = "";
+    }
+}
+
+displayToc = buildDisplayToc(toc);
+---
+
+<a
+    href={`/posts/${post.id}/`}
+    data-astro-prefetch
+    class="group relative overflow-hidden bg-global-bg/50 border border-white/5 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md rounded-xl transition-all duration-300 hover:border-accent/20 hover:shadow-[0_8px_20px_-12px_rgba(0,0,0,0.45)] cursor-pointer w-full block ring-1 ring-white/5"
+    data-pagefind-body={true}
+>
+    {post.data.coverImage && (
+        <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
+            <!-- Ensure solid background base -->
+            <div class="absolute inset-0 bg-global-bg"></div>
+            <!-- Blurred cover image on right side - now fills 48% minimum for wider layout -->
+            <div
+                class="absolute inset-y-0 right-0 w-[55%] min-w-[48%] bg-cover bg-right blur-[1.5px] opacity-45 transition-all duration-300 group-hover:opacity-65 group-hover:scale-105"
+                style={`background-image: url(${post.data.coverImage.src.src});`}
+            ></div>
+            <!-- Strong fade gradient to protect text - adjusted for wider coverage -->
+            <div class="absolute inset-0 bg-gradient-to-l from-transparent from-5% via-global-bg/25 via-25% to-global-bg to-50%"></div>
+        </div>
+    )}
+
+    <!-- Main card content -->
+    <div class="relative p-6 flex gap-6">
+        <!-- Left side: Content (prioritize title and description) -->
+    <div class="flex-1 flex flex-col min-w-0 lg:pr-12">
+            <!-- Title gets top priority - LARGER -->
+            <h2 class="text-2xl lg:text-3xl font-bold text-accent-2 mb-3 group-hover:text-accent transition-colors leading-tight">
+                {post.data.title}
+            </h2>
+
+            <!-- Description gets second priority with generous space - LARGER -->
+            <p class="text-base lg:text-lg text-global-text/90 leading-relaxed mb-auto max-w-3xl">
+                {post.data.description}
+            </p>
+
+            <!-- Compact metadata footer - single line, minimal -->
+            <div class="flex items-center gap-2.5 flex-wrap mt-5 text-xs opacity-60">
+                <FormattedDate
+                    class="font-medium text-accent"
+                    date={post.data.publishDate}
+                    dateTimeOptions={{
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric"
+                    }}
+                />
+                {readingTime && (
+                    <>
+                        <span class="text-global-text/40">·</span>
+                        <span class="font-medium">{readingTime}</span>
+                    </>
+                )}
+                {post.data.draft && (
+                    <>
+                        <span class="text-global-text/40">·</span>
+                        <span class="font-semibold text-red-500">Draft</span>
+                    </>
+                )}
+                <span class="text-global-text/40 mx-0.5">·</span>
+                {post.data.tags.slice(0, 3).map((tag: string, index: number) => (
+                    <>
+                        <span class="font-medium group-hover:text-accent transition-colors">#{tag}</span>
+                        {index < Math.min(post.data.tags.length, 3) - 1 && <span class="text-global-text/40">,</span>}
+                    </>
+                ))}
+                {post.data.tags.length > 3 && (
+                    <span class="text-global-text/50">+{post.data.tags.length - 3}</span>
+                )}
+            </div>
+        </div>
+
+        <!-- Spacer preserved via padding on content -->
+    </div>
+
+    <!-- Hover Table of Contents tooltip -->
+    {displayToc.length > 0 && (
+        <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 pointer-events-none">
+            <div class="bg-global-bg/80 border border-white/10 rounded-xl shadow-[0_8px_20px_-12px_rgba(0,0,0,0.45)] backdrop-blur-md p-4 w-72 max-h-96 overflow-y-auto ring-1 ring-white/5">
+                <h4 class="text-sm font-semibold text-accent-2 mb-3 border-b border-white/10 pb-2">Table of Contents</h4>
+                <nav class="space-y-1">
+                    {displayToc.map((heading) => (
+                        <div>
+                            <div
+                                class="text-xs text-global-text py-1.5 px-2 rounded-md hover:bg-accent/5 transition-colors"
+                                style={`padding-left: ${(heading.depth - 2) * 0.75 + 0.5}rem`}
+                            >
+                                {heading.text}
+                            </div>
+                            {heading.children.length > 0 && (
+                                <div class="space-y-1">
+                                    {heading.children.map((child) => (
+                                        <div
+                                            class="text-xs text-global-text/75 py-1 px-2 rounded-md hover:bg-accent/5 transition-colors"
+                                            style={`padding-left: ${(child.depth - 2) * 0.75 + 0.5}rem`}
+                                        >
+                                            {child.text}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </nav>
+            </div>
+        </div>
+    )}
+</a>

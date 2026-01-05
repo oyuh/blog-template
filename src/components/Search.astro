@@ -1,0 +1,262 @@
+---
+// Heavy inspiration taken from Astro Starlight -> https://github.com/withastro/starlight/blob/main/packages/starlight/components/Search.astro
+
+import "@/styles/blocks/search.css";
+import { getAllPosts, getUniqueTagsWithCount } from "@/data/post";
+
+const allPosts = await getAllPosts();
+const allTags = getUniqueTagsWithCount(allPosts);
+const topTags = allTags.slice(0, 10); // Get top 10 tags
+
+const quickLinks = [
+	{ title: "All Posts", href: "/posts" },
+	{ title: "All Tags", href: "/tags" },
+	{ title: "About", href: "/about" },
+  { title: "Notes", href: "/notes" },
+];
+---
+
+<site-search class="ms-auto" id="search">
+	<button
+		class="group relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-all duration-200 hover:bg-accent/5 hover:text-accent"
+		aria-keyshortcuts="Control+K Meta+K"
+		data-open-modal
+		disabled
+	>
+		<svg
+			aria-hidden="true"
+			class="h-6 w-6 transition-transform duration-200 group-hover:scale-110"
+			fill="none"
+			height="16"
+			stroke="currentColor"
+			stroke-width="1.5"
+			viewBox="0 0 24 24"
+			width="16"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path d="M0 0h24v24H0z" stroke="none"></path>
+			<path d="M3 10a7 7 0 1 0 14 0 7 7 0 1 0-14 0M21 21l-6-6"></path>
+		</svg>
+		<span class="sr-only">Open Search (Ctrl+K)</span>
+	</button>
+	<dialog
+		aria-label="search"
+		class="bg-global-bg/95 h-full max-h-full w-full max-w-full border border-zinc-200/50 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] backdrop:backdrop-blur-xl backdrop:bg-black/30 open:flex open:animate-in open:fade-in-0 open:zoom-in-95 sm:mx-auto sm:mt-16 sm:mb-auto sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-2xl dark:bg-global-bg/90 dark:border-zinc-700/50 dark:backdrop:bg-black/50 dark:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.25),0_10px_10px_-5px_rgba(0,0,0,0.1)]"
+	>
+		<div class="dialog-frame flex grow flex-col gap-6 p-8 pt-16 sm:pt-8">
+			<div class="flex items-center justify-between mb-2">
+				<h2 class="text-2xl font-bold text-global-text">Search</h2>
+				<button
+					class="flex items-center gap-2 cursor-pointer rounded-xl bg-zinc-50/80 px-4 py-2.5 text-sm font-medium text-zinc-600 transition-all duration-200 hover:bg-zinc-100/90 hover:text-zinc-800 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:ring-offset-2 dark:bg-zinc-800/60 dark:text-zinc-400 dark:hover:bg-zinc-700/80 dark:hover:text-zinc-200 dark:focus:ring-offset-zinc-900 backdrop-blur-sm"
+					data-close-modal
+				>
+					<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+					</svg>
+					Close
+				</button>
+			</div>
+			{
+				import.meta.env.DEV ? (
+					<div class="mx-auto text-center p-8">
+						<div class="bg-accent/10 border border-accent/20 rounded-lg p-6">
+							<svg class="mx-auto h-12 w-12 text-accent mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+							</svg>
+							<h3 class="text-lg font-semibold text-accent mb-2">Search Unavailable in Development</h3>
+							<p class="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+								Gotta build to see this stuff twin
+							</p>
+						</div>
+					</div>
+				) : (
+					<div class="search-container">
+						<div id="lawson__search" />
+						<div id="search-placeholder" class="search-placeholder">
+							<div class="placeholder-content">
+								<!-- Popular Tags -->
+								<div class="mb-8">
+									<h3 class="text-lg font-semibold text-global-text mb-4">Popular Tags</h3>
+									<div class="flex flex-wrap gap-2">
+										{topTags.map(([tag, count]) => (
+											<a
+												href={`/tags/${tag}/`}
+												class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent/10 hover:bg-accent/20 border border-accent/20 hover:border-accent/40 rounded-lg text-sm font-medium text-accent transition-all duration-200"
+												data-close-on-click
+											>
+												<span>#{tag}</span>
+												<span class="text-xs opacity-70">({count})</span>
+											</a>
+										))}
+									</div>
+								</div>
+
+								<!-- Quick Links -->
+								<div>
+									<h3 class="text-lg font-semibold text-global-text mb-4">Quick Links</h3>
+									<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+										{quickLinks.map((link) => (
+											<a
+												href={link.href}
+												class="group flex items-center justify-between px-4 py-3 bg-zinc-50/80 hover:bg-accent/10 dark:bg-zinc-800/60 dark:hover:bg-accent/20 rounded-lg text-global-text hover:text-accent transition-all duration-200 border border-zinc-200/50 hover:border-accent/50 dark:border-zinc-700/50 dark:hover:border-accent/50 hover:shadow-md hover:translate-x-1"
+												data-close-on-click
+											>
+												<span class="font-medium">{link.title}</span>
+												<svg class="h-5 w-5 flex-shrink-0 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+												</svg>
+											</a>
+										))}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				)
+			}
+		</div>
+	</dialog>
+</site-search>
+
+<script>
+	class SiteSearch extends HTMLElement {
+		#closeBtn: HTMLButtonElement | null;
+		#dialog: HTMLDialogElement | null;
+		#dialogFrame: HTMLDivElement | null;
+		#openBtn: HTMLButtonElement | null;
+		#controller: AbortController;
+
+		constructor() {
+			super();
+			this.#openBtn = this.querySelector<HTMLButtonElement>("button[data-open-modal]");
+			this.#closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]");
+			this.#dialog = this.querySelector<HTMLDialogElement>("dialog");
+			this.#dialogFrame = this.querySelector(".dialog-frame");
+			this.#controller = new AbortController();
+
+			// Set up events
+			if (this.#openBtn) {
+				this.#openBtn.addEventListener("click", this.openModal);
+				this.#openBtn.disabled = false;
+			} else {
+				console.warn("Search button not found");
+			}
+
+			if (this.#closeBtn) {
+				this.#closeBtn.addEventListener("click", this.closeModal);
+			} else {
+				console.warn("Close button not found");
+			}
+
+			if (this.#dialog) {
+				this.#dialog.addEventListener("close", () => {
+					window.removeEventListener("click", this.onWindowClick);
+				});
+			} else {
+				console.warn("Dialog not found");
+			}
+
+			// only add pagefind in production
+			if (import.meta.env.DEV) return;
+			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
+			onIdle(async () => {
+				const { PagefindUI } = await import("@pagefind/default-ui");
+				new PagefindUI({
+					baseUrl: import.meta.env.BASE_URL,
+					bundlePath: import.meta.env.BASE_URL.replace(/\/$/, "") + "/pagefind/",
+					element: "#lawson__search",
+					showImages: false,
+					showSubResults: true,
+				});
+			});
+		}
+
+		connectedCallback() {
+			// window events, requires cleanup
+			window.addEventListener("keydown", this.onWindowKeydown, { signal: this.#controller.signal });
+		}
+
+		disconnectedCallback() {
+			this.#controller.abort();
+		}
+
+		openModal = (event?: MouseEvent) => {
+			if (!this.#dialog) {
+				console.warn("Dialog not found");
+				return;
+			}
+
+			this.#dialog.showModal();
+			this.querySelector("input")?.focus();
+			event?.stopPropagation();
+			// Remove focus from the button to prevent persistent outline
+			this.#openBtn?.blur();
+			window.addEventListener("click", this.onWindowClick, { signal: this.#controller.signal });
+
+			// Show placeholder initially
+			this.showPlaceholder();
+
+			// Set up event listener to hide placeholder when user types
+			setTimeout(() => {
+				const searchInput = this.querySelector<HTMLInputElement>(".pagefind-ui__search-input");
+				if (searchInput) {
+					searchInput.addEventListener("input", () => {
+						if (searchInput.value.trim().length > 0) {
+							this.hidePlaceholder();
+						} else {
+							this.showPlaceholder();
+						}
+					});
+				}
+			}, 100);
+		};
+
+		closeModal = () => this.#dialog?.close();
+
+		showPlaceholder = () => {
+			const placeholder = this.querySelector<HTMLDivElement>("#search-placeholder");
+			if (placeholder) {
+				placeholder.style.display = "block";
+			}
+		};
+
+		hidePlaceholder = () => {
+			const placeholder = this.querySelector<HTMLDivElement>("#search-placeholder");
+			if (placeholder) {
+				placeholder.style.display = "none";
+			}
+		};
+
+		onWindowClick = (event: MouseEvent) => {
+			// check if it's a link
+			const isLink = "href" in (event.target || {});
+			// check if it's a close-on-click element
+			const target = event.target as HTMLElement;
+			const isCloseOnClick = target?.closest("[data-close-on-click]");
+
+			// make sure the click is either a link, close-on-click, or outside of the dialog
+			if (
+				isLink ||
+				isCloseOnClick ||
+				(document.body.contains(event.target as Node) &&
+					!this.#dialogFrame?.contains(event.target as Node))
+			) {
+				this.closeModal();
+			}
+		};
+
+		onWindowKeydown = (e: KeyboardEvent) => {
+			if (!this.#dialog) {
+				console.warn("Dialog not found");
+				return;
+			}
+			// check if it's the Control+K or ⌘+K shortcut
+			if ((e.metaKey === true || e.ctrlKey === true) && e.key === "k") {
+				this.#dialog.open ? this.closeModal() : this.openModal();
+				e.preventDefault();
+			}
+		};
+	}
+
+	customElements.define("site-search", SiteSearch);
+</script>

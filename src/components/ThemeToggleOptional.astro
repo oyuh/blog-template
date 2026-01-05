@@ -1,0 +1,13 @@
+---
+// SOFT IMPORT (template-safe): `ThemeToggle.astro` exists in my private site repo,
+// but may be omitted from the public template repo. Using `import.meta.glob`
+// keeps builds working when the file is deleted.
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+
+const themeToggleModules = import.meta.glob("./ThemeToggle.astro", { eager: true });
+const ThemeToggle = (themeToggleModules["./ThemeToggle.astro"] as unknown as { default?: AstroComponent })
+	?.default;
+---
+
+{ThemeToggle && <ThemeToggle {...Astro.props} />}

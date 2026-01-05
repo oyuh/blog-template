@@ -1,0 +1,301 @@
+---
+// Dither background component using Three.js - exact implementation from reactbits.dev
+interface Props {
+	enabled?: boolean;
+}
+
+const { enabled = true } = Astro.props;
+---
+
+{enabled && (
+	<div id="dither-bg" class="fixed inset-0 -z-10 w-full h-screen pointer-events-none" aria-hidden="true">
+	</div>
+)}
+
+<script>
+import * as THREE from 'three';
+
+// Simplified dither background using pure Three.js (no React)
+class DitherBackground {
+  private container: HTMLElement;
+  private scene: THREE.Scene;
+  private camera: THREE.OrthographicCamera;
+  private renderer: THREE.WebGLRenderer;
+  private material: THREE.ShaderMaterial;
+  private mouse: THREE.Vector2;
+  private animationId: number | null = null;
+
+  constructor(container: HTMLElement) {
+    this.container = container;
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+    this.renderer = new THREE.WebGLRenderer({
+      alpha: true,
+      antialias: false,
+      preserveDrawingBuffer: true
+    });
+    this.mouse = new THREE.Vector2(0.5, 0.5);
+
+    this.init();
+    this.setupEventListeners();
+    this.animate();
+  }
+
+  private init() {
+    // Set up renderer
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setClearColor(0x000000, 0);
+    this.container.appendChild(this.renderer.domElement);
+
+    // Create full-screen quad
+    const geometry = new THREE.PlaneGeometry(2, 2);
+
+    // Dithering shader material with exact reactbits.dev implementation
+    this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        time: { value: 0 },
+        resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+        mouse: { value: this.mouse },
+        waveSpeed: { value: 0.05 },
+        waveFrequency: { value: 3.0 },
+        waveAmplitude: { value: 0.3 },
+        colorNum: { value: 4.0 },
+        pixelSize: { value: 2.0 },
+        isDarkMode: { value: 0.0 }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float time;
+        uniform vec2 resolution;
+        uniform vec2 mouse;
+        uniform float waveSpeed;
+        uniform float waveFrequency;
+        uniform float waveAmplitude;
+        uniform float colorNum;
+        uniform float pixelSize;
+        uniform float isDarkMode;
+        varying vec2 vUv;
+
+        // Bayer matrix for ordered dithering
+        const float bayerMatrix8x8[64] = float[64](
+          0.0/64.0, 48.0/64.0, 12.0/64.0, 60.0/64.0,  3.0/64.0, 51.0/64.0, 15.0/64.0, 63.0/64.0,
+          32.0/64.0,16.0/64.0, 44.0/64.0, 28.0/64.0, 35.0/64.0,19.0/64.0, 47.0/64.0, 31.0/64.0,
+          8.0/64.0, 56.0/64.0,  4.0/64.0, 52.0/64.0, 11.0/64.0,59.0/64.0,  7.0/64.0, 55.0/64.0,
+          40.0/64.0,24.0/64.0, 36.0/64.0, 20.0/64.0, 43.0/64.0,27.0/64.0, 39.0/64.0, 23.0/64.0,
+          2.0/64.0, 50.0/64.0, 14.0/64.0, 62.0/64.0,  1.0/64.0,49.0/64.0, 13.0/64.0, 61.0/64.0,
+          34.0/64.0,18.0/64.0, 46.0/64.0, 30.0/64.0, 33.0/64.0,17.0/64.0, 45.0/64.0, 29.0/64.0,
+          10.0/64.0,58.0/64.0,  6.0/64.0, 54.0/64.0,  9.0/64.0,57.0/64.0,  5.0/64.0, 53.0/64.0,
+          42.0/64.0,26.0/64.0, 38.0/64.0, 22.0/64.0, 41.0/64.0,25.0/64.0, 37.0/64.0, 21.0/64.0
+        );
+
+        // Perlin noise functions
+        vec4 mod289(vec4 x) { return x - floor(x * (1.0/289.0)) * 289.0; }
+        vec4 permute(vec4 x) { return mod289(((x * 34.0) + 1.0) * x); }
+        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+        vec2 fade(vec2 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }
+
+        float cnoise(vec2 P) {
+          vec4 Pi = floor(P.xyxy) + vec4(0.0,0.0,1.0,1.0);
+          vec4 Pf = fract(P.xyxy) - vec4(0.0,0.0,1.0,1.0);
+          Pi = mod289(Pi);
+          vec4 ix = Pi.xzxz;
+          vec4 iy = Pi.yyww;
+          vec4 fx = Pf.xzxz;
+          vec4 fy = Pf.yyww;
+          vec4 i = permute(permute(ix) + iy);
+          vec4 gx = fract(i * (1.0/41.0)) * 2.0 - 1.0;
+          vec4 gy = abs(gx) - 0.5;
+          vec4 tx = floor(gx + 0.5);
+          gx = gx - tx;
+          vec2 g00 = vec2(gx.x, gy.x);
+          vec2 g10 = vec2(gx.y, gy.y);
+          vec2 g01 = vec2(gx.z, gy.z);
+          vec2 g11 = vec2(gx.w, gy.w);
+          vec4 norm = taylorInvSqrt(vec4(dot(g00,g00), dot(g01,g01), dot(g10,g10), dot(g11,g11)));
+          g00 *= norm.x; g01 *= norm.y; g10 *= norm.z; g11 *= norm.w;
+          float n00 = dot(g00, vec2(fx.x, fy.x));
+          float n10 = dot(g10, vec2(fx.y, fy.y));
+          float n01 = dot(g01, vec2(fx.z, fy.z));
+          float n11 = dot(g11, vec2(fx.w, fy.w));
+          vec2 fade_xy = fade(Pf.xy);
+          vec2 n_x = mix(vec2(n00, n01), vec2(n10, n11), fade_xy.x);
+          return 2.3 * mix(n_x.x, n_x.y, fade_xy.y);
+        }
+
+        const int OCTAVES = 4;
+        float fbm(vec2 p) {
+          float value = 0.0;
+          float amp = 1.0;
+          float freq = waveFrequency;
+          for (int i = 0; i < OCTAVES; i++) {
+            value += amp * abs(cnoise(p));
+            p *= freq;
+            amp *= waveAmplitude;
+          }
+          return value;
+        }
+
+        float pattern(vec2 p) {
+          vec2 p2 = p - time * waveSpeed;
+          return fbm(p + fbm(p2));
+        }
+
+        vec3 dither(vec2 uv, vec3 color) {
+          vec2 scaledCoord = floor(uv * resolution / pixelSize);
+          int x = int(mod(scaledCoord.x, 8.0));
+          int y = int(mod(scaledCoord.y, 8.0));
+          float threshold = bayerMatrix8x8[y * 8 + x] - 0.25;
+          float step = 1.0 / (colorNum - 1.0);
+          color += threshold * step;
+          float bias = 0.2;
+          color = clamp(color - bias, 0.0, 1.0);
+          return floor(color * (colorNum - 1.0) + 0.5) / (colorNum - 1.0);
+        }
+
+        void main() {
+          vec2 uv = gl_FragCoord.xy / resolution.xy;
+          vec2 st = uv * 2.0 - 1.0;
+          st.x *= resolution.x / resolution.y;
+
+          // Create wave pattern
+          float f = pattern(st);
+
+          // Mouse interaction
+          vec2 mouseNorm = (mouse - 0.5) * 2.0;
+          mouseNorm.x *= resolution.x / resolution.y;
+          float mouseDist = length(st - mouseNorm);
+          float mouseEffect = 1.0 - smoothstep(0.0, 1.0, mouseDist);
+          f -= 0.5 * mouseEffect;
+
+          // Theme-aware colors - adjust these values to dial in visibility
+          vec3 color;
+
+          if (isDarkMode > 0.5) {
+            // Dark mode: subtle lighter dots on dark background
+            vec3 darkBg = vec3(0.024, 0.024, 0.022);
+            vec3 darkDots = vec3(0.10, 0.10, 0.23); // ← ADJUST: increase these to make dots lighter/more visible
+            color = mix(darkBg, darkDots, f * 0.8); // ← ADJUST: increase multiplier (0.1-1.0) for stronger pattern
+          } else {
+            // Light mode: subtle darker dots on light background
+            vec3 lightBg = vec3(0.985, 0.985, 0.985);
+            vec3 lightDots = vec3(0.90, 0.90, 0.91); // ← ADJUST: decrease these to make dots darker/more visible
+            color = mix(lightBg, lightDots, f * 0.5); // ← ADJUST: increase multiplier (0.1-1.0) for stronger pattern
+          }
+
+          // Apply dithering
+          color = dither(uv, color);
+
+          gl_FragColor = vec4(color, 0.6);
+        }
+      `
+    });
+
+    const mesh = new THREE.Mesh(geometry, this.material);
+    this.scene.add(mesh);
+
+    this.resize();
+  }
+
+  private setupEventListeners() {
+    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.x = e.clientX / window.innerWidth;
+      this.mouse.y = 1.0 - (e.clientY / window.innerHeight);
+    });
+
+    // Listen for theme changes
+    this.updateTheme();
+
+    // Watch for theme attribute changes
+    const observer = new MutationObserver(() => {
+      this.updateTheme();
+    });
+
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    });
+  }
+
+  private updateTheme() {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    this.material.uniforms.isDarkMode.value = isDark ? 1.0 : 0.0;
+    //console.log('Dither theme updated:', isDark ? 'dark' : 'light');
+  }
+
+  private resize() {
+    const { innerWidth, innerHeight } = window;
+
+    this.renderer.setSize(innerWidth, innerHeight);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    this.material.uniforms.resolution.value.set(innerWidth, innerHeight);
+  }
+
+  private animate = () => {
+    this.material.uniforms.time.value = performance.now() * 0.001;
+    this.material.uniforms.mouse.value.copy(this.mouse);
+
+    this.renderer.render(this.scene, this.camera);
+    this.animationId = requestAnimationFrame(this.animate);
+  };
+
+  public destroy() {
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId);
+    }
+    window.removeEventListener('resize', () => this.resize());
+    this.renderer.dispose();
+    this.material.dispose();
+    if (this.container && this.renderer.domElement) {
+      this.container.removeChild(this.renderer.domElement);
+    }
+  }
+}
+
+// Initialize when DOM is loaded
+function initDitherBackground() {
+  const container = document.getElementById('dither-bg');
+  if (!container) {
+    // Silently skip if container not found (disabled on this page)
+    return;
+  }
+
+  try {
+    new DitherBackground(container);
+    //console.log('Dither background initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize dither background:', error);
+  }
+}
+
+// Initialize immediately if DOM is ready, otherwise wait
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initDitherBackground);
+} else {
+  initDitherBackground();
+}
+</script>
+
+<style>
+	#dither-bg {
+		opacity: 0.6;
+	}
+
+	#dither-bg canvas {
+		width: 100% !important;
+		height: 100% !important;
+	}
+
+	/* Dark mode adjustments */
+	:global([data-theme="dark"]) #dither-bg {
+		opacity: 0.4;
+	}
+</style>
