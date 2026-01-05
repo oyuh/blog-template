@@ -17,7 +17,7 @@
 		"check": "astro check"
 	},
 	"dependencies": {
-		"@astrojs/markdown-remark": "^6.3.8",
+		"@astrojs/markdown-remark": "^6.3.10",
 		"@astrojs/mdx": "4.3.6",
 		"@astrojs/node": "^9.5.0",
 		"@astrojs/react": "^4.4.2",
