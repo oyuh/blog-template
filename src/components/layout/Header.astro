@@ -46,8 +46,6 @@ const pathname = Astro.url.pathname;
                     {
                         menuLinks.map((link, index) => {
                             const active = pathname === link.path || pathname.startsWith(link.path);
-                            const shimmerPaused = active && (link.path === "/about/" || link.path.startsWith("/posts"));
-                            const shimmerDelay = `${index * 2}s`;
                             return (
                                 <>
                                     <a

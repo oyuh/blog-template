@@ -21,7 +21,18 @@ class DitherBackground {
   private scene: THREE.Scene;
   private camera: THREE.OrthographicCamera;
   private renderer: THREE.WebGLRenderer;
-  private material: THREE.ShaderMaterial;
+  private material!: THREE.ShaderMaterial;
+  private uniforms!: {
+    time: { value: number };
+    resolution: { value: THREE.Vector2 };
+    mouse: { value: THREE.Vector2 };
+    waveSpeed: { value: number };
+    waveFrequency: { value: number };
+    waveAmplitude: { value: number };
+    colorNum: { value: number };
+    pixelSize: { value: number };
+    isDarkMode: { value: number };
+  };
   private mouse: THREE.Vector2;
   private animationId: number | null = null;
 
@@ -52,18 +63,20 @@ class DitherBackground {
     const geometry = new THREE.PlaneGeometry(2, 2);
 
     // Dithering shader material with exact reactbits.dev implementation
+    this.uniforms = {
+      time: { value: 0 },
+      resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+      mouse: { value: this.mouse },
+      waveSpeed: { value: 0.05 },
+      waveFrequency: { value: 3.0 },
+      waveAmplitude: { value: 0.3 },
+      colorNum: { value: 4.0 },
+      pixelSize: { value: 2.0 },
+      isDarkMode: { value: 0.0 }
+    };
+
     this.material = new THREE.ShaderMaterial({
-      uniforms: {
-        time: { value: 0 },
-        resolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-        mouse: { value: this.mouse },
-        waveSpeed: { value: 0.05 },
-        waveFrequency: { value: 3.0 },
-        waveAmplitude: { value: 0.3 },
-        colorNum: { value: 4.0 },
-        pixelSize: { value: 2.0 },
-        isDarkMode: { value: 0.0 }
-      },
+      uniforms: this.uniforms,
       vertexShader: `
         varying vec2 vUv;
         void main() {
@@ -226,7 +239,7 @@ class DitherBackground {
 
   private updateTheme() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    this.material.uniforms.isDarkMode.value = isDark ? 1.0 : 0.0;
+    this.uniforms.isDarkMode.value = isDark ? 1.0 : 0.0;
     //console.log('Dither theme updated:', isDark ? 'dark' : 'light');
   }
 
@@ -236,12 +249,12 @@ class DitherBackground {
     this.renderer.setSize(innerWidth, innerHeight);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    this.material.uniforms.resolution.value.set(innerWidth, innerHeight);
+    this.uniforms.resolution.value.set(innerWidth, innerHeight);
   }
 
   private animate = () => {
-    this.material.uniforms.time.value = performance.now() * 0.001;
-    this.material.uniforms.mouse.value.copy(this.mouse);
+    this.uniforms.time.value = performance.now() * 0.001;
+    this.uniforms.mouse.value.copy(this.mouse);
 
     this.renderer.render(this.scene, this.camera);
     this.animationId = requestAnimationFrame(this.animate);
@@ -264,7 +277,7 @@ class DitherBackground {
 function initDitherBackground() {
   const container = document.getElementById('dither-bg');
   if (!container) {
-    // Silently skip if container not found (disabled on this page)
+    console.warn('Dither background container not found');
     return;
   }
 
@@ -272,7 +285,7 @@ function initDitherBackground() {
     new DitherBackground(container);
     //console.log('Dither background initialized successfully');
   } catch (error) {
-    console.error('Failed to initialize dither background:', error);
+    //console.error('Failed to initialize dither background:', error);
   }
 }
 

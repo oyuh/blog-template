@@ -12,4 +12,4 @@ type Props = {
 const { repo, compact } = Astro.props;
 ---
 
-<GitHubRepoCard client:load repo={repo} compact={compact} />
+<GitHubRepoCard client:load repo={repo} compact={compact ?? false} />

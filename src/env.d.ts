@@ -1,7 +1,18 @@
+/// <reference path="./types/vendor.d.ts" />
+
 declare module "@pagefind/default-ui" {
-	declare class PagefindUI {
+	export class PagefindUI {
 		constructor(arg: unknown);
 	}
+	export default PagefindUI;
+}
+
+declare module "aos" {
+	const AOS: {
+		init?: (opts?: Record<string, unknown>) => void;
+		refreshHard?: () => void;
+	};
+	export default AOS;
 }
 
 declare module "*?raw" {

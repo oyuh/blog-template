@@ -1,10 +1,21 @@
 import { AstroError } from "astro/errors";
-import { AstroJSX, jsx } from "astro/jsx-runtime";
+import { jsx } from "astro/jsx-runtime";
 import { renderJSX } from "astro/runtime/server/index.js";
 
 const slotName = (str: string) => str.trim().replace(/[-_]([a-z])/g, (_, w) => w.toUpperCase());
 
 const MDX_COMPONENT_SYMBOL = Symbol.for("mdx-component");
+
+type JsxComponent = Parameters<typeof jsx>[0];
+
+function isMdxTaggedComponent(Component: unknown): Component is Record<PropertyKey, unknown> {
+	if (typeof Component !== "function") return false;
+	return (Component as unknown as Record<PropertyKey, unknown>)[MDX_COMPONENT_SYMBOL] === true;
+}
+
+function isRecord(value: unknown): value is Record<PropertyKey, unknown> {
+	return typeof value === "object" && value !== null;
+}
 
 /**
  * This is a safety-patched version of `@astrojs/mdx/dist/server.js`.
@@ -23,40 +34,48 @@ export async function check(
 	_props: Record<string, unknown>,
 	_slotted: Record<string, unknown> = {},
 ) {
-	if (typeof Component !== "function") return false;
 	// Only claim components that MDX itself produced.
-	return (Component as any)[MDX_COMPONENT_SYMBOL] === true;
+	return isMdxTaggedComponent(Component);
 }
 
 export async function renderToStaticMarkup(
-	Component: any,
+	this: { result: Parameters<typeof renderJSX>[0] },
+	Component: JsxComponent,
 	props: Record<string, unknown> = {},
-	{ default: children = null, ...slotted }: Record<string, any> = {},
+	slotted: Record<string, unknown> = {},
 ) {
-	const slots: Record<string, any> = {};
-	for (const [key, value] of Object.entries(slotted)) {
+	const { default: children = null, ...rest } = slotted as Record<string, unknown> & {
+		default?: unknown;
+	};
+
+	const slots: Record<string, unknown> = {};
+	for (const [key, value] of Object.entries(rest)) {
 		const name = slotName(key);
 		slots[name] = value;
 	}
 
-	const { result } = this as any;
+	const { result } = this;
 
 	try {
 		const html = await renderJSX(result, jsx(Component, { ...props, ...slots, children }));
 		return { html };
-	} catch (e: any) {
+	} catch (e: unknown) {
 		throwEnhancedErrorIfMdxComponent(e, Component);
 		throw e;
 	}
 }
 
-function throwEnhancedErrorIfMdxComponent(error: any, Component: any) {
-	if (Component?.[MDX_COMPONENT_SYMBOL]) {
-		if (AstroError.is(error)) return;
-		error.title = error.name;
-		error.hint = `This issue often occurs when your MDX component encounters runtime errors.`;
-		throw error;
+function throwEnhancedErrorIfMdxComponent(error: unknown, Component: unknown) {
+	if (!isMdxTaggedComponent(Component)) return;
+	if (AstroError.is(error)) return;
+
+	if (isRecord(error)) {
+		const title = error instanceof Error ? error.name : String(error.name ?? "Error");
+		error.title = title;
+		error.hint = "This issue often occurs when your MDX component encounters runtime errors.";
 	}
+
+	throw error;
 }
 
 const renderer = {

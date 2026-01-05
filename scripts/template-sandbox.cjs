@@ -36,18 +36,18 @@ const { spawn } = require("node:child_process");
 
 function usage(exitCode = 0) {
 	const msg =
-		`\nTemplate sandbox\n\n` +
-		`Commands:\n` +
-		`  dev    Run dev server in a sandbox copy\n` +
-		`  build  Run build in a sandbox copy\n\n` +
-		`Options:\n` +
-		`  --exclude <path>        Repeatable\n` +
-		`  --exclude-list <file>   One relative path per line (# comments allowed)\n` +
-		`  --dry-run               Don't run, just print what would happen\n\n` +
-		`Examples:\n` +
-		`  pnpm template:dev\n` +
-		`  pnpm template:dev -- --exclude src/components/SpotifyStatus.tsx\n` +
-		`  pnpm template:build -- --exclude src/components/HolidayOverlay.tsx\n`;
+		"\nTemplate sandbox\n\n" +
+		"Commands:\n" +
+		"  dev    Run dev server in a sandbox copy\n" +
+		"  build  Run build in a sandbox copy\n\n" +
+		"Options:\n" +
+		"  --exclude <path>        Repeatable\n" +
+		"  --exclude-list <file>   One relative path per line (# comments allowed)\n" +
+		"  --dry-run               Don't run, just print what would happen\n\n" +
+		"Examples:\n" +
+		"  pnpm template:dev\n" +
+		"  pnpm template:dev -- --exclude src/components/SpotifyStatus.tsx\n" +
+		"  pnpm template:build -- --exclude src/components/HolidayOverlay.tsx\n";
 	process.stdout.write(msg);
 	process.exit(exitCode);
 }

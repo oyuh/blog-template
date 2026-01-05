@@ -114,12 +114,6 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 		);
 	}
 
-	const updatedDate = new Date(repoData.updated_at).toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "short",
-		day: "numeric",
-	});
-
 	if (compact) {
 		return (
 			<a

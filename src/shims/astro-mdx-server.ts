@@ -41,7 +41,7 @@ export async function check(
 	try {
 		const componentFn = Component as unknown as CallableComponent;
 		const result = await componentFn({ ...props, ...slots, children });
-		const resultRecord = result as unknown as Record<symbol, unknown>;
+		const resultRecord = result as unknown as Record<PropertyKey, unknown>;
 		return Boolean(resultRecord?.[AstroJSX]);
 	} catch (error: unknown) {
 		throwEnhancedErrorIfMdxComponent(error, Component);

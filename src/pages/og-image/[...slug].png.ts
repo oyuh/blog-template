@@ -5,6 +5,7 @@ import { siteConfig } from "@/site.config";
 import { getFormattedDate } from "@/utils/date";
 import { Resvg } from "@resvg/resvg-js";
 import type { APIContext, InferGetStaticPropsType } from "astro";
+import type { ReactNode } from "react";
 import satori, { type SatoriOptions } from "satori";
 import { html } from "satori-html";
 
@@ -58,8 +59,8 @@ export async function GET(context: APIContext) {
 		month: "long",
 		weekday: "long",
 	});
-	const svg = await satori(markup(title, postDate), ogOptions);
-	const png = new Resvg(svg).render().asPng();
+	const svg = await satori(markup(title, postDate) as unknown as ReactNode, ogOptions);
+	const png = new Uint8Array(new Resvg(svg).render().asPng());
 	return new Response(png, {
 		headers: {
 			"Cache-Control": "public, max-age=31536000, immutable",
