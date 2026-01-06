@@ -107,8 +107,8 @@ body[data-search-modal-open] {
 #lawson__search .pagefind-ui__search-clear {
 	position: absolute;
 	right: 0.5rem;
-	top: 0.5rem;
-	transform: none;
+	top: 50%;
+	transform: translateY(-50%);
 	width: 2.25rem;
 	height: 2.25rem;
 	padding: 0;
@@ -180,6 +180,7 @@ body[data-search-modal-open] {
 	border-radius: 0.75rem;
 	transition: all 0.2s ease;
 	position: relative;
+	cursor: pointer;
 
 	&:last-child {
 		margin-bottom: 0;
@@ -199,7 +200,10 @@ body[data-search-modal-open] {
 
 #lawson__search .pagefind-ui__result-link {
 	color: var(--color-accent-2);
-	text-decoration: none;
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--color-accent-2) 28%, transparent);
+	text-decoration-thickness: 0.08em;
+	text-underline-offset: 0.14em;
 	font-weight: 600;
 	font-size: 1.125rem;
 	line-height: 1.4;
@@ -210,6 +214,7 @@ body[data-search-modal-open] {
 
 	&:hover {
 		color: var(--color-accent);
+		text-decoration-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
 	}
 
 	&:focus {
@@ -220,11 +225,93 @@ body[data-search-modal-open] {
 }
 
 #lawson__search .pagefind-ui__result-excerpt {
-	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
-	font-size: 0.875rem;
-	line-height: 1.6;
+	color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
+	font-size: 0.9375rem;
+	line-height: 1.55;
 	margin-top: 0.5rem;
 	font-weight: 400;
+	text-wrap: pretty;
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 3;
+	overflow: hidden;
+}
+
+/* When a card is clickable, make hover/focus affordances more obvious */
+#lawson__search .pagefind-ui__result[data-clickable="true"]:hover {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+}
+
+#lawson__search .pagefind-ui__result[data-clickable="true"]:hover .pagefind-ui__result-link {
+	text-decoration: underline;
+}
+
+/* Sub-results (Pagefind "nested" hits): keep them clearly secondary.
+   These often show up as things like "Posts with the tag …" and should read
+   as smaller items under the main page result. */
+#lawson__search .pagefind-ui__result-nested {
+	margin-top: 0.75rem;
+	padding-left: 0.875rem;
+	border-left: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+}
+
+/* Add a small label above the first nested item so it's clear these are in-page matches */
+#lawson__search .pagefind-ui__result-nested:first-of-type::before {
+	content: "Matches in this page";
+	display: block;
+	margin-bottom: 0.25rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+}
+
+#lawson__search .pagefind-ui__result-nested + .pagefind-ui__result-nested {
+	margin-top: 0.5rem;
+}
+
+#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-link {
+	font-size: 0.875rem;
+	font-weight: 550;
+	line-height: 1.35;
+	letter-spacing: 0;
+	color: color-mix(in srgb, var(--color-global-text) 82%, transparent);
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--color-global-text) 26%, transparent);
+	transition: color 0.2s ease, text-decoration-color 0.2s ease, background-color 0.2s ease;
+}
+
+#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-link:hover {
+	color: var(--color-accent);
+	text-decoration-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
+}
+
+/* Pagefind adds a big "⤷" prefix by default. Tone it down to reduce visual noise. */
+#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-link::before {
+	content: "";
+	display: none;
+}
+
+#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-excerpt {
+	margin-top: 0;
+	font-size: 0.8125rem;
+	line-height: 1.45;
+	color: color-mix(in srgb, var(--color-global-text) 68%, transparent);
+	-webkit-line-clamp: 2;
+}
+
+/* Make nested items feel like tappable rows */
+#lawson__search .pagefind-ui__result-nested[data-clickable="true"] {
+	cursor: pointer;
+	border-radius: 0.5rem;
+	padding: 0.5rem 0.5rem 0.5rem 0.875rem;
+}
+
+#lawson__search .pagefind-ui__result-nested[data-clickable="true"]:hover {
+	background-color: color-mix(in srgb, var(--color-global-bg) 88%, transparent);
 }
 
 #lawson__search .pagefind-ui__result-tags {
@@ -256,8 +343,9 @@ body[data-search-modal-open] {
 /* Enhanced messages and loading states */
 #lawson__search .pagefind-ui__message {
 	position: absolute;
-	top: 0.5rem;
+	top: 50%;
 	right: 3.25rem;
+	transform: translateY(-50%);
 	height: 2.25rem;
 	display: flex;
 	align-items: center;
@@ -400,6 +488,7 @@ body[data-search-modal-open] {
 
 /* Make the tag list compact and easy to scan */
 #search-tags-panel .pagefind-ui__filter-panel label {
+	/* Fallback: older Pagefind versions may use a label wrapper */
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -410,6 +499,27 @@ body[data-search-modal-open] {
 	user-select: none;
 	border: 1px solid transparent;
 	color: color-mix(in srgb, var(--color-global-text) 90%, transparent);
+}
+
+/* Primary selector for Pagefind's filter row */
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.375rem 0.5rem;
+	border-radius: 0.5rem;
+	cursor: pointer;
+	user-select: none;
+	border: 1px solid transparent;
+	color: color-mix(in srgb, var(--color-global-text) 90%, transparent);
+}
+
+/* Pagefind draws its own checkmark via .pagefind-ui__filter-value::before.
+   We render the checkmark on the checkbox itself, so disable theirs to avoid the doubled icon. */
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value::before {
+	content: none !important;
+	display: none !important;
 }
 
 /* Remove Pagefind's default checkbox decoration (prevents double-check icons) */
@@ -424,7 +534,16 @@ body[data-search-modal-open] {
 	background-color: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
 }
 
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value:hover {
+	background-color: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
+}
+
 #search-tags-panel .pagefind-ui__filter-panel label:has(input[type="checkbox"]:checked) {
+	background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value.pagefind-ui__filter-value--checked {
 	background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
 	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
 }
@@ -434,7 +553,13 @@ body[data-search-modal-open] {
 	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"] {
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value:has(.pagefind-ui__filter-checkbox:focus-visible) {
+	outline: none;
+	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
+}
+
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"],
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox {
 	appearance: none;
 	-webkit-appearance: none;
 	width: 1rem;
@@ -448,7 +573,8 @@ body[data-search-modal-open] {
 	place-content: center;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]::before {
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]::before,
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox::before {
 	content: "";
 	width: 0.625rem;
 	height: 0.625rem;
@@ -459,12 +585,14 @@ body[data-search-modal-open] {
 	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked {
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked,
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox:checked {
 	background-color: var(--color-accent);
 	border-color: var(--color-accent);
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked::before {
+#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked::before,
+#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox:checked::before {
 	transform: scale(1);
 }
 

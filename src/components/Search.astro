@@ -242,6 +242,7 @@ const quickLinks = [
 						search_suggestion: "0 results",
 					},
 				});
+				this.bindResultClickBehavior();
 				this.attachFilterPanel();
 			});
 		}
@@ -348,6 +349,63 @@ const quickLinks = [
 					{ signal: this.#controller.signal },
 				);
 			}
+		};
+
+		bindResultClickBehavior = () => {
+			const root = this.querySelector<HTMLElement>("#lawson__search");
+			if (!root) return;
+			if (root.dataset.resultsClickBound === "true") return;
+			root.dataset.resultsClickBound = "true";
+
+			const markClickable = () => {
+				root.querySelectorAll<HTMLElement>(".pagefind-ui__result, .pagefind-ui__result-nested").forEach((el) => {
+					if (el.dataset.clickable === "true") return;
+					const link = el.querySelector<HTMLAnchorElement>(".pagefind-ui__result-link");
+					if (!link) return;
+
+					el.dataset.clickable = "true";
+					// Make the whole row keyboard reachable without changing Pagefind's markup.
+					el.tabIndex = 0;
+				});
+			};
+
+			markClickable();
+			const observer = new MutationObserver(() => markClickable());
+			observer.observe(root, { childList: true, subtree: true });
+
+			root.addEventListener(
+				"click",
+				(e) => {
+					const target = e.target as HTMLElement | null;
+					if (!target) return;
+					// Let real links behave normally.
+					if (target.closest("a")) return;
+
+					const row = target.closest<HTMLElement>(".pagefind-ui__result-nested, .pagefind-ui__result");
+					if (!row) return;
+					const link = row.querySelector<HTMLAnchorElement>(".pagefind-ui__result-link");
+					if (!link) return;
+					link.click();
+				},
+				{ signal: this.#controller.signal },
+			);
+
+			root.addEventListener(
+				"keydown",
+				(e) => {
+					const ke = e as KeyboardEvent;
+					if (ke.key !== "Enter" && ke.key !== " ") return;
+					const target = ke.target as HTMLElement | null;
+					if (!target) return;
+					const row = target.closest<HTMLElement>(".pagefind-ui__result-nested, .pagefind-ui__result");
+					if (!row || row.dataset.clickable !== "true") return;
+					const link = row.querySelector<HTMLAnchorElement>(".pagefind-ui__result-link");
+					if (!link) return;
+					ke.preventDefault();
+					link.click();
+				},
+				{ signal: this.#controller.signal },
+			);
 		};
 
 		initTagsPanel = () => {
