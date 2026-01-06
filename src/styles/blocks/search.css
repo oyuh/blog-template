@@ -107,8 +107,8 @@ body[data-search-modal-open] {
 #lawson__search .pagefind-ui__search-clear {
 	position: absolute;
 	right: 0.5rem;
-	top: 50%;
-	transform: translateY(-50%);
+	top: 0.5rem;
+	transform: none;
 	width: 2.25rem;
 	height: 2.25rem;
 	padding: 0;
@@ -200,10 +200,7 @@ body[data-search-modal-open] {
 
 #lawson__search .pagefind-ui__result-link {
 	color: var(--color-accent-2);
-	text-decoration: underline;
-	text-decoration-color: color-mix(in srgb, var(--color-accent-2) 28%, transparent);
-	text-decoration-thickness: 0.08em;
-	text-underline-offset: 0.14em;
+	text-decoration: none;
 	font-weight: 600;
 	font-size: 1.125rem;
 	line-height: 1.4;
@@ -211,6 +208,10 @@ body[data-search-modal-open] {
 	position: relative;
 	transition: color 0.2s ease;
 	letter-spacing: -0.01em;
+	text-underline-offset: 0.14em;
+	text-decoration-thickness: 0.08em;
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--color-accent-2) 28%, transparent);
 
 	&:hover {
 		color: var(--color-accent);
@@ -341,11 +342,13 @@ body[data-search-modal-open] {
 }
 
 /* Enhanced messages and loading states */
-#lawson__search .pagefind-ui__message {
+/* The "X results" element is rendered by Pagefind in the results area.
+   We relocate it into the form so it sits on the search bar, then position it there. */
+#lawson__search .pagefind-ui__form .pagefind-ui__message {
 	position: absolute;
-	top: 50%;
+	top: 0.5rem;
 	right: 3.25rem;
-	transform: translateY(-50%);
+	transform: none;
 	height: 2.25rem;
 	display: flex;
 	align-items: center;
