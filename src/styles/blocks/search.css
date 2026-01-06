@@ -270,6 +270,8 @@ body[data-search-modal-open] {
 	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
 }
 
+
+
 #lawson__search .pagefind-ui__result-nested + .pagefind-ui__result-nested {
 	margin-top: 0.5rem;
 }

@@ -52,23 +52,25 @@ const paginationProps = {
 ---
 
 <PageLayout meta={meta}>
-	<div class="mb-6 flex items-center">
-		<h1 class="sr-only">Posts with the tag {tag}</h1>
-		<a class="title text-accent" href="/tags/"><span class="sr-only">All {" "}</span>Tags</a>
-		<span aria-hidden="true" class="ms-2 me-3 text-xl">→</span>
-		<span aria-hidden="true" class="text-xl">#{tag}</span>
+	<div data-pagefind-ignore="all">
+		<div class="mb-6 flex items-center">
+			<h1 class="sr-only">Posts with the tag {tag}</h1>
+			<a class="title text-accent" href="/tags/"><span class="sr-only">All {" "}</span>Tags</a>
+			<span aria-hidden="true" class="ms-2 me-3 text-xl">→</span>
+			<span aria-hidden="true" class="text-xl">#{tag}</span>
+		</div>
+		<section aria-labelledby={`tags-${tag}`}>
+			<h2 id={`tags-${tag}`} class="sr-only">Post List</h2>
+			<ul class="space-y-4">
+				{
+					page.data.map((p) => (
+						<li class="grid gap-2 sm:grid-cols-[auto_1fr]">
+							<PostPreview as="h2" post={p} />
+						</li>
+					))
+				}
+			</ul>
+			<Pagination {...paginationProps} />
+		</section>
 	</div>
-	<section aria-labelledby={`tags-${tag}`}>
-		<h2 id={`tags-${tag}`} class="sr-only">Post List</h2>
-		<ul class="space-y-4">
-			{
-				page.data.map((p) => (
-					<li class="grid gap-2 sm:grid-cols-[auto_1fr]">
-						<PostPreview as="h2" post={p} />
-					</li>
-				))
-			}
-		</ul>
-		<Pagination {...paginationProps} />
-	</section>
 </PageLayout>

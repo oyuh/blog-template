@@ -5,15 +5,18 @@ const meta = {
   title: "Policy Info",
   description: "Clarifications on terminology and scope used in our Privacy Policy and Terms of Service.",
 };
+
+export const prerender = true;
 ---
 
 <PageLayout meta={meta}>
-  <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Policy Information</h1>
+  <article data-pagefind-body>
+    <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Policy Information</h1>
 
-  <div class="prose prose-base dark:prose-invert max-w-none">
-    <p class="leading-relaxed">
-      This page defines terms used in the Privacy Policy and Terms of Service. If you want clarity on what <em>Service</em> or <em>Website</em> means here is where you check.
-    </p>
+    <div class="prose prose-base dark:prose-invert max-w-none">
+      <p class="leading-relaxed">
+        This page defines terms used in the Privacy Policy and Terms of Service. If you want clarity on what <em>Service</em> or <em>Website</em> means here is where you check.
+      </p>
 
     <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-sm font-medium tracking-tight shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
       <span class="text-accent-2">Last Updated</span>
@@ -65,7 +68,8 @@ const meta = {
       <li>Links to third party resources or repositories</li>
     </ul>
 
-  <h2 class="text-accent-2">Legal Contact</h2>
-  <p>Questions or clarifications: <a href="mailto:me@lawsonhart.me?subject=lawsonhart.me%20Policy%20Question" class="text-accent hover:underline"><code>me@lawsonhart.me</code></a></p>
-  </div>
+    <h2 class="text-accent-2">Legal Contact</h2>
+    <p>Questions or clarifications: <a href="mailto:me@lawsonhart.me?subject=lawsonhart.me%20Policy%20Question" class="text-accent hover:underline"><code>me@lawsonhart.me</code></a></p>
+    </div>
+  </article>
 </PageLayout>

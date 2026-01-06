@@ -39,63 +39,65 @@ const meta = {
 ---
 
 <PageLayout meta={meta}>
-	<div class="mb-10 space-y-3">
-		<h1 class="title text-3xl">Tags</h1>
-		<p class="max-w-2xl text-base text-global-text/80 dark:text-global-text/70">
-			Browse every topic I write about. Each tag highlights the latest posts and imagery that inspired them.
-		</p>
-	</div>
-	<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-		{
-			tagCards.map(({ tag, count, coverImages, featuredPosts }) => (
-				<a
-					class="group relative flex h-64 flex-col overflow-hidden rounded-2xl border border-zinc-400/60 bg-global-bg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-					data-astro-prefetch
-					href={`/tags/${tag}/`}
-					title={`View ${count} post${count === 1 ? "" : "s"} tagged with ${tag}`}
-				>
-					<div class="absolute inset-0 overflow-hidden" aria-hidden="true">
-						{coverImages.length > 0 && (
-							<div
-								class="absolute inset-0 grid h-full w-full transition-transform duration-500 group-hover:scale-[1.05]"
-								style={`grid-template-columns: repeat(${coverImages.length}, minmax(0, 1fr));`}
-							>
-								{coverImages.map((image) => (
-									<div
-										class="relative h-full w-full bg-cover bg-center"
-										style={`background-image: url(${image.src});`}
-									/>
-								))}
-							</div>
-						)}
-						{coverImages.length === 0 && <div class="absolute inset-0 pointer-events-none tag-card-placeholder" />}
-						<div class="absolute inset-0 pointer-events-none tag-card-overlay" />
-						<div class="absolute inset-0 bg-grid-pattern opacity-30 mix-blend-overlay pointer-events-none" />
-					</div>
-					<div class="relative z-10 flex h-full flex-col justify-between p-6 text-white">
-						<div class="space-y-2">
-							<span class="text-xs uppercase tracking-[0.2em] text-white/85 drop-shadow-[0_2px_10px_rgba(8,12,20,0.6)]">Tag</span>
-							<h2 class="text-2xl font-semibold text-white drop-shadow-[0_8px_20px_rgba(8,12,20,0.6)] transition-colors duration-300 group-hover:text-accent">
-								&#35;{tag}
-							</h2>
-							<p class="text-sm text-white/90 drop-shadow-[0_5px_16px_rgba(8,12,20,0.6)]">
-								{count} post{count === 1 ? "" : "s"}
-							</p>
+	<div data-pagefind-ignore="all">
+		<div class="mb-10 space-y-3">
+			<h1 class="title text-3xl">Tags</h1>
+			<p class="max-w-2xl text-base text-global-text/80 dark:text-global-text/70">
+				Browse every topic I write about. Each tag highlights the latest posts and imagery that inspired them.
+			</p>
+		</div>
+		<div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+			{
+				tagCards.map(({ tag, count, coverImages, featuredPosts }) => (
+					<a
+						class="group relative flex h-64 flex-col overflow-hidden rounded-2xl border border-zinc-400/60 bg-global-bg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-accent hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+						data-astro-prefetch
+						href={`/tags/${tag}/`}
+						title={`View ${count} post${count === 1 ? "" : "s"} tagged with ${tag}`}
+					>
+						<div class="absolute inset-0 overflow-hidden" aria-hidden="true">
+							{coverImages.length > 0 && (
+								<div
+									class="absolute inset-0 grid h-full w-full transition-transform duration-500 group-hover:scale-[1.05]"
+									style={`grid-template-columns: repeat(${coverImages.length}, minmax(0, 1fr));`}
+								>
+									{coverImages.map((image) => (
+										<div
+											class="relative h-full w-full bg-cover bg-center"
+											style={`background-image: url(${image.src});`}
+										/>
+									))}
+								</div>
+							)}
+							{coverImages.length === 0 && <div class="absolute inset-0 pointer-events-none tag-card-placeholder" />}
+							<div class="absolute inset-0 pointer-events-none tag-card-overlay" />
+							<div class="absolute inset-0 bg-grid-pattern opacity-30 mix-blend-overlay pointer-events-none" />
 						</div>
-						{featuredPosts.length > 0 && (
-							<div class="mt-4 space-y-2 text-sm text-white/90 drop-shadow-[0_4px_14px_rgba(8,12,20,0.55)]">
-								{featuredPosts.map((post) => (
-									<div class="flex items-center gap-2 truncate">
-										<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
-										<span class="truncate">{post.title}</span>
-									</div>
-								))}
+						<div class="relative z-10 flex h-full flex-col justify-between p-6 text-white">
+							<div class="space-y-2">
+								<span class="text-xs uppercase tracking-[0.2em] text-white/85 drop-shadow-[0_2px_10px_rgba(8,12,20,0.6)]">Tag</span>
+								<h2 class="text-2xl font-semibold text-white drop-shadow-[0_8px_20px_rgba(8,12,20,0.6)] transition-colors duration-300 group-hover:text-accent">
+									&#35;{tag}
+								</h2>
+								<p class="text-sm text-white/90 drop-shadow-[0_5px_16px_rgba(8,12,20,0.6)]">
+									{count} post{count === 1 ? "" : "s"}
+								</p>
 							</div>
-						)}
-					</div>
-				</a>
-			))
-		}
+							{featuredPosts.length > 0 && (
+								<div class="mt-4 space-y-2 text-sm text-white/90 drop-shadow-[0_4px_14px_rgba(8,12,20,0.55)]">
+									{featuredPosts.map((post) => (
+										<div class="flex items-center gap-2 truncate">
+											<span class="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
+											<span class="truncate">{post.title}</span>
+										</div>
+									))}
+								</div>
+							)}
+						</div>
+					</a>
+				))
+			}
+		</div>
 	</div>
 </PageLayout>
 

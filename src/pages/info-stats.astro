@@ -44,10 +44,12 @@ const colorTokens = {
 		"Accent Dark": "oklch(52% 0.1 238.12)",
 	},
 };
+
+export const prerender = true;
 ---
 
 <PageLayout meta={meta}>
-	<div class="w-full">
+	<article class="w-full" data-pagefind-body>
 		<div class="mb-8">
 			<h1 class="title mb-2 text-5xl font-bold">Info & Stats</h1>
 			<p class="text-lg opacity-80">
@@ -251,5 +253,5 @@ const colorTokens = {
 
 		{InfoStatsChangelog && <InfoStatsChangelog />}
 
-	</div>
+	</article>
 </PageLayout>

@@ -18,147 +18,150 @@ const defaultResumePdfUrl = "/Lawson_Hart_Resume.pdf";
 const defaultResumePdfPath = fileURLToPath(new URL("../../public/Lawson_Hart_Resume.pdf", import.meta.url));
 const hasResumePdf = fs.existsSync(defaultResumePdfPath);
 
+export const prerender = true;
+
 ---
 <PageLayout meta={meta}>
-  <section class="relative">
-    <div class="relative z-10 py-6">
-      <div class="mb-6">
-        <h1 class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
-          About Me <span class="inline-block"></span>
-        </h1>
-      </div>
+  <article data-pagefind-body>
+    <section class="relative">
+      <div class="relative z-10 py-6">
+        <div class="mb-6">
+          <h1 class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
+            About Me <span class="inline-block"></span>
+          </h1>
+        </div>
 
-      <div class="max-w-full space-y-4 mb-6">
-        <p class="text-lg text-global-text leading-relaxed">
-          Hey, I'm <span class="font-semibold text-accent-2">Lawson Hart</span> a
-          <span class="font-semibold text-accent-2">computer science student</span> at the
-          <span class="font-semibold text-accent-2">University of Texas at Dallas</span>, aka The MIT of the South.
-          Dallas born and raised, never really left the <span class="font-semibold text-accent-2">DFW</span> bubble.
-        </p>
-        <p class="text-base text-global-text/90 leading-relaxed">
-          I'm kinda obsessed with building things that actually <span class="font-medium text-accent-2">solve problems</span> I come across in my internet nook.
-          I think it's pretty fun taking a messy idea and turning it into something clean, functional, and genuinely useful.
-        </p>
-        <p class="text-base text-global-text/80 leading-relaxed">
-          Growing up as the family's unofficial <span class="font-medium text-accent-2">tech support</span> was basically my first job
-          That curiosity naturally evolved into a love for <span class="font-medium text-accent-2">full-stack development</span>
-          and building <span class="font-medium text-accent-2">web applications</span>.
-          I'm a
-          <span class="font-medium text-accent-2">full‑stack developer</span> with a strong interest in
-          <span class="font-medium text-accent-2">web based applications</span>. When I’m not studying, I’m working with
-          personal projects or just generally procrastinating.
-        </p>
-      </div>
-
-      <div class="border-t border-zinc-400 pt-6"></div>
-    </div>
-  </section>
-
-  <section class="relative">
-    <div class="py-4">
-      <div class="mb-4">
-        <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Technologies & Tools</h2>
-      </div>
-
-      <p class="max-w-full text-base text-global-text/85 leading-relaxed mb-4">
-        Technologies and tools I use frequently for projects, coursework, and personal development.
-      </p>
-
-      <div class="space-y-8">
-        <TechList client:load />
-      </div>
-
-      <div class="mt-4">
-        {hasResumePdf ? (
-          <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
-        ) : (
-          <p class="text-sm text-global-text/70">
-            Resume PDF not included in this template.
+        <div class="max-w-full space-y-4 mb-6">
+          <p class="text-lg text-global-text leading-relaxed">
+            Hey, I'm <span class="font-semibold text-accent-2">Lawson Hart</span> a
+            <span class="font-semibold text-accent-2">computer science student</span> at the
+            <span class="font-semibold text-accent-2">University of Texas at Dallas</span>, aka The MIT of the South.
+            Dallas born and raised, never really left the <span class="font-semibold text-accent-2">DFW</span> bubble.
           </p>
-        )}
-      </div>
-    </div>
-  </section>
-
-  <div class="border-t border-zinc-400 my-8"></div>
-
-
-  <section class="relative">
-    <div class="py-4">
-      <div class="mb-3">
-        <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Contact Me</h2>
-      </div>
-
-      <div class="space-y-4">
-        <p class="text-base text-global-text/85">
-          The quickest ways to get in touch are
-          <a class="lawson-link" href="mailto:me@lawsonhart.me" target="_blank">email</a>
-          or a
-          <a class="lawson-link" href="https://discordapp.com/users/527167786200465418" target="_blank" rel="noreferrer">Discord DM</a>.
-        </p>
-
-        <div class="flex flex-wrap gap-2">
-          <a
-            href="mailto:me@lawsonhart.me"
-            target="_blank"
-            class="inline-flex items-center gap-2 rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-          >
-            <Icon aria-hidden="true" class="h-5 w-5" focusable="false" name="mdi:email" />
-            <span>Email me</span>
-          </a>
-          <a
-            href="https://discordapp.com/users/527167786200465418"
-            target="_blank"
-            rel="noreferrer"
-            class="inline-flex items-center gap-2 rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-          >
-            <Icon aria-hidden="true" class="h-5 w-5" focusable="false" name="mdi:discord" />
-            <span>DM on Discord</span>
-          </a>
+          <p class="text-base text-global-text/90 leading-relaxed">
+            I'm kinda obsessed with building things that actually <span class="font-medium text-accent-2">solve problems</span> I come across in my internet nook.
+            I think it's pretty fun taking a messy idea and turning it into something clean, functional, and genuinely useful.
+          </p>
+          <p class="text-base text-global-text/80 leading-relaxed">
+            Growing up as the family's unofficial <span class="font-medium text-accent-2">tech support</span> was basically my first job
+            That curiosity naturally evolved into a love for <span class="font-medium text-accent-2">full-stack development</span>
+            and building <span class="font-medium text-accent-2">web applications</span>.
+            I'm a
+            <span class="font-medium text-accent-2">full‑stack developer</span> with a strong interest in
+            <span class="font-medium text-accent-2">web based applications</span>. When I’m not studying, I’m working with
+            personal projects or just generally procrastinating.
+          </p>
         </div>
 
-        <div class="pt-2">
-          <SocialList />
+        <div class="border-t border-zinc-400 pt-6"></div>
+      </div>
+    </section>
+
+    <section class="relative">
+      <div class="py-4">
+        <div class="mb-4">
+          <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Technologies & Tools</h2>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <div class="border-t border-zinc-400 my-8"></div>
-
-  <section class="relative">
-    <div class="py-4">
-      <div class="mb-3">
-        <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Site Information/Credits</h2>
-      </div>
-
-      <div class="space-y-4">
-        <p class="text-base text-global-text/85 leading-relaxed">
-          This site is built with <a class="lawson-link" href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>
-          and is based on the <a class="lawson-link" href="https://github.com/chrismwilliams/astro-theme-cactus" target="_blank" rel="noopener noreferrer">Astro Cactus</a>
-          theme. I kept the core structure, but redesigned and extended the components and styling.
+        <p class="max-w-full text-base text-global-text/85 leading-relaxed mb-4">
+          Technologies and tools I use frequently for projects, coursework, and personal development.
         </p>
 
-        <div class="flex flex-wrap gap-2">
-          {templateRepoUrl ? (
+        <div class="space-y-8">
+          <TechList client:load />
+        </div>
+
+        <div class="mt-4">
+          {hasResumePdf ? (
+            <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
+          ) : (
+            <p class="text-sm text-global-text/70">
+              Resume PDF not included in this template.
+            </p>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <div class="border-t border-zinc-400 my-8"></div>
+
+    <section class="relative">
+      <div class="py-4">
+        <div class="mb-3">
+          <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Contact Me</h2>
+        </div>
+
+        <div class="space-y-4">
+          <p class="text-base text-global-text/85">
+            The quickest ways to get in touch are
+            <a class="lawson-link" href="mailto:me@lawsonhart.me" target="_blank">email</a>
+            or a
+            <a class="lawson-link" href="https://discordapp.com/users/527167786200465418" target="_blank" rel="noreferrer">Discord DM</a>.
+          </p>
+
+          <div class="flex flex-wrap gap-2">
             <a
-              href={templateRepoUrl}
+              href="mailto:me@lawsonhart.me"
               target="_blank"
-              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+            >
+              <Icon aria-hidden="true" class="h-5 w-5" focusable="false" name="mdi:email" />
+              <span>Email me</span>
+            </a>
+            <a
+              href="https://discordapp.com/users/527167786200465418"
+              target="_blank"
+              rel="noreferrer"
+              class="inline-flex items-center gap-2 rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+            >
+              <Icon aria-hidden="true" class="h-5 w-5" focusable="false" name="mdi:discord" />
+              <span>DM on Discord</span>
+            </a>
+          </div>
+
+          <div class="pt-2">
+            <SocialList />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="border-t border-zinc-400 my-8"></div>
+
+    <section class="relative">
+      <div class="py-4">
+        <div class="mb-3">
+          <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Site Information/Credits</h2>
+        </div>
+
+        <div class="space-y-4">
+          <p class="text-base text-global-text/85 leading-relaxed">
+            This site is built with <a class="lawson-link" href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>
+            and is based on the <a class="lawson-link" href="https://github.com/chrismwilliams/astro-theme-cactus" target="_blank" rel="noopener noreferrer">Astro Cactus</a>
+            theme. I kept the core structure, but redesigned and extended the components and styling.
+          </p>
+
+          <div class="flex flex-wrap gap-2">
+            {templateRepoUrl ? (
+              <a
+                href={templateRepoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+              >
+                Blog template
+              </a>
+            ) : null}
+
+            <a
+              href="/info-stats"
               class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
             >
-              Blog template
+              Info &amp; stats
             </a>
-          ) : null}
-
-          <a
-            href="/info-stats"
-            class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-          >
-            Info &amp; stats
-          </a>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </article>
 </PageLayout>

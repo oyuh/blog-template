@@ -5,13 +5,16 @@ const meta = {
   title: "Privacy Policy",
   description: "How I handle your data and privacy. Last Updated: April 10, 2025",
 };
+
+export const prerender = true;
 ---
 
 <PageLayout meta={meta}>
-  <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Privacy Policy</h1>
+  <article data-pagefind-body>
+    <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Privacy Policy</h1>
 
-  <div class="prose prose-base dark:prose-invert max-w-none">
-    <p>I collect limited personal data to operate and improve the site. Using the site means you agree to this policy.</p>
+    <div class="prose prose-base dark:prose-invert max-w-none">
+      <p>I collect limited personal data to operate and improve the site. Using the site means you agree to this policy.</p>
 
     <h2 class="text-accent-2">What I Collect</h2>
     <ul class="list-disc ms-5">
@@ -36,7 +39,8 @@ const meta = {
     <h2 class="text-accent-2">Children</h2>
     <p>This site is not for users under 13. If a child’s data was submitted contact me.</p>
 
-    <h2 class="text-accent-2">Changes</h2>
-    <p>This policy may change. The date above updates when it does. Check back for the latest version.</p>
-  </div>
+      <h2 class="text-accent-2">Changes</h2>
+      <p>This policy may change. The date above updates when it does. Check back for the latest version.</p>
+    </div>
+  </article>
 </PageLayout>
