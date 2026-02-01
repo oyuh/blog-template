@@ -45,7 +45,7 @@
 		"date-fns-tz": "^3.2.0",
 		"drizzle-orm": "^0.42.0",
 		"effect": "^3.19.3",
-		"framer-motion": "^12.23.24",
+		"framer-motion": "^12.29.2",
 		"hastscript": "^9.0.1",
 		"mdast-util-directive": "^3.1.0",
 		"mdast-util-to-markdown": "^2.1.2",
