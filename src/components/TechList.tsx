@@ -1,20 +1,9 @@
+import type { TechnologyUsage } from "@/data/post";
 import { Icon as IconifyIcon } from "@iconify/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { IconType } from "react-icons";
-import {
-	FaApple,
-	FaDatabase,
-	FaDesktop,
-	FaExternalLinkAlt,
-	FaGit,
-	FaGlobe,
-	FaJava,
-	FaServer,
-	FaTools,
-	FaUbuntu,
-	FaWindows,
-} from "react-icons/fa";
+import { FaApple, FaGit, FaJava, FaUbuntu, FaWindows } from "react-icons/fa";
 import {
 	SiAstro,
 	SiCloudflare,
@@ -39,6 +28,7 @@ type Tech = {
 	icon: IconType;
 	link?: string;
 	description?: string;
+	aliases?: string[];
 };
 
 type Category = {
@@ -47,6 +37,12 @@ type Category = {
 };
 
 type FlatTech = Tech & { __cat: string };
+
+type TechListProps = {
+	techUsage?: TechnologyUsage;
+};
+
+const normalizeTechName = (name: string) => name.toLowerCase().trim();
 
 // Iconify-based Shadcn UI icon wrapped to match react-icons' IconType
 const ShadcnIcon: IconType = ((props: { className?: string }) => (
@@ -73,6 +69,7 @@ const categories: Category[] = [
 				icon: SiNextdotjs,
 				link: "https://nextjs.org/",
 				description: "A React-based full-stack framework with server-side rendering.",
+				aliases: ["nextjs"],
 			},
 			{
 				name: "Express",
@@ -97,6 +94,7 @@ const categories: Category[] = [
 				icon: SiTailwindcss,
 				link: "https://tailwindcss.com/",
 				description: "A utility-first CSS framework for rapidly building UIs.",
+				aliases: ["tailwind"],
 			},
 			{
 				name: "HeroUI",
@@ -168,6 +166,7 @@ const categories: Category[] = [
 				icon: SiTypescript,
 				link: "https://www.typescriptlang.org/",
 				description: "JavaScript with type safety — modern dev standard.",
+				aliases: ["ts"],
 			},
 			{
 				name: "Python",
@@ -198,6 +197,7 @@ const categories: Category[] = [
 				icon: SiCplusplus,
 				link: "https://isocpp.org/",
 				description: "A powerful systems programming language with performance focus.",
+				aliases: ["cpp"],
 			},
 			//nodejs
 			// {
@@ -304,18 +304,56 @@ const categories: Category[] = [
 	// },
 ];
 
-export default function TechList() {
+export default function TechList({ techUsage = {} }: TechListProps) {
 	// Flatten into one grid and prepare cursor-following tooltips
 	const flat: FlatTech[] = categories.flatMap((c) =>
 		c.items.map((i) => ({ ...i, __cat: c.title })),
 	);
 
 	const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-	const [mouse, setMouse] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+	const [tooltipAnchor, setTooltipAnchor] = useState<{ left: number; top: number } | null>(null);
 	const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
 	const [lastPointerType, setLastPointerType] = useState<"mouse" | "touch" | "pen" | "unknown">(
 		"unknown",
 	);
+	const [hoveredTechKey, setHoveredTechKey] = useState<string | null>(null);
+	const [isTooltipHovered, setIsTooltipHovered] = useState(false);
+	const closeTimeoutRef = useRef<number | null>(null);
+
+	const getUsageForItem = useCallback(
+		(item: Tech) => {
+			const keys = [normalizeTechName(item.name), ...(item.aliases ?? []).map(normalizeTechName)];
+			for (const key of keys) {
+				const usage = techUsage[key];
+				if (usage) return usage;
+			}
+			return null;
+		},
+		[techUsage],
+	);
+
+	const getUsageKeyForItem = useCallback(
+		(item: Tech) => {
+			const keys = [normalizeTechName(item.name), ...(item.aliases ?? []).map(normalizeTechName)];
+			for (const key of keys) {
+				if (techUsage[key]) return key;
+			}
+			return null;
+		},
+		[techUsage],
+	);
+
+	const getClampedTooltipPosition = useCallback(() => {
+		if (typeof window === "undefined" || !tooltipAnchor) return { left: 0, top: 0 };
+		const margin = 10;
+		const tooltipWidth = 340;
+		const tooltipHeight = 360;
+		let left = tooltipAnchor.left;
+		let top = tooltipAnchor.top;
+		left = Math.min(Math.max(margin, left), window.innerWidth - tooltipWidth - margin);
+		top = Math.min(Math.max(margin, top), window.innerHeight - tooltipHeight - margin);
+		return { left, top };
+	}, [tooltipAnchor]);
 
 	// Track the last pointer type (mouse/touch/pen) to decide interaction mode per event
 	useEffect(() => {
@@ -349,29 +387,50 @@ export default function TechList() {
 		return () => document.removeEventListener("keydown", onKey);
 	}, [selectedIdx]);
 
-	const catBadge: Record<string, { icon: IconType; title: string }> = {
-		"Web Development": { icon: FaGlobe, title: "Web Dev" },
-		"Databases & Storage": { icon: FaDatabase, title: "Database" },
-		"Programming Languages & Tools": { icon: FaTools, title: "Programming" },
-		"Infrastructure & Deployment": { icon: FaServer, title: "Infrastructure" },
-		"Operating Systems": { icon: FaDesktop, title: "OS" },
-	};
-
 	return (
 		<div>
-			<div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 gap-3 sm:gap-2 md:gap-2.5">
+			<div className="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 gap-0.25 sm:gap-0 md:gap-0.25">
 				{flat.map((item, idx) => {
-					const badge = catBadge[item.__cat as keyof typeof catBadge];
+					const usage = getUsageForItem(item);
+					const projects = usage?.projects ?? [];
+					const usageKey = getUsageKeyForItem(item) ?? normalizeTechName(item.name);
+					const projectHref = projects[0] ? `/posts/${projects[0].id}/` : undefined;
+					const categoryLabel = item.__cat;
+					const hasProjects = projects.length > 0;
 					return (
 						<div
 							key={`${item.name}-${idx}`}
-							className="lh-techlist-item group relative flex items-center justify-center p-3 md:p-2 bg-transparent"
+							className="lh-techlist-item group relative flex items-center justify-center p-1.5 md:p-1 bg-transparent"
 							onMouseEnter={(e) => {
+								if (closeTimeoutRef.current !== null) {
+									window.clearTimeout(closeTimeoutRef.current);
+									closeTimeoutRef.current = null;
+								}
+								const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
+								const tooltipWidth = 340;
+								const margin = 10;
+								const spaceRight =
+									typeof window !== "undefined" ? window.innerWidth - rect.right : tooltipWidth;
+								const left =
+									spaceRight < tooltipWidth + margin
+										? rect.left - tooltipWidth - 12
+										: rect.right + 12;
 								setHoverIdx(idx);
-								setMouse({ x: e.clientX, y: e.clientY });
+								setTooltipAnchor({ left, top: rect.top });
+								setHoveredTechKey(usageKey);
+								setIsTooltipHovered(false);
 							}}
-							onMouseLeave={() => setHoverIdx(null)}
-							onMouseMove={(e) => setMouse({ x: e.clientX, y: e.clientY })}
+							onMouseLeave={(e) => {
+								const next = e.relatedTarget as HTMLElement | null;
+								if (next?.closest?.(".lh-tech-tooltip")) return;
+								if (isTooltipHovered) return;
+								closeTimeoutRef.current = window.setTimeout(() => {
+									setHoverIdx(null);
+									setHoveredTechKey(null);
+									setIsTooltipHovered(false);
+									closeTimeoutRef.current = null;
+								}, 140);
+							}}
 							onPointerDown={(e) => {
 								// Ensure pointer type is captured for click handling below
 								const pt = (e.pointerType as "mouse" | "touch" | "pen") ?? "unknown";
@@ -380,21 +439,9 @@ export default function TechList() {
 								e.stopPropagation();
 							}}
 						>
-							{/* Category badge */}
-							{badge && (
-								<span className="absolute right-1.5 top-1.5 sm:right-0.5 sm:top-0.5 z-10">
-									<badge.icon
-										className="h-5 w-5 sm:h-4 sm:w-4"
-										style={{ color: "var(--color-accent-dark)" }}
-									/>
-								</span>
-							)}
-
-							{item.link ? (
+							{projectHref ? (
 								<a
-									href={item.link}
-									target="_blank"
-									rel="noopener noreferrer"
+									href={projectHref}
 									onClick={(e) => {
 										// On touch, open the mobile tooltip instead of navigating
 										if (lastPointerType === "touch") {
@@ -402,7 +449,9 @@ export default function TechList() {
 											setSelectedIdx((prev) => (prev === idx ? null : idx));
 										}
 									}}
-									className="inline-flex items-center justify-center text-[var(--c-text)] group-hover:text-accent transition-colors"
+									className={`inline-flex items-center justify-center transition-colors ${
+										hasProjects ? "text-accent" : "text-[var(--c-text)] group-hover:text-accent"
+									}`}
 								>
 									<item.icon className="w-10 h-10 sm:w-9 sm:h-9 md:w-10 md:h-10" />
 									<span className="sr-only">{item.name}</span>
@@ -415,7 +464,9 @@ export default function TechList() {
 											setSelectedIdx((prev) => (prev === idx ? null : idx));
 										}
 									}}
-									className="inline-flex items-center justify-center text-[var(--c-text)] group-hover:text-accent transition-colors"
+									className={`inline-flex items-center justify-center transition-colors ${
+										hasProjects ? "text-accent" : "text-[var(--c-text)] group-hover:text-accent"
+									}`}
 								>
 									<item.icon className="w-10 h-10 sm:w-9 sm:h-9 md:w-10 md:h-10" />
 									<span className="sr-only">{item.name}</span>
@@ -423,43 +474,139 @@ export default function TechList() {
 							)}
 
 							{/* Cursor-following tooltip (page overlay) */}
-							{lastPointerType !== "touch" &&
+							{hasProjects &&
+								lastPointerType !== "touch" &&
 								hoverIdx === idx &&
+								hoveredTechKey === usageKey &&
 								typeof window !== "undefined" &&
 								typeof document !== "undefined" &&
 								createPortal(
 									<div
-										className="pointer-events-none fixed z-[9999]"
-										style={{ left: mouse.x + 12, top: mouse.y + 12 }}
+										className="lh-tech-tooltip pointer-events-auto fixed z-[9999]"
+										style={getClampedTooltipPosition()}
+										onMouseEnter={() => {
+											if (closeTimeoutRef.current !== null) {
+												window.clearTimeout(closeTimeoutRef.current);
+												closeTimeoutRef.current = null;
+											}
+											setIsTooltipHovered(true);
+										}}
+										onMouseLeave={(e) => {
+											const next = e.relatedTarget as HTMLElement | null;
+											if (next?.closest?.(".lh-techlist-item")) return;
+											closeTimeoutRef.current = window.setTimeout(() => {
+												setHoverIdx(null);
+												setHoveredTechKey(null);
+												setIsTooltipHovered(false);
+												closeTimeoutRef.current = null;
+											}, 140);
+										}}
 									>
-										<div className="w-60 rounded-xl bg-global-bg/70 p-4 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10">
+										<div className="w-[340px] max-w-[88vw] rounded-xl bg-global-bg/70 p-4 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10">
 											<div className="flex items-center gap-2 mb-2">
 												<item.icon className="h-4 w-4" />
 												<p className="text-xs font-semibold text-accent-2">{item.name}</p>
-												<div className="ml-auto flex items-center gap-2">
-													{badge && (
-														<span
-															className="inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px]"
-															style={{
-																borderColor: "var(--color-accent-dark)",
-																backgroundColor:
-																	"color-mix(in oklab, var(--color-accent-dark) 12%, transparent)",
-																color: "var(--color-accent-dark)",
-															}}
-														>
-															<badge.icon className="h-3 w-3" /> {badge.title}
-														</span>
-													)}
-													{item.link && (
-														<FaExternalLinkAlt className="h-3 w-3 text-global-text/50" />
-													)}
-												</div>
+												<span className="text-[10px] text-global-text/40">· {categoryLabel}</span>
 											</div>
 											{item.description && (
 												<p className="text-[11px] text-global-text/70 leading-relaxed">
 													{item.description}
 												</p>
 											)}
+											<div className="mt-3 border-t border-white/10 pt-3">
+												<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/50">
+													Projects using this
+												</p>
+												{projects.length > 0 ? (
+													<div className="mt-2 max-h-44 space-y-2 overflow-y-auto pr-1">
+														{projects.map((project) => (
+															<a
+																key={project.id}
+																href={`/posts/${project.id}/`}
+																className="group relative block overflow-hidden rounded-lg border border-white/5 bg-white/5 px-3 py-3 text-[11px] text-global-text/80 transition-colors hover:border-accent/40 hover:text-global-text"
+																data-astro-prefetch
+															>
+																{project.coverImage?.src && (
+																	<span
+																		className="pointer-events-none absolute inset-0 opacity-90 blur-3xl"
+																		style={{
+																			backgroundImage: `url(${project.coverImage.src})`,
+																			backgroundSize: "cover",
+																			backgroundPosition: "center",
+																		}}
+																	/>
+																)}
+																<span className="pointer-events-none absolute inset-0 bg-global-bg/5" />
+																<p className="relative text-[11px] font-semibold text-accent-2">
+																	{project.title}
+																</p>
+																{project.description && (
+																	<p className="relative mt-1 text-[10px] text-global-text/65 leading-relaxed">
+																		{project.description}
+																	</p>
+																)}
+															</a>
+														))}
+													</div>
+												) : (
+													<p className="mt-2 text-[11px] text-global-text/60">
+														No projects tagged yet.
+													</p>
+												)}
+											</div>
+										</div>
+									</div>,
+									document.body,
+								)}
+
+							{!hasProjects &&
+								lastPointerType !== "touch" &&
+								hoverIdx === idx &&
+								hoveredTechKey === usageKey &&
+								typeof window !== "undefined" &&
+								typeof document !== "undefined" &&
+								createPortal(
+									<div
+										className="lh-tech-tooltip pointer-events-auto fixed z-[9999]"
+										style={getClampedTooltipPosition()}
+										onMouseEnter={() => {
+											if (closeTimeoutRef.current !== null) {
+												window.clearTimeout(closeTimeoutRef.current);
+												closeTimeoutRef.current = null;
+											}
+											setIsTooltipHovered(true);
+										}}
+										onMouseLeave={(e) => {
+											const next = e.relatedTarget as HTMLElement | null;
+											if (next?.closest?.(".lh-techlist-item")) return;
+											closeTimeoutRef.current = window.setTimeout(() => {
+												setHoverIdx(null);
+												setHoveredTechKey(null);
+												setIsTooltipHovered(false);
+												closeTimeoutRef.current = null;
+											}, 140);
+										}}
+									>
+										<div className="w-[320px] max-w-[88vw] rounded-xl bg-global-bg/70 p-4 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10">
+											<div className="flex items-center gap-2 mb-2">
+												<item.icon className="h-4 w-4" />
+												<p className="text-xs font-semibold text-accent-2">{item.name}</p>
+												<span className="text-[10px] text-global-text/40">· {categoryLabel}</span>
+											</div>
+											{item.description && (
+												<p className="text-[11px] text-global-text/70 leading-relaxed">
+													{item.description}
+												</p>
+											)}
+											<div className="mt-3 border-t border-white/10 pt-3">
+												<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/50">
+													Projects using this
+												</p>
+												<p className="mt-2 text-[11px] text-global-text/70 leading-relaxed">
+													I either haven't wrote about this project or I only use this in
+													coursework.
+												</p>
+											</div>
 										</div>
 									</div>,
 									document.body,
@@ -511,25 +658,42 @@ export default function TechList() {
 												<div className="flex items-center gap-2 mb-2 pr-6">
 													<item.icon className="h-5 w-5" />
 													<p className="text-sm font-semibold text-accent-2">{item.name}</p>
-													{badge && (
-														<span
-															className="ml-auto inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px]"
-															style={{
-																borderColor: "var(--color-accent-dark)",
-																backgroundColor:
-																	"color-mix(in oklab, var(--color-accent-dark) 12%, transparent)",
-																color: "var(--color-accent-dark)",
-															}}
-														>
-															<badge.icon className="h-3.5 w-3.5" /> {badge.title}
-														</span>
-													)}
 												</div>
 												{item.description && (
 													<p className="text-[13px] text-[var(--c-text-dimmed)] leading-relaxed">
 														{item.description}
 													</p>
 												)}
+												<div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-3">
+													<p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-global-text/60">
+														Projects using this
+													</p>
+													{projects.length > 0 ? (
+														<div className="mt-2 max-h-40 overflow-y-auto space-y-2 pr-1">
+															{projects.map((project) => (
+																<a
+																	key={project.id}
+																	href={`/posts/${project.id}/`}
+																	className="block rounded-md border border-white/5 bg-global-bg/70 px-3 py-2 text-[12px] text-global-text/80 hover:border-accent/40"
+																	data-astro-prefetch
+																>
+																	<p className="text-[12px] font-semibold text-accent-2">
+																		{project.title}
+																	</p>
+																	{project.description && (
+																		<p className="mt-1 text-[11px] text-global-text/65 leading-relaxed">
+																			{project.description}
+																		</p>
+																	)}
+																</a>
+															))}
+														</div>
+													) : (
+														<p className="mt-2 text-[12px] text-global-text/60">
+															No projects tagged yet.
+														</p>
+													)}
+												</div>
 												{item.link && (
 													<div className="mt-3 text-[12px]">
 														<a

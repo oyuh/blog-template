@@ -5,6 +5,18 @@ function removeDupsAndLowerCase(array: string[]) {
 	return [...new Set(array.map((str) => str.toLowerCase()))];
 }
 
+function removeDupsCaseInsensitive(array: string[]) {
+	const seen = new Set<string>();
+	return array
+		.map((str) => str.trim())
+		.filter((str) => {
+			const key = str.toLowerCase();
+			if (!key || seen.has(key)) return false;
+			seen.add(key);
+			return true;
+		});
+}
+
 const baseSchema = z.object({
 	title: z.string().max(60),
 });
@@ -23,6 +35,7 @@ const post = defineCollection({
 			draft: z.boolean().default(false),
 			ogImage: z.string().optional(),
 			tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
+			technologies: z.array(z.string()).default([]).transform(removeDupsCaseInsensitive),
 			publishDate: z
 				.string()
 				.or(z.date())

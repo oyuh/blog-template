@@ -39,7 +39,11 @@ export default defineConfig({
 	},
 	integrations: [
 		expressiveCode(expressiveCodeOptions),
-		icon(),
+		icon({
+			include: {
+				"simple-icons": ["*"],
+			},
+		}),
 		sitemap(),
 		mdx(),
 		robotsTxt({

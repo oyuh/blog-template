@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import ResumeDownload from "@/components/ResumeDownload.tsx";
 import SocialList from "@/components/SocialList.astro";
 import TechList from "@/components/TechList.tsx";
+import { getAllPosts, getTechnologyUsage } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 import { Icon } from "astro-icon/components";
 
@@ -17,6 +18,9 @@ const templateRepoUrl = import.meta.env.PUBLIC_TEMPLATE_REPO_URL;
 const defaultResumePdfUrl = "/Lawson_Hart_Resume.pdf";
 const defaultResumePdfPath = fileURLToPath(new URL("../../public/Lawson_Hart_Resume.pdf", import.meta.url));
 const hasResumePdf = fs.existsSync(defaultResumePdfPath);
+
+const allPosts = await getAllPosts();
+const technologyUsage = getTechnologyUsage(allPosts);
 
 export const prerender = true;
 
@@ -38,10 +42,15 @@ export const prerender = true;
             <span class="font-semibold text-accent-2">University of Texas at Dallas</span>, aka The MIT of the South.
             Dallas born and raised, never really left the <span class="font-semibold text-accent-2">DFW</span> bubble.
           </p>
-          <p class="text-base text-global-text/90 leading-relaxed">
+          <!-- <p class="text-base text-global-text/90 leading-relaxed">
             I'm kinda obsessed with building things that actually <span class="font-medium text-accent-2">solve problems</span> I come across in my internet nook.
             I think it's pretty fun taking a messy idea and turning it into something clean, functional, and genuinely useful.
+          </p> -->
+          <p class="text-base text-global-text/90 leading-relaxed">I'm on the computer science track with a focus on software engineering/cyber security. I take everything I find annoying or that I think I can do better
+            on the internet and give it a go. Most of my projects focus on a playform with oAuth and storing some information as I learn new technologies and frameworks.
+
           </p>
+
           <p class="text-base text-global-text/80 leading-relaxed">
             Growing up as the family's unofficial <span class="font-medium text-accent-2">tech support</span> was basically my first job
             That curiosity naturally evolved into a love for <span class="font-medium text-accent-2">full-stack development</span>
@@ -65,10 +74,13 @@ export const prerender = true;
 
         <p class="max-w-full text-base text-global-text/85 leading-relaxed mb-4">
           Technologies and tools I use frequently for projects, coursework, and personal development.
+          <span class="block mt-2 text-sm text-global-text/70">
+            Blue icons have project write‑ups behind them; muted icons are tools I use but haven’t documented yet.
+          </span>
         </p>
 
         <div class="space-y-8">
-          <TechList client:load />
+          <TechList client:load techUsage={technologyUsage} />
         </div>
 
         <div class="mt-4">
