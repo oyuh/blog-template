@@ -39,7 +39,7 @@ const technologyIcons: Record<string, string> = {
     "c++": "simple-icons:cplusplus",
 };
 
-const technologies = (post.data.technologies ?? []).map((tech) => tech.trim()).filter(Boolean);
+const technologies = (post.data.technologies ?? []).map((tech: string) => tech.trim()).filter(Boolean);
 
 // Get table of contents for preview and reading time
 interface TocDisplayItem {
@@ -167,7 +167,7 @@ displayToc = buildDisplayToc(toc);
                 )}
                 {technologies.length > 0 && (
                     <span class="ms-1 flex items-center gap-1">
-                        {technologies.slice(0, 6).map((tech) => {
+                        {technologies.slice(0, 6).map((tech: string) => {
                             const iconKey = tech.toLowerCase();
                             const iconName = technologyIcons[iconKey];
                             return iconName ? (

@@ -104,6 +104,8 @@ export function getTechnologyUsage(posts: CollectionEntry<"post">[]): Technology
 		for (const tech of technologies) {
 			const key = tech.trim().toLowerCase();
 			if (!key) continue;
+			const coverImageSrc = post.data.coverImage?.src?.src;
+			const coverImageAlt = post.data.coverImage?.alt;
 			const entry = usage.get(key) ?? { count: 0, projects: [] };
 			entry.count += 1;
 			entry.projects.push({
@@ -111,12 +113,14 @@ export function getTechnologyUsage(posts: CollectionEntry<"post">[]): Technology
 				title: post.data.title,
 				description: post.data.description,
 				publishDate: post.data.publishDate.toISOString(),
-				coverImage: post.data.coverImage?.src?.src
+				...(coverImageSrc
 					? {
-							src: post.data.coverImage.src.src,
-							alt: post.data.coverImage.alt,
+							coverImage: {
+								src: coverImageSrc,
+								...(coverImageAlt !== undefined ? { alt: coverImageAlt } : {}),
+							},
 						}
-					: undefined,
+					: {}),
 			});
 			usage.set(key, entry);
 		}
