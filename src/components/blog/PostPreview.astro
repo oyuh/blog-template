@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "@/components/FormattedDate.astro";
 import { type TocItem, generateToc } from "@/utils/generateToc";
+import { getTechIconName } from "@/utils/techIcons";
 import { Icon } from "astro-icon/components";
 import type { HTMLTag, Polymorphic } from "astro/types";
 
@@ -11,33 +12,6 @@ type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
 };
 
 const { post} = Astro.props;
-
-const technologyIcons: Record<string, string> = {
-    "next.js": "simple-icons:nextdotjs",
-    "nextjs": "simple-icons:nextdotjs",
-    "react": "simple-icons:react",
-    "astro": "simple-icons:astro",
-    "vite": "simple-icons:vite",
-    "typescript": "simple-icons:typescript",
-    "ts": "simple-icons:typescript",
-    "javascript": "simple-icons:javascript",
-    "tailwind css": "simple-icons:tailwindcss",
-    "tailwind": "simple-icons:tailwindcss",
-    "node.js": "simple-icons:nodedotjs",
-    "nodejs": "simple-icons:nodedotjs",
-    "express": "simple-icons:express",
-    "postgresql": "simple-icons:postgresql",
-    "postgres": "simple-icons:postgresql",
-    "mongodb": "simple-icons:mongodb",
-    "redis": "simple-icons:redis",
-    "vercel": "simple-icons:vercel",
-    "cloudflare": "simple-icons:cloudflare",
-    "pnpm": "simple-icons:pnpm",
-    "python": "simple-icons:python",
-    "java": "simple-icons:java",
-    "kotlin": "simple-icons:kotlin",
-    "c++": "simple-icons:cplusplus",
-};
 
 const technologies = (post.data.technologies ?? []).map((tech: string) => tech.trim()).filter(Boolean);
 
@@ -168,16 +142,10 @@ displayToc = buildDisplayToc(toc);
                 {technologies.length > 0 && (
                     <span class="ms-1 flex items-center gap-1">
                         {technologies.slice(0, 6).map((tech: string) => {
-                            const iconKey = tech.toLowerCase();
-                            const iconName = technologyIcons[iconKey];
-                            return iconName ? (
-                                <Icon
-                                    aria-hidden="true"
-                                    class="h-3.5 w-3.5 text-white/80"
-                                    name={iconName}
-                                    title={tech}
-                                />
-                            ) : null;
+                            const iconName = getTechIconName(tech);
+                            return (
+                                <Icon aria-hidden="true" class="h-3.5 w-3.5 text-white/80" name={iconName} title={tech} />
+                            );
                         })}
                         {technologies.length > 6 && (
                             <span class="text-global-text/50">+{technologies.length - 6}</span>

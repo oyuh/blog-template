@@ -248,7 +248,10 @@ samp {
 
 	.admonition {
 		--admonition-color: var(--tw-prose-quotes);
-		@apply my-4 border-s-2 border-(--admonition-color) py-4 ps-4;
+		@apply my-4 rounded-xl border border-white/10 p-4;
+		/* Kill the “left stripe” look even if something else injects it */
+		border-left: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent) !important;
+		border-inline-start: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent) !important;
 
 		.admonition-title {
 			@apply my-0! flex items-center gap-2 text-base font-bold text-(--admonition-color) capitalize;

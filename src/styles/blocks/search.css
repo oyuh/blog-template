@@ -251,8 +251,10 @@ body[data-search-modal-open] {
    as smaller items under the main page result. */
 #lawson__search .pagefind-ui__result-nested {
 	margin-top: 0.75rem;
-	padding-left: 0.875rem;
-	border-left: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+	padding: 0.75rem 0.875rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+	border-radius: 0.75rem;
+	background: color-mix(in srgb, var(--color-global-text) 2.5%, transparent);
 	display: flex;
 	flex-direction: column;
 	gap: 0.35rem;

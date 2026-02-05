@@ -42,6 +42,27 @@ export default defineConfig({
 		icon({
 			include: {
 				"simple-icons": ["*"],
+				// MDI is used across the site (social links, rss icons, and Java icon)
+				mdi: [
+					"api",
+					"coffee",
+					"cloud",
+					"code-tags",
+					"cube-outline",
+					"database",
+					"discord",
+					"email",
+					"flask-outline",
+					"github",
+					"instagram",
+					"language-java",
+					"linkedin",
+					"lock",
+					"palette",
+					"cellphone",
+					"rss",
+					"twitter",
+				],
 			},
 		}),
 		sitemap(),
