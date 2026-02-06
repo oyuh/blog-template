@@ -43,7 +43,7 @@
 		"cssnano": "^7.1.2",
 		"date-fns": "^4.1.0",
 		"date-fns-tz": "^3.2.0",
-		"drizzle-orm": "^0.42.0",
+		"drizzle-orm": "^0.45.1",
 		"effect": "^3.19.15",
 		"framer-motion": "^12.31.0",
 		"hastscript": "^9.0.1",
