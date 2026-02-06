@@ -71,7 +71,7 @@
 		"@biomejs/biome": "^1.9.4",
 		"@iconify-json/mdi": "^1.2.3",
 		"@iconify-json/simple-icons": "^1.2.69",
-		"@netlify/functions": "^4.3.0",
+		"@netlify/functions": "^5.1.2",
 		"@pagefind/default-ui": "^1.4.0",
 		"@resvg/resvg-js": "^2.6.2",
 		"@tailwindcss/typography": "^0.5.19",
