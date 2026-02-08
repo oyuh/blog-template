@@ -14,3 +14,16 @@ declare module "aos" {
 	};
 	export default AOS;
 }
+
+declare module "baffle" {
+	export type BaffleInstance = {
+		start: () => BaffleInstance;
+		stop: () => BaffleInstance;
+		set: (options: Record<string, unknown>) => BaffleInstance;
+		text: (fn: (text: string) => string) => BaffleInstance;
+		reveal: (duration?: number, delay?: number) => BaffleInstance;
+	};
+
+	const baffle: (target: Element | NodeListOf<Element> | string) => BaffleInstance;
+	export default baffle;
+}

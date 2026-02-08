@@ -40,6 +40,7 @@
 		"astro-icon": "^1.1.5",
 		"astro-robots-txt": "^1.0.0",
 		"astro-webmanifest": "^1.0.0",
+		"baffle": "^0.3.6",
 		"cssnano": "^7.1.2",
 		"date-fns": "^4.1.0",
 		"date-fns-tz": "^3.2.0",

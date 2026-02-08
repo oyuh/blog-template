@@ -1,0 +1,27 @@
+---
+import { SPLASH_TEXTS } from "@/data/splashTexts";
+
+type Props = {
+	intervalMs?: number;
+	class?: string;
+};
+
+const { intervalMs = 3000, class: className = "" } = Astro.props as Props;
+
+// Fallback for no-JS / initial paint
+const fallbackText = SPLASH_TEXTS[0] ?? "";
+const texts = SPLASH_TEXTS;
+---
+
+<span
+	class={className}
+	data-splash-text
+	data-splash-interval-ms={String(intervalMs)}
+	data-splash-texts={JSON.stringify(texts)}
+>
+	{fallbackText}
+</span>
+
+<script>
+	import "@/scripts/splashText";
+</script>

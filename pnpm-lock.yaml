@@ -81,6 +81,9 @@ importers:
       astro-webmanifest:
         specifier: ^1.0.0
         version: 1.0.0
+      baffle:
+        specifier: ^0.3.6
+        version: 0.3.6
       cssnano:
         specifier: ^7.1.2
         version: 7.1.2(postcss@8.5.6)
@@ -2899,6 +2902,9 @@ packages:
     peerDependenciesMeta:
       react-native-b4a:
         optional: true
+
+  baffle@0.3.6:
+    resolution: {integrity: sha512-EAae8dURqcjcuQOXdU69vvLX50NobtFyPwhCZGd40sz220E+4b47X8I24Uuj44bYoIY7ieNdgrtvhFdZM5/qag==}
 
   bail@2.0.2:
     resolution: {integrity: sha512-0xO6mYd7JB2YesxDKplafRpsiOzPt9V02ddPCLbY1xYGPOX24NTyN50qnUxgCPcSoYMhKpAuBTjQoRZCAkUDRw==}
@@ -9961,6 +9967,8 @@ snapshots:
   axobject-query@4.1.0: {}
 
   b4a@1.7.3: {}
+
+  baffle@0.3.6: {}
 
   bail@2.0.2: {}
 
