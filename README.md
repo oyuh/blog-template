@@ -89,6 +89,7 @@ coverImage:                         # optional
   src: ./cover.png
 ogImage: "/og/custom.png"          # optional
 tryLink: "https://example.app"      # optional (adds a "Try it live" button)
+technologies: []                  # optional (Adds the icons of the used technologies) [You must also add them if needed]
 ```
 
 ## Environment variables

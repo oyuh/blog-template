@@ -1,7 +1,7 @@
 import type { TechnologyUsage } from "@/data/post";
 import { getTechIconName } from "@/utils/techIcons";
 import { Icon as IconifyIcon } from "@iconify/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Tech = {
@@ -24,17 +24,6 @@ type TechListProps = {
 	techUsage?: TechnologyUsage;
 };
 
-type AnchorRect = {
-	left: number;
-	top: number;
-	right: number;
-	bottom: number;
-	width: number;
-	height: number;
-};
-
-type TooltipPlacement = "right" | "left" | "bottom" | "top";
-
 const normalizeTechName = (name: string) => name.toLowerCase().trim();
 
 const categories: Category[] = [
@@ -50,7 +39,6 @@ const categories: Category[] = [
 				name: "Next.js",
 				link: "https://nextjs.org/",
 				description: "A React-based full-stack framework with server-side rendering.",
-				aliases: ["nextjs"],
 			},
 			{
 				name: "Express",
@@ -271,7 +259,10 @@ const categories: Category[] = [
 ];
 
 export default function TechList({ techUsage = {} }: TechListProps) {
-	// Flatten into one grid and prepare cursor-following tooltips
+	const PANEL_STATE_KEY = "tech:panelState:v1";
+	const DEFAULT_PANEL_SIZE = { width: 520, height: 560 };
+	const DEFAULT_PANEL_POS = { x: 24, y: 96 };
+
 	const flat: FlatTech[] = categories.flatMap((c) =>
 		c.items.map((i) => ({
 			...i,
@@ -280,71 +271,32 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 		})),
 	);
 
+	// Hover tooltip state (simple, non-interactive)
 	const [hoverIdx, setHoverIdx] = useState<number | null>(null);
-	const [anchorRect, setAnchorRect] = useState<AnchorRect | null>(null);
-	const [pointerPos, setPointerPos] = useState<{ x: number; y: number } | null>(null);
-	const [tooltipSize, setTooltipSize] = useState<{ width: number; height: number }>({
-		width: 340,
-		height: 360,
-	});
-	const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+	const [mouse, setMouse] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+	const [supportsHover, setSupportsHover] = useState(false);
 	const [lastPointerType, setLastPointerType] = useState<"mouse" | "touch" | "pen" | "unknown">(
 		"unknown",
 	);
-	const [hoveredTechKey, setHoveredTechKey] = useState<string | null>(null);
-	const [isTooltipHovered, setIsTooltipHovered] = useState(false);
-	const closeTimeoutRef = useRef<number | null>(null);
-	const tooltipRef = useRef<HTMLDivElement | null>(null);
-	const tooltipResizeObserverRef = useRef<ResizeObserver | null>(null);
-	const itemRefs = useRef<Array<HTMLDivElement | null>>([]);
-	const SAFE_CLOSE_DELAY_MS = 260;
-	const SAFE_ZONE_PADDING_PX = 10;
 
-	const clearCloseTimeout = useCallback(() => {
-		if (closeTimeoutRef.current !== null) {
-			window.clearTimeout(closeTimeoutRef.current);
-			closeTimeoutRef.current = null;
-		}
-	}, []);
-
-	const closeTooltip = useCallback(() => {
-		setHoverIdx(null);
-		setHoveredTechKey(null);
-		setAnchorRect(null);
-		setPointerPos(null);
-		setIsTooltipHovered(false);
-		closeTimeoutRef.current = null;
-	}, []);
-
-	const scheduleClose = useCallback(
-		(delay = SAFE_CLOSE_DELAY_MS) => {
-			clearCloseTimeout();
-			closeTimeoutRef.current = window.setTimeout(() => {
-				closeTooltip();
-			}, delay);
-		},
-		[clearCloseTimeout, closeTooltip],
-	);
-
-	const tooltipNodeRef = useCallback((node: HTMLDivElement | null) => {
-		tooltipRef.current = node;
-		if (tooltipResizeObserverRef.current) {
-			tooltipResizeObserverRef.current.disconnect();
-			tooltipResizeObserverRef.current = null;
-		}
-		if (!node) return;
-		const measure = () => {
-			const rect = node.getBoundingClientRect();
-			if (!rect.width || !rect.height) return;
-			setTooltipSize({ width: rect.width, height: rect.height });
-		};
-		measure();
-		if (typeof ResizeObserver !== "undefined") {
-			const ro = new ResizeObserver(() => measure());
-			ro.observe(node);
-			tooltipResizeObserverRef.current = ro;
-		}
-	}, []);
+	// Click modal state (accumulates tabs until closed)
+	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [openTabs, setOpenTabs] = useState<number[]>([]);
+	const [activeTab, setActiveTab] = useState<number | null>(null);
+	const modalRef = useRef<HTMLDialogElement>(null);
+	const [panelPos, setPanelPos] = useState<{ x: number; y: number }>(DEFAULT_PANEL_POS);
+	const [panelSize, setPanelSize] = useState<{ width: number; height: number }>(DEFAULT_PANEL_SIZE);
+	const panelPosRef = useRef(panelPos);
+	const panelSizeRef = useRef(panelSize);
+	const persistTimerRef = useRef<number | null>(null);
+	const dragRef = useRef<{
+		active: boolean;
+		pointerId: number;
+		startX: number;
+		startY: number;
+		originX: number;
+		originY: number;
+	} | null>(null);
 
 	const getUsageForItem = useCallback(
 		(item: Tech) => {
@@ -358,228 +310,191 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 		[techUsage],
 	);
 
-	const getUsageKeyForItem = useCallback(
-		(item: Tech) => {
-			const keys = [normalizeTechName(item.name), ...(item.aliases ?? []).map(normalizeTechName)];
-			for (const key of keys) {
-				if (techUsage[key]) return key;
-			}
-			return null;
-		},
-		[techUsage],
-	);
-
-	const getCurrentAnchorRect = useCallback((idx: number | null): AnchorRect | null => {
-		if (idx === null) return null;
-		const el = itemRefs.current[idx];
-		if (!el) return null;
-		const rect = el.getBoundingClientRect();
-		return {
-			left: rect.left,
-			top: rect.top,
-			right: rect.right,
-			bottom: rect.bottom,
-			width: rect.width,
-			height: rect.height,
-		};
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
+		const update = () => setSupportsHover(mq.matches);
+		update();
+		mq.addEventListener?.("change", update);
+		return () => mq.removeEventListener?.("change", update);
 	}, []);
 
-	const computeTooltipPosition = useCallback((): {
-		left: number;
-		top: number;
-		placement: TooltipPlacement;
-	} => {
-		if (typeof window === "undefined") return { left: 0, top: 0, placement: "right" };
-		if (!anchorRect) return { left: 0, top: 0, placement: "right" };
-		const { width: tooltipWidth, height: tooltipHeight } = tooltipSize;
-		const margin = 10;
-		const gap = 12;
-		const vw = window.innerWidth;
-		const vh = window.innerHeight;
-		const fallbackX = anchorRect.left + anchorRect.width / 2;
-		const fallbackY = anchorRect.top + anchorRect.height / 2;
-		const rawX = pointerPos?.x ?? fallbackX;
-		const rawY = pointerPos?.y ?? fallbackY;
-		// Only let the pointer influence position while it's still "on" the icon.
-		const px = Math.min(Math.max(anchorRect.left, rawX), anchorRect.right);
-		const py = Math.min(Math.max(anchorRect.top, rawY), anchorRect.bottom);
-
-		const spaceRight = vw - anchorRect.right;
-		const spaceLeft = anchorRect.left;
-		const spaceBottom = vh - anchorRect.bottom;
-		const spaceTop = anchorRect.top;
-
-		let placement: TooltipPlacement = "right";
-		if (spaceRight >= tooltipWidth + gap + margin) placement = "right";
-		else if (spaceLeft >= tooltipWidth + gap + margin) placement = "left";
-		else if (spaceBottom >= tooltipHeight + gap + margin) placement = "bottom";
-		else if (spaceTop >= tooltipHeight + gap + margin) placement = "top";
-		else placement = spaceBottom >= spaceTop ? "bottom" : "top";
-
-		let left = 0;
-		let top = 0;
-		if (placement === "right") {
-			left = anchorRect.right + gap;
-			top = py - tooltipHeight / 2;
-		} else if (placement === "left") {
-			left = anchorRect.left - tooltipWidth - gap;
-			top = py - tooltipHeight / 2;
-		} else if (placement === "bottom") {
-			left = px - tooltipWidth / 2;
-			top = anchorRect.bottom + gap;
-		} else {
-			left = px - tooltipWidth / 2;
-			top = anchorRect.top - tooltipHeight - gap;
-		}
-
-		left = Math.min(Math.max(margin, left), vw - tooltipWidth - margin);
-		top = Math.min(Math.max(margin, top), vh - tooltipHeight - margin);
-
-		return { left, top, placement };
-	}, [anchorRect, pointerPos, tooltipSize]);
-
-	const tooltipPosition = useMemo(() => computeTooltipPosition(), [computeTooltipPosition]);
-
-	const tooltipRect = useMemo(() => {
-		return {
-			left: tooltipPosition.left,
-			top: tooltipPosition.top,
-			right: tooltipPosition.left + tooltipSize.width,
-			bottom: tooltipPosition.top + tooltipSize.height,
-			width: tooltipSize.width,
-			height: tooltipSize.height,
-		};
-	}, [tooltipPosition.left, tooltipPosition.top, tooltipSize.height, tooltipSize.width]);
-
-	const isPointerInSafeZone = useCallback(
-		(x: number, y: number) => {
-			if (!anchorRect) return false;
-			const inRect = (rect: { left: number; top: number; right: number; bottom: number }) =>
-				x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
-
-			const paddedAnchor = {
-				left: anchorRect.left - SAFE_ZONE_PADDING_PX,
-				top: anchorRect.top - SAFE_ZONE_PADDING_PX,
-				right: anchorRect.right + SAFE_ZONE_PADDING_PX,
-				bottom: anchorRect.bottom + SAFE_ZONE_PADDING_PX,
-			};
-			const paddedTooltip = {
-				left: tooltipRect.left - SAFE_ZONE_PADDING_PX,
-				top: tooltipRect.top - SAFE_ZONE_PADDING_PX,
-				right: tooltipRect.right + SAFE_ZONE_PADDING_PX,
-				bottom: tooltipRect.bottom + SAFE_ZONE_PADDING_PX,
-			};
-
-			// Inside either element => safe
-			if (inRect(paddedAnchor) || inRect(paddedTooltip)) return true;
-
-			// Corridor between anchor and tooltip based on placement
-			const top = Math.min(paddedAnchor.top, paddedTooltip.top);
-			const bottom = Math.max(paddedAnchor.bottom, paddedTooltip.bottom);
-			if (tooltipPosition.placement === "right") {
-				const corridor = {
-					left: paddedAnchor.right,
-					right: paddedTooltip.left,
-					top,
-					bottom,
-				};
-				return inRect(corridor);
-			}
-			if (tooltipPosition.placement === "left") {
-				const corridor = {
-					left: paddedTooltip.right,
-					right: paddedAnchor.left,
-					top,
-					bottom,
-				};
-				return inRect(corridor);
-			}
-			if (tooltipPosition.placement === "bottom") {
-				const corridor = {
-					left: Math.min(paddedAnchor.left, paddedTooltip.left),
-					right: Math.max(paddedAnchor.right, paddedTooltip.right),
-					top: paddedAnchor.bottom,
-					bottom: paddedTooltip.top,
-				};
-				return inRect(corridor);
-			}
-			// top
-			const corridor = {
-				left: Math.min(paddedAnchor.left, paddedTooltip.left),
-				right: Math.max(paddedAnchor.right, paddedTooltip.right),
-				top: paddedTooltip.bottom,
-				bottom: paddedAnchor.top,
-			};
-			return inRect(corridor);
-		},
-		[anchorRect, tooltipRect, tooltipPosition.placement],
-	);
-
-	// While a tooltip is open, keep close behavior forgiving:
-	// - entering the safe corridor cancels a pending close
-	// - leaving the safe corridor schedules a close
-	// NOTE: this does NOT update tooltip positioning (so it won't chase the cursor).
 	useEffect(() => {
-		if (hoverIdx === null) return;
-		if (lastPointerType === "touch") return;
-		const onMove = (e: MouseEvent) => {
-			const inSafe = isPointerInSafeZone(e.clientX, e.clientY);
-			if (inSafe) {
-				clearCloseTimeout();
-				return;
-			}
-			if (closeTimeoutRef.current === null) scheduleClose(180);
-		};
-		window.addEventListener("mousemove", onMove, { passive: true });
-		return () => window.removeEventListener("mousemove", onMove);
-	}, [hoverIdx, lastPointerType, clearCloseTimeout, isPointerInSafeZone, scheduleClose]);
-
-	useEffect(() => {
-		if (hoverIdx === null) return;
-		const update = () => {
-			const next = getCurrentAnchorRect(hoverIdx);
-			if (next) setAnchorRect(next);
-		};
-		update();
-		window.addEventListener("resize", update);
-		window.addEventListener("scroll", update, true);
-		return () => {
-			window.removeEventListener("resize", update);
-			window.removeEventListener("scroll", update, true);
-		};
-	}, [hoverIdx, getCurrentAnchorRect]);
-
-	// Track the last pointer type (mouse/touch/pen) to decide interaction mode per event
-	useEffect(() => {
+		if (typeof document === "undefined") return;
 		const handler = (e: PointerEvent) => {
 			const pt = (e.pointerType as "mouse" | "touch" | "pen") ?? "unknown";
 			setLastPointerType(pt);
-		};
-		document.addEventListener("pointerdown", handler);
-		return () => document.removeEventListener("pointerdown", handler);
-	}, []);
-
-	// Close mobile tooltip when tapping outside (ignore taps on item button or tooltip content)
-	useEffect(() => {
-		const handler = (e: PointerEvent) => {
-			if (selectedIdx === null) return;
-			const el = e.target as HTMLElement | null;
-			if (el?.closest?.(".lh-techlist-tooltip") || el?.closest?.(".lh-techlist-item")) return;
-			setSelectedIdx(null);
+			if (pt !== "mouse") setHoverIdx(null);
 		};
 		document.addEventListener("pointerdown", handler, { passive: true });
 		return () => document.removeEventListener("pointerdown", handler);
-	}, [selectedIdx]);
+	}, []);
 
-	// Allow closing with Escape key
 	useEffect(() => {
-		if (selectedIdx === null) return;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") setSelectedIdx(null);
+		panelPosRef.current = panelPos;
+	}, [panelPos]);
+
+	useEffect(() => {
+		panelSizeRef.current = panelSize;
+	}, [panelSize]);
+
+	const clampToViewport = useCallback((x: number, y: number, width?: number, height?: number) => {
+		if (typeof window === "undefined") return { x, y };
+		const margin = 16;
+		const w = width ?? panelSizeRef.current.width ?? DEFAULT_PANEL_SIZE.width;
+		const h = height ?? panelSizeRef.current.height ?? DEFAULT_PANEL_SIZE.height;
+		const maxX = Math.max(margin, window.innerWidth - w - margin);
+		const maxY = Math.max(margin, window.innerHeight - h - margin);
+		return {
+			x: Math.min(Math.max(margin, x), maxX),
+			y: Math.min(Math.max(margin, y), maxY),
 		};
-		document.addEventListener("keydown", onKey);
-		return () => document.removeEventListener("keydown", onKey);
-	}, [selectedIdx]);
+	}, []);
+
+	const persistPanelState = useCallback(
+		(state?: { x: number; y: number; width: number; height: number }) => {
+			if (typeof window === "undefined") return;
+			try {
+				const s =
+					state ??
+					(() => {
+						const rect = modalRef.current?.getBoundingClientRect();
+						const pos = panelPosRef.current;
+						const size = panelSizeRef.current;
+						return {
+							x: pos.x,
+							y: pos.y,
+							width: rect?.width ?? size.width,
+							height: rect?.height ?? size.height,
+						};
+					})();
+				window.localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(s));
+			} catch {
+				// ignore
+			}
+		},
+		[],
+	);
+
+	const persistPanelStateDebounced = useCallback(() => {
+		if (persistTimerRef.current !== null) window.clearTimeout(persistTimerRef.current);
+		persistTimerRef.current = window.setTimeout(() => {
+			persistTimerRef.current = null;
+			persistPanelState();
+		}, 250);
+	}, [persistPanelState]);
+
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		try {
+			const raw = window.localStorage.getItem(PANEL_STATE_KEY);
+			if (!raw) return;
+			const parsed = JSON.parse(raw) as unknown;
+			if (!parsed || typeof parsed !== "object") return;
+			const s = parsed as { x?: unknown; y?: unknown; width?: unknown; height?: unknown };
+			const x = Number(s.x);
+			const y = Number(s.y);
+			const width = Number(s.width);
+			const height = Number(s.height);
+			if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+			if (!Number.isFinite(width) || !Number.isFinite(height)) return;
+			if (width < 320 || height < 320) return;
+			setPanelSize({ width, height });
+			setPanelPos(() => clampToViewport(x, y, width, height));
+		} catch {
+			// ignore
+		}
+	}, [clampToViewport]);
+
+	const beginDrag = useCallback((e: React.PointerEvent) => {
+		if (e.button !== 0) return;
+		const target = e.target as HTMLElement | null;
+		// Don't start a drag when the user is trying to click a tab/button/link.
+		if (target?.closest?.("button, a, input, textarea, select, option")) return;
+		const el = modalRef.current;
+		if (!el) return;
+		try {
+			el.setPointerCapture(e.pointerId);
+		} catch {
+			// ignore
+		}
+		dragRef.current = {
+			active: true,
+			pointerId: e.pointerId,
+			startX: e.clientX,
+			startY: e.clientY,
+			originX: panelPosRef.current.x,
+			originY: panelPosRef.current.y,
+		};
+	}, []);
+
+	const onDragMove = useCallback(
+		(e: React.PointerEvent) => {
+			const d = dragRef.current;
+			if (!d?.active) return;
+			if (e.pointerId !== d.pointerId) return;
+			const dx = e.clientX - d.startX;
+			const dy = e.clientY - d.startY;
+			setPanelPos(() => {
+				const next = clampToViewport(d.originX + dx, d.originY + dy);
+				return next;
+			});
+			persistPanelStateDebounced();
+		},
+		[clampToViewport, persistPanelStateDebounced],
+	);
+
+	const endDrag = useCallback(() => {
+		const d = dragRef.current;
+		if (!d) return;
+		dragRef.current = null;
+		persistPanelState();
+	}, [persistPanelState]);
+
+	const closeModal = useCallback(() => {
+		persistPanelState();
+		setIsModalOpen(false);
+		setOpenTabs([]);
+		setActiveTab(null);
+	}, [persistPanelState]);
+
+	const closeTab = useCallback((idx: number) => {
+		setOpenTabs((prev) => {
+			const next = prev.filter((t) => t !== idx);
+			// If we closed the last tab, close the whole panel.
+			if (next.length === 0) {
+				setIsModalOpen(false);
+				setActiveTab(null);
+				return [];
+			}
+			// If we closed the active tab, move to a neighbor.
+			setActiveTab((current) => {
+				if (current !== idx) return current;
+				const oldIndex = prev.indexOf(idx);
+				const fallbackIndex = Math.max(0, oldIndex - 1);
+				return next[fallbackIndex] ?? next[0] ?? null;
+			});
+			return next;
+		});
+	}, []);
+
+	const getTooltipPosition = useCallback(() => {
+		if (typeof window === "undefined") return { left: 0, top: 0 };
+		const margin = 10;
+		const tooltipWidth = 210;
+		const tooltipHeight = 52;
+		let left = mouse.x - tooltipWidth - 12;
+		let top = mouse.y + 12;
+		left = Math.min(Math.max(margin, left), window.innerWidth - tooltipWidth - margin);
+		top = Math.min(Math.max(margin, top), window.innerHeight - tooltipHeight - margin);
+		return { left, top };
+	}, [mouse.x, mouse.y]);
+
+	const openModalForTech = useCallback((idx: number) => {
+		setIsModalOpen(true);
+		setActiveTab(idx);
+		setOpenTabs((prev) => (prev.includes(idx) ? prev : [...prev, idx]));
+	}, []);
 
 	return (
 		<div>
@@ -587,131 +502,148 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 				{flat.map((item, idx) => {
 					const usage = getUsageForItem(item);
 					const projects = usage?.projects ?? [];
-					const usageKey = getUsageKeyForItem(item) ?? normalizeTechName(item.name);
-					const projectHref = projects[0] ? `/posts/${projects[0].id}/` : undefined;
 					const hasProjects = projects.length > 0;
 					return (
 						<div
 							key={`${item.name}-${idx}`}
-							ref={(el) => {
-								itemRefs.current[idx] = el;
-							}}
 							className="lh-techlist-item group relative flex items-center justify-center p-1.5 md:p-1 bg-transparent"
 							onMouseEnter={(e) => {
-								// If a tooltip is already open, don't let neighboring icons steal hover while
-								// the cursor is in the current tooltip's safe corridor (common when tooltip is
-								// placed to the right/left and you move quickly into it).
-								if (hoverIdx !== null && hoverIdx !== idx) {
-									if (isTooltipHovered) return;
-									if (isPointerInSafeZone(e.clientX, e.clientY)) return;
-								}
-
-								clearCloseTimeout();
-								const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect();
-								setAnchorRect({
-									left: rect.left,
-									top: rect.top,
-									right: rect.right,
-									bottom: rect.bottom,
-									width: rect.width,
-									height: rect.height,
-								});
-								setPointerPos({ x: e.clientX, y: e.clientY });
+								setLastPointerType("mouse");
 								setHoverIdx(idx);
-								setHoveredTechKey(usageKey);
-								setIsTooltipHovered(false);
+								setMouse({ x: e.clientX, y: e.clientY });
 							}}
 							onMouseMove={(e) => {
 								if (hoverIdx !== idx) return;
-								setPointerPos({ x: e.clientX, y: e.clientY });
+								setMouse({ x: e.clientX, y: e.clientY });
 							}}
-							onMouseLeave={(e) => {
-								const next = e.relatedTarget as HTMLElement | null;
-								if (next?.closest?.(".lh-tech-tooltip")) return;
-								// Always schedule close on leave; safe corridor cancels it via global mousemove.
-								if (isTooltipHovered) return;
-								scheduleClose();
+							onMouseLeave={() => {
+								setHoverIdx(null);
 							}}
 							onPointerDown={(e) => {
-								// Ensure pointer type is captured for click handling below
 								const pt = (e.pointerType as "mouse" | "touch" | "pen") ?? "unknown";
 								setLastPointerType(pt);
-								// Prevent outside click handler from firing immediately
-								e.stopPropagation();
 							}}
 						>
-							{projectHref ? (
-								<a
-									href={projectHref}
-									onClick={(e) => {
-										// On touch, open the mobile tooltip instead of navigating
-										if (lastPointerType === "touch") {
-											e.preventDefault();
-											setSelectedIdx((prev) => (prev === idx ? null : idx));
-										}
-									}}
-									className={`inline-flex items-center justify-center transition-colors ${
-										hasProjects ? "text-accent" : "text-[var(--c-text)] group-hover:text-accent"
-									}`}
-								>
-									<IconifyIcon
-										icon={item.icon}
-										className="w-10 h-10 sm:w-9 sm:h-9 md:w-10 md:h-10"
-									/>
-									<span className="sr-only">{item.name}</span>
-								</a>
-							) : (
-								<button
-									type="button"
-									onClick={() => {
-										if (lastPointerType === "touch") {
-											setSelectedIdx((prev) => (prev === idx ? null : idx));
-										}
-									}}
-									className={`inline-flex items-center justify-center transition-colors ${
-										hasProjects ? "text-accent" : "text-[var(--c-text)] group-hover:text-accent"
-									}`}
-								>
-									<IconifyIcon
-										icon={item.icon}
-										className="w-10 h-10 sm:w-9 sm:h-9 md:w-10 md:h-10"
-									/>
-									<span className="sr-only">{item.name}</span>
-								</button>
-							)}
+							<button
+								type="button"
+								onClick={() => openModalForTech(idx)}
+								className={`inline-flex items-center justify-center transition-colors ${
+									hasProjects ? "text-accent" : "text-[var(--c-text)] group-hover:text-accent"
+								}`}
+								aria-label={`Click to learn more about ${item.name}`}
+							>
+								<IconifyIcon icon={item.icon} className="w-10 h-10 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+								<span className="sr-only">{item.name}</span>
+							</button>
+						</div>
+					);
+				})}
+			</div>
 
-							{/* Mobile: tap-to-open fixed tooltip at bottom */}
-							{/* Mobile: tap-to-open fixed tooltip at bottom */}
-							{lastPointerType === "touch" &&
-								selectedIdx === idx &&
-								typeof window !== "undefined" &&
-								typeof document !== "undefined" &&
-								createPortal(
-									<div className="lh-techlist-tooltip fixed inset-0 z-[9999] flex items-center justify-center px-4 pointer-events-auto">
-										{/* Dim backdrop (tap or keyboard to close) */}
-										<button
-											type="button"
-											aria-label="Close overlay"
-											onClick={() => setSelectedIdx(null)}
-											onKeyDown={(e) => {
-												if (e.key === "Enter" || e.key === " ") setSelectedIdx(null);
-											}}
-											className="absolute inset-0 bg-black/40"
-										/>
-										{/* Content card */}
-										<dialog
-											open
-											className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-sm rounded-lg border border-accent/20 bg-global-bg shadow-xl overflow-hidden p-0"
-										>
-											<div className="bg-accent/5 p-4 relative">
+			{/* Hover tooltip (like header tooltips) */}
+			{hoverIdx !== null &&
+				supportsHover &&
+				lastPointerType === "mouse" &&
+				!isModalOpen &&
+				typeof document !== "undefined" &&
+				createPortal(
+					<div
+						className="pointer-events-none fixed z-[9999] max-w-[85vw] rounded-xl bg-global-bg/70 px-4 py-3 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10"
+						style={getTooltipPosition()}
+					>
+						<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/60">
+							Click to learn more
+						</p>
+					</div>,
+					document.body,
+				)}
+
+			{/* Tabbed panel (comments-style: non-blocking, close with X) */}
+			{isModalOpen &&
+				activeTab !== null &&
+				typeof document !== "undefined" &&
+				createPortal(
+					<div className="fixed inset-0 z-50 pointer-events-none">
+						<dialog
+							open
+							ref={modalRef}
+							aria-label="Tech details"
+							className="pointer-events-auto absolute flex max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] min-w-[320px] min-h-[320px] flex-col overflow-hidden rounded-2xl bg-global-bg/95 backdrop-blur-sm ring-1 ring-global-text/10 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] p-0"
+							onPointerMove={onDragMove}
+							onPointerUp={() => {
+								// Covers resize-end in browsers where ResizeObserver doesn't fire reliably for CSS resize.
+								try {
+									window.requestAnimationFrame(() => {
+										const el = modalRef.current;
+										if (!el) return;
+										const rect = el.getBoundingClientRect();
+										const width = Math.max(320, rect.width);
+										const height = Math.max(320, rect.height);
+										setPanelSize({ width, height });
+										setPanelPos((pos) => clampToViewport(pos.x, pos.y, width, height));
+										persistPanelStateDebounced();
+									});
+								} catch {
+									// ignore
+								}
+								endDrag();
+							}}
+							style={{
+								left: panelPos.x,
+								top: panelPos.y,
+								width: panelSize.width,
+								height: panelSize.height,
+								resize: "both",
+							}}
+						>
+							{/* Tab strip + close (browser-ish) */}
+							<div
+								onPointerDown={beginDrag}
+								onPointerUp={endDrag}
+								className="flex items-center justify-between gap-3 border-b border-global-text/10 px-4 py-3 select-none cursor-move"
+								style={{ touchAction: "none" }}
+							>
+								<div className="flex min-w-0 flex-1 gap-1 overflow-x-auto overflow-y-visible px-1 py-1">
+									{openTabs.map((tabIdx) => {
+										const tabItem = flat[tabIdx];
+										if (!tabItem) return null;
+										const isActive = tabIdx === activeTab;
+										return (
+											<div
+												key={`${tabItem.name}-${tabIdx}`}
+												role="tab"
+												aria-selected={isActive}
+												tabIndex={0}
+												onPointerDown={(e) => e.stopPropagation()}
+												onClick={() => setActiveTab(tabIdx)}
+												onKeyDown={(e) => {
+													if (e.key === "Enter" || e.key === " ") {
+														e.preventDefault();
+														setActiveTab(tabIdx);
+													}
+												}}
+												className={`group inline-flex min-w-[120px] max-w-[220px] items-center gap-2 overflow-hidden rounded-xl ring-1 px-3 py-2 text-xs transition-colors ${
+													isActive
+														? "bg-global-bg/80 ring-2 ring-accent/40 text-global-text"
+														: "bg-global-bg/55 ring-global-text/20 text-global-text/70 hover:bg-global-bg/70 hover:ring-global-text/30 hover:text-accent"
+												}`}
+												title={tabItem.name}
+											>
+												<IconifyIcon icon={tabItem.icon} className="h-4 w-4 shrink-0" />
+												<span className="min-w-0 flex-1 truncate text-left">{tabItem.name}</span>
 												<button
 													type="button"
-													aria-label="Close"
-													onClick={() => setSelectedIdx(null)}
-													className="absolute right-2 top-2 rounded p-1 text-global-text/60 hover:text-global-text hover:bg-accent/10 transition-colors"
+													aria-label={`Close ${tabItem.name}`}
+													onPointerDown={(e) => e.stopPropagation()}
+													onClick={(e) => {
+														e.stopPropagation();
+														closeTab(tabIdx);
+													}}
+													className="ml-1 inline-flex rounded-md p-1 text-global-text/50 opacity-80 transition-colors hover:bg-accent/10 hover:text-accent group-hover:opacity-100"
+													title="Close tab"
 												>
 													<svg
-														className="h-4 w-4"
+														className="h-3.5 w-3.5"
 														fill="none"
 														stroke="currentColor"
 														viewBox="0 0 24 24"
@@ -724,170 +656,104 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 														/>
 													</svg>
 												</button>
-												<div className="flex items-center gap-2 mb-2 pr-6">
-													<IconifyIcon icon={item.icon} className="h-5 w-5" />
-													<p className="text-sm font-semibold text-accent-2">{item.name}</p>
-												</div>
-												{item.description && (
-													<p className="text-[13px] text-[var(--c-text-dimmed)] leading-relaxed">
-														{item.description}
-													</p>
-												)}
-												<div className="mt-3 rounded-lg border border-white/10 bg-white/5 p-3">
-													<p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-global-text/60">
-														Projects using this
-													</p>
-													{projects.length > 0 ? (
-														<div className="mt-2 max-h-40 overflow-y-auto space-y-2 pr-1">
-															{projects.map((project) => (
-																<a
-																	key={project.id}
-																	href={`/posts/${project.id}/`}
-																	className="block rounded-md border border-white/5 bg-global-bg/70 px-3 py-2 text-[12px] text-global-text/80 hover:border-accent/40"
-																	data-astro-prefetch
-																>
-																	<p className="text-[12px] font-semibold text-accent-2">
-																		{project.title}
-																	</p>
-																	{project.description && (
-																		<p className="mt-1 text-[11px] text-global-text/65 leading-relaxed">
-																			{project.description}
-																		</p>
-																	)}
-																</a>
-															))}
-														</div>
-													) : (
-														<p className="mt-2 text-[12px] text-global-text/60">
-															No projects tagged yet.
-														</p>
-													)}
-												</div>
-												{item.link && (
-													<div className="mt-3 text-[12px]">
-														<a
-															href={item.link}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="lawson-link inline-flex items-center gap-1"
-														>
-															Open resource ↗
-														</a>
-													</div>
-												)}
 											</div>
-										</dialog>
-									</div>,
-									document.body,
-								)}
-						</div>
-					);
-				})}
-			</div>
-
-			{/* Desktop hover tooltip (single portal) */}
-			{hoverIdx !== null &&
-				lastPointerType !== "touch" &&
-				hoveredTechKey &&
-				typeof window !== "undefined" &&
-				typeof document !== "undefined" &&
-				(() => {
-					const item = flat[hoverIdx];
-					if (!item) return null;
-					const usage = getUsageForItem(item);
-					const projects = usage?.projects ?? [];
-					const hasProjects = projects.length > 0;
-					const categoryLabel = item.__cat;
-					return createPortal(
-						<div
-							ref={tooltipNodeRef}
-							className="lh-tech-tooltip pointer-events-auto fixed z-[9999]"
-							style={{ left: tooltipPosition.left, top: tooltipPosition.top }}
-							data-placement={tooltipPosition.placement}
-							onMouseEnter={() => {
-								clearCloseTimeout();
-								setIsTooltipHovered(true);
-							}}
-							onMouseLeave={(e) => {
-								const next = e.relatedTarget as HTMLElement | null;
-								if (next?.closest?.(".lh-techlist-item")) return;
-								// Always schedule close on leave; safe corridor cancels it via global mousemove.
-								scheduleClose();
-							}}
-						>
-							<div
-								className={`max-w-[88vw] rounded-xl bg-global-bg/70 p-4 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10 ${
-									hasProjects ? "w-[340px]" : "w-[320px]"
-								}`}
-							>
-								<div className="flex items-center gap-2 mb-2">
-									<IconifyIcon icon={item.icon} className="h-4 w-4" />
-									<p className="text-xs font-semibold text-accent-2">{item.name}</p>
-									<span className="text-[10px] text-global-text/40">· {categoryLabel}</span>
+										);
+									})}
 								</div>
-								{item.description && (
-									<p className="text-[11px] text-global-text/70 leading-relaxed">
-										{item.description}
-									</p>
-								)}
-								<div className="mt-3 border-t border-white/10 pt-3">
-									<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/50">
-										Projects using this
-									</p>
-									{hasProjects ? (
-										<div className="mt-2 max-h-44 space-y-2 overflow-y-auto pr-1">
-											{projects.map((project) => (
-												<a
-													key={project.id}
-													href={`/posts/${project.id}/`}
-													className="group relative block overflow-hidden rounded-lg border border-white/5 bg-white/5 px-3 py-3 text-[11px] text-global-text/80 transition-colors hover:border-accent/40 hover:text-global-text"
-													data-astro-prefetch
-												>
-													{project.coverImage?.src && (
-														<span
-															className="pointer-events-none absolute inset-0 opacity-90 blur-3xl"
-															style={{
-																backgroundImage: `url(${project.coverImage.src})`,
-																backgroundSize: "cover",
-																backgroundPosition: "center",
-															}}
-														/>
-													)}
-													<span className="pointer-events-none absolute inset-0 bg-global-bg/5" />
-													<p className="relative text-[11px] font-semibold text-accent-2">
-														{project.title}
-													</p>
-													{project.description && (
-														<p className="relative mt-1 text-[10px] text-global-text/65 leading-relaxed">
-															{project.description}
-														</p>
-													)}
-												</a>
-											))}
-										</div>
-									) : (
-										<p className="mt-2 text-[11px] text-global-text/70 leading-relaxed">
-											I either haven't wrote about this project or I only use this in coursework.
-										</p>
-									)}
-								</div>
-								{item.link && (
-									<div className="mt-3 text-[12px]">
-										<a
-											href={item.link}
-											target="_blank"
-											rel="noopener noreferrer"
-											className="lawson-link inline-flex items-center gap-1"
-										>
-											Open resource ↗
-										</a>
-									</div>
-								)}
+								<button
+									type="button"
+									onClick={closeModal}
+									onPointerDown={(e) => e.stopPropagation()}
+									className="inline-flex cursor-pointer items-center justify-center rounded-lg p-1 text-global-text/70 hover:text-accent transition-colors"
+									aria-label="Close tech panel"
+									title="Close"
+								>
+									<IconifyIcon icon="mdi:close" className="h-4 w-4" />
+								</button>
 							</div>
-						</div>,
-						document.body,
-					);
-				})()}
+
+							{(() => {
+								const item = flat[activeTab];
+								if (!item) return null;
+								const usage = getUsageForItem(item);
+								const projects = usage?.projects ?? [];
+								const hasProjects = projects.length > 0;
+								const categoryLabel = item.__cat;
+								return (
+									<div className="min-h-0 flex-1 overflow-auto p-4">
+										<div className="flex items-center gap-2 mb-2">
+											<IconifyIcon icon={item.icon} className="h-5 w-5" />
+											<p className="text-sm font-semibold text-accent-2">{item.name}</p>
+											<span className="text-[10px] text-global-text/40">· {categoryLabel}</span>
+										</div>
+										{item.description && (
+											<p className="text-[12px] text-global-text/70 leading-relaxed">
+												{item.description}
+											</p>
+										)}
+
+										<div className="mt-4 border-t border-global-text/10 pt-4">
+											<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/60">
+												Projects using this
+											</p>
+											{hasProjects ? (
+												<div className="mt-2 max-h-64 overflow-y-auto divide-y divide-global-text/10 rounded-xl bg-global-bg/40 ring-1 ring-global-text/10">
+													{projects.map((project) => (
+														<a
+															key={project.id}
+															href={`/posts/${project.id}/`}
+															className="group relative block overflow-hidden px-3 py-3 text-[11px] text-global-text/80 transition-colors hover:bg-global-bg/45 hover:text-global-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+															data-astro-prefetch
+														>
+															{project.coverImage?.src && (
+																<span
+																	className="pointer-events-none absolute inset-0 opacity-80 blur-3xl"
+																	style={{
+																		backgroundImage: `url(${project.coverImage.src})`,
+																		backgroundSize: "cover",
+																		backgroundPosition: "center",
+																	}}
+																/>
+															)}
+															<span className="pointer-events-none absolute inset-0 bg-global-bg/10" />
+															<p className="relative text-[11px] font-semibold text-accent-2">
+																{project.title}
+															</p>
+															{project.description && (
+																<p className="relative mt-1 text-[10px] text-global-text/65 leading-relaxed">
+																	{project.description}
+																</p>
+															)}
+														</a>
+													))}
+												</div>
+											) : (
+												<p className="mt-2 text-[11px] text-global-text/70 leading-relaxed">
+													I either haven't wrote about this project or I only use this in
+													coursework.
+												</p>
+											)}
+										</div>
+
+										{item.link && (
+											<div className="mt-4 text-[12px]">
+												<a
+													href={item.link}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="lawson-link inline-flex items-center gap-1"
+												>
+													Open resource ↗
+												</a>
+											</div>
+										)}
+									</div>
+								);
+							})()}
+						</dialog>
+					</div>,
+					document.body,
+				)}
 		</div>
 	);
 }
