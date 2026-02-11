@@ -1,6 +1,6 @@
 ---
-import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import ResumeDownload from "@/components/ResumeDownload.tsx";
 import SocialList from "@/components/SocialList.astro";
 import TechList from "@/components/TechList.tsx";
@@ -16,8 +16,9 @@ const meta = {
 const templateRepoUrl = import.meta.env.PUBLIC_TEMPLATE_REPO_URL;
 
 const defaultResumePdfUrl = "/Lawson_Hart_Resume.pdf";
-const defaultResumePdfPath = fileURLToPath(new URL("../../public/Lawson_Hart_Resume.pdf", import.meta.url));
-const hasResumePdf = fs.existsSync(defaultResumePdfPath);
+
+const resumePdfFsPath = resolve(process.cwd(), "public", defaultResumePdfUrl.replace(/^\//, ""));
+const resumePdfExists = existsSync(resumePdfFsPath);
 
 const allPosts = await getAllPosts();
 const technologyUsage = getTechnologyUsage(allPosts);
@@ -73,10 +74,7 @@ export const prerender = true;
         </div>
 
         <p class="max-w-full text-base text-global-text/85 leading-relaxed mb-4">
-          Technologies and tools I use frequently for projects, coursework, and personal development.
-          <span class="block mt-2 text-sm text-global-text/70">
-            Blue icons have project write‑ups behind them; muted icons are tools I use but haven’t documented yet.
-          </span>
+          Here's a "tech list", this isn't just like a list of things "I know" but rather something with more detail. Click on any technology to learn more about how I use it!
         </p>
 
         <div class="space-y-8">
@@ -84,12 +82,10 @@ export const prerender = true;
         </div>
 
         <div class="mt-4">
-          {hasResumePdf ? (
+          {resumePdfExists ? (
             <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
           ) : (
-            <p class="text-sm text-global-text/70">
-              Resume PDF not included in this template.
-            </p>
+            <p class="text-sm text-global-text/70">Resume PDF is not available.</p>
           )}
         </div>
       </div>
