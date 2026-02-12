@@ -18,6 +18,8 @@ const SpotifyStatusIsland = (spotifyIslandModules["../SpotifyStatusIsland.astro"
 
 // Path helper for active link highlighting
 const pathname = Astro.url.pathname;
+
+const showDevToastControls = import.meta.env.DEV;
 ---
 
 <!-- Mobile Header (shown only on mobile) -->
@@ -100,6 +102,35 @@ const pathname = Astro.url.pathname;
                 <!-- All buttons (visible on desktop, some hidden on mobile) -->
                 <div class="flex items-center gap-2 sm:gap-3" id="header-icons">
                     <ThemeToggleOptional />
+                    {showDevToastControls && (
+                        <details class="relative" id="dev-toast-menu" data-search-hide>
+                            <summary
+                                class="list-none select-none inline-flex items-center justify-center rounded-md px-2 py-2 text-sm font-semibold tracking-wide transition-all duration-200 hover:bg-accent/5 hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,var(--color-accent)_55%,transparent)]"
+                                aria-label="Dev tools: show toast previews"
+                            >
+                                Toasts
+                            </summary>
+                            <div
+                                class="absolute right-0 mt-2 w-56 overflow-hidden rounded-xl border border-white/10 bg-global-bg/80 backdrop-blur-md shadow-[0_18px_40px_-24px_rgba(0,0,0,0.35)]"
+                            >
+                                <div class="px-3 py-2 text-xs font-semibold text-global-text/70">Dev toast previews</div>
+                                <button
+                                    type="button"
+                                    data-dev-toast="copy"
+                                    class="w-full px-3 py-2 text-left text-sm font-semibold text-global-text hover:bg-accent/5 hover:text-accent"
+                                >
+                                    Copy
+                                </button>
+                                <button
+                                    type="button"
+                                    data-dev-toast="holiday"
+                                    class="w-full px-3 py-2 text-left text-sm font-semibold text-global-text hover:bg-accent/5 hover:text-accent"
+                                >
+                                    Holiday theme
+                                </button>
+                            </div>
+                        </details>
+                    )}
                     {HolidayStatusIsland && <HolidayStatusIsland />}
                     {SpotifyStatusIsland && <SpotifyStatusIsland />}
                     <!-- Search button -->
@@ -343,6 +374,35 @@ const pathname = Astro.url.pathname;
     const ro = new ResizeObserver(updateHeaderClearance);
     if (mainHeader) ro.observe(mainHeader);
 </script>
+
+{showDevToastControls && (
+    <script>
+        import { showToast } from "@/utils/toast";
+
+        function setupDevToastMenu() {
+            const details = document.getElementById("dev-toast-menu") as HTMLDetailsElement | null;
+            if (!details) return;
+            if (details.dataset.bound === "true") return;
+            details.dataset.bound = "true";
+
+            const copyBtn = details.querySelector('[data-dev-toast="copy"]') as HTMLButtonElement | null;
+            const holidayBtn = details.querySelector('[data-dev-toast="holiday"]') as HTMLButtonElement | null;
+
+            copyBtn?.addEventListener("click", () => {
+                showToast("Copied!", "success", 2000);
+                details.open = false;
+            });
+
+            holidayBtn?.addEventListener("click", () => {
+                showToast("Holiday theme active — hover ✨ to manage.", "info", 6000);
+                details.open = false;
+            });
+        }
+
+        setupDevToastMenu();
+        document.addEventListener("astro:page-load", setupDevToastMenu);
+    </script>
+)}
 
 <style>
     /* Respect reduce motion */

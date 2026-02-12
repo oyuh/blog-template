@@ -250,48 +250,15 @@ const CommentsIsland =
 		display: none !important;
 	}
 
-	/* Toast notification for copy feedback */
-	.copy-toast {
-		position: fixed;
-		bottom: 2rem;
-		left: 50%;
-		transform: translateX(-50%) translateY(100px);
-		opacity: 0;
-		transition: opacity 0.2s ease, transform 0.2s ease;
-		pointer-events: none;
-		z-index: 9999;
-	}
-
-	.copy-toast.show {
-		opacity: 1;
-		transform: translateX(-50%) translateY(0);
-	}
 </style>
 
 <script>
+	import { showToast } from "@/utils/toast";
+
 	const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
 	const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
-	const mobileActions = document.getElementById('mobile-toc-actions') as HTMLDivElement | null;
-	const footerEl = document.querySelector('footer');
-
-	function getOrCreateCopyToast() {
-		let toast = document.querySelector('.copy-toast') as HTMLDivElement | null;
-		if (!toast) {
-			toast = document.createElement('div');
-			toast.className = 'copy-toast lawson-toast';
-			document.body.appendChild(toast);
-		}
-		return toast;
-	}
-
-	function showCopyToast(message: string) {
-		const toast = getOrCreateCopyToast();
-		toast.textContent = message;
-		toast.classList.add('show');
-		setTimeout(() => {
-			toast.classList.remove('show');
-		}, 2000);
-	}
+	const mobileActions = document.getElementById("mobile-toc-actions") as HTMLDivElement | null;
+	const footerEl = document.querySelector("footer");
 
 	// Dynamic safe area handling so buttons do not overlap footer
 	const BASE_OFFSET = 24; // 1.5rem (bottom-6)
@@ -299,12 +266,12 @@ const CommentsIsland =
 	let footerVisible = false;
 
 	function setButtonOffset(offsetPx: number) {
-		scrollBtn.style.bottom = offsetPx + 'px';
-		if (mobileActions) mobileActions.style.bottom = offsetPx + 'px';
+		scrollBtn.style.bottom = `${offsetPx}px`;
+		if (mobileActions) mobileActions.style.bottom = `${offsetPx}px`;
 	}
 
 	function handleFooterIntersect(entries: IntersectionObserverEntry[]) {
-		entries.forEach(entry => {
+		entries.forEach((entry) => {
 			footerVisible = entry.isIntersecting;
 			setButtonOffset(footerVisible ? LIFTED_OFFSET : BASE_OFFSET);
 		});
@@ -314,7 +281,7 @@ const CommentsIsland =
 		const footerObserver = new IntersectionObserver(handleFooterIntersect, {
 			root: null,
 			threshold: 0,
-			rootMargin: '0px 0px -40% 0px' // trigger a bit earlier
+			rootMargin: "0px 0px -40% 0px", // trigger a bit earlier
 		});
 		footerObserver.observe(footerEl);
 	}
@@ -335,9 +302,11 @@ const CommentsIsland =
 
 	// Heading click to copy link functionality
 	function setupHeadingLinks() {
-		const headings = document.querySelectorAll<HTMLElement>('.blog-prose h1[id], .blog-prose h2[id], .blog-prose h3[id], .blog-prose h4[id], .blog-prose h5[id], .blog-prose h6[id]');
+		const headings = document.querySelectorAll<HTMLElement>(
+			".blog-prose h1[id], .blog-prose h2[id], .blog-prose h3[id], .blog-prose h4[id], .blog-prose h5[id], .blog-prose h6[id]",
+		);
 
-		headings.forEach(heading => {
+			headings.forEach((heading) => {
 			heading.addEventListener('click', async (e) => {
 				e.preventDefault();
 				const id = heading.getAttribute('id');
@@ -346,12 +315,12 @@ const CommentsIsland =
 
 					try {
 						await navigator.clipboard.writeText(url);
-						showCopyToast('Link copied to clipboard!');
+						showToast("Link copied to clipboard!", "success", 2000);
 
 						// Update URL without scrolling
 						history.pushState(null, '', `#${id}`);
 					} catch (err) {
-						console.error('Failed to copy link:', err);
+						console.error("Failed to copy link:", err);
 					}
 				}
 			});
@@ -359,14 +328,14 @@ const CommentsIsland =
 			// Add aria-label for accessibility
 			const id = heading.getAttribute('id');
 			if (id) {
-				heading.setAttribute('aria-label', `Click to copy link to ${heading.textContent}`);
-				heading.setAttribute('role', 'button');
-				heading.setAttribute('tabindex', '0');
+				heading.setAttribute("aria-label", `Click to copy link to ${heading.textContent}`);
+				heading.setAttribute("role", "button");
+				heading.setAttribute("tabindex", "0");
 
 				// Keyboard support
-				heading.addEventListener('keydown', (e) => {
+				heading.addEventListener("keydown", (e) => {
 					const keyEvent = e as KeyboardEvent;
-					if (keyEvent.key === 'Enter' || keyEvent.key === ' ') {
+					if (keyEvent.key === "Enter" || keyEvent.key === " ") {
 						e.preventDefault();
 						heading.click();
 					}
@@ -377,13 +346,13 @@ const CommentsIsland =
 
 	function setupExpressiveCodeToasts() {
 		const buttons = document.querySelectorAll<HTMLButtonElement>(
-			'.blog-prose .expressive-code .copy button',
+			".blog-prose .expressive-code .copy button",
 		);
 
 		buttons.forEach((btn) => {
-			btn.addEventListener('click', () => {
+			btn.addEventListener("click", () => {
 				const copied = btn.getAttribute('data-copied');
-				showCopyToast(copied && copied.trim().length > 0 ? copied : 'Copied!');
+				showToast(copied && copied.trim().length > 0 ? copied : "Copied!", "success", 2000);
 			});
 		});
 	}
@@ -394,7 +363,7 @@ const CommentsIsland =
 
 	// Re-run if content dynamically changes (for SPAs)
 	if (document.addEventListener) {
-		document.addEventListener('astro:page-load', () => {
+		document.addEventListener("astro:page-load", () => {
 			setupHeadingLinks();
 			setupExpressiveCodeToasts();
 		});

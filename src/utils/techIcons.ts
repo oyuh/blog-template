@@ -31,7 +31,6 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	javascript: "simple-icons:javascript",
 	js: "simple-icons:javascript",
 	python: "simple-icons:python",
-	// Avoid `logos:java` (multi-colored). Prefer a monochrome icon that follows currentColor.
 	java: "mdi:language-java",
 	kotlin: "simple-icons:kotlin",
 	"c++": "simple-icons:cplusplus",

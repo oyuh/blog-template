@@ -41,22 +41,26 @@
 
 /* Shared toast styling (used by blog header-copy toast + holiday notifications) */
 .lawson-toast {
-	background: color-mix(in srgb, var(--color-global-bg) 88%, transparent);
+	/* Slightly tinted surface so it stands out on both light + dark */
+	background: color-mix(in srgb, var(--color-global-bg) 90%, var(--color-global-text) 10%);
 	color: var(--color-global-text);
 	border-radius: 0.75rem;
 	padding: 0.75rem 1.25rem;
 	font-size: 0.875rem;
 	font-weight: 600;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
-	box-shadow: 0 14px 30px -22px color-mix(in srgb, var(--color-global-text) 45%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 20%, transparent);
+	box-shadow:
+		0 18px 40px -24px color-mix(in srgb, var(--color-global-text) 55%, transparent),
+		0 0 0 1px color-mix(in srgb, var(--color-global-bg) 65%, transparent);
 	backdrop-filter: blur(14px);
 	-webkit-backdrop-filter: blur(14px);
+	max-width: min(34rem, calc(100vw - 2rem));
 }
 
 /* Toast host animation/positioning (matches BlogPost copy toast) */
 .copy-toast {
 	position: fixed;
-	bottom: 2rem;
+	bottom: calc(2rem + env(safe-area-inset-bottom));
 	left: 50%;
 	transform: translateX(-50%) translateY(100px);
 	opacity: 0;
@@ -68,6 +72,13 @@
 .copy-toast.show {
 	opacity: 1;
 	transform: translateX(-50%) translateY(0);
+	pointer-events: auto;
+}
+
+.lawson-toast__content {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
 }
 
 .lawson-toast :is(a) {
