@@ -132,7 +132,7 @@ const mobileMenuLinks = [{ path: "/", title: "Home" }, ...filteredMenuLinks];
 
 <script>
     // Position button higher on blog posts to avoid TOC button and sync menu offset
-    const isBlogPost = document.querySelector('article[data-pagefind-body]') !== null;
+    const isBlogPost = document.querySelector('article[data-blog-post="true"]') !== null;
     const mobileNavButton = document.querySelector('.mobile-nav-button') as HTMLElement | null;
     const mobileMenu = document.getElementById('mobile-navigation-menu') as HTMLElement | null;
     const mobileToggle = document.getElementById('mobile-nav-toggle') as HTMLButtonElement | null;

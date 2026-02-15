@@ -331,6 +331,28 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 	}, []);
 
 	useEffect(() => {
+		if (typeof window === "undefined") return;
+		const clearHover = () => setHoverIdx(null);
+		const onVisibilityChange = () => {
+			if (document.visibilityState !== "visible") {
+				setHoverIdx(null);
+			}
+		};
+
+		window.addEventListener("scroll", clearHover, { passive: true, capture: true });
+		window.addEventListener("resize", clearHover, { passive: true });
+		window.addEventListener("blur", clearHover);
+		document.addEventListener("visibilitychange", onVisibilityChange);
+
+		return () => {
+			window.removeEventListener("scroll", clearHover, true);
+			window.removeEventListener("resize", clearHover);
+			window.removeEventListener("blur", clearHover);
+			document.removeEventListener("visibilitychange", onVisibilityChange);
+		};
+	}, []);
+
+	useEffect(() => {
 		panelPosRef.current = panelPos;
 	}, [panelPos]);
 
@@ -506,29 +528,29 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 					return (
 						<div
 							key={`${item.name}-${idx}`}
-							className="lh-techlist-item group relative flex items-center justify-center p-1.5 md:p-1 bg-transparent"
-							onMouseEnter={(e) => {
-								setLastPointerType("mouse");
-								setHoverIdx(idx);
-								setMouse({ x: e.clientX, y: e.clientY });
-							}}
-							onMouseMove={(e) => {
-								if (hoverIdx !== idx) return;
-								setMouse({ x: e.clientX, y: e.clientY });
-							}}
-							onMouseLeave={() => {
-								setHoverIdx(null);
-							}}
-							onPointerDown={(e) => {
-								const pt = (e.pointerType as "mouse" | "touch" | "pen") ?? "unknown";
-								setLastPointerType(pt);
-							}}
+							className="lh-techlist-item relative flex items-center justify-center p-1.5 md:p-1 bg-transparent"
 						>
 							<button
 								type="button"
 								onClick={() => openModalForTech(idx)}
-								className={`inline-flex items-center justify-center transition-colors ${
-									hasProjects ? "text-accent" : "text-[var(--c-text)] group-hover:text-accent"
+								onMouseEnter={(e) => {
+									setLastPointerType("mouse");
+									setHoverIdx(idx);
+									setMouse({ x: e.clientX, y: e.clientY });
+								}}
+								onMouseMove={(e) => {
+									if (hoverIdx !== idx) return;
+									setMouse({ x: e.clientX, y: e.clientY });
+								}}
+								onMouseLeave={() => {
+									setHoverIdx(null);
+								}}
+								onPointerDown={(e) => {
+									const pt = (e.pointerType as "mouse" | "touch" | "pen") ?? "unknown";
+									setLastPointerType(pt);
+								}}
+								className={`inline-flex items-center justify-center rounded-lg p-1.5 transition-colors duration-200 ease-out hover:bg-accent/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${
+									hasProjects ? "text-accent" : "text-[var(--c-text)] hover:text-accent"
 								}`}
 								aria-label={`Click to learn more about ${item.name}`}
 							>

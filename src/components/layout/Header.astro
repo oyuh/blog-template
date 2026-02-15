@@ -174,7 +174,7 @@ const showDevToastControls = import.meta.env.DEV;
     const desktopMedia = window.matchMedia('(min-width: 640px)');
     const isDesktopView = () => desktopMedia.matches;
 
-    const isBlogPost = document.querySelector('article[data-pagefind-body]') !== null;
+    const isBlogPost = document.querySelector('article[data-blog-post="true"]') !== null;
     //console.log('🔍 Is blog post page?', isBlogPost);
     //console.log('📄 Found article element:', document.querySelector('article[data-pagefind-body]'));
     //console.log('🎯 Header element:', header);
