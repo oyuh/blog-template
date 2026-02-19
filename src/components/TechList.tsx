@@ -503,8 +503,8 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 	const getTooltipPosition = useCallback(() => {
 		if (typeof window === "undefined") return { left: 0, top: 0 };
 		const margin = 10;
-		const tooltipWidth = 210;
-		const tooltipHeight = 52;
+		const tooltipWidth = 288; // w-72
+		const tooltipHeight = 90; // approx (3 lines)
 		let left = mouse.x - tooltipWidth - 12;
 		let top = mouse.y + 12;
 		left = Math.min(Math.max(margin, left), window.innerWidth - tooltipWidth - margin);
@@ -517,6 +517,8 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 		setActiveTab(idx);
 		setOpenTabs((prev) => (prev.includes(idx) ? prev : [...prev, idx]));
 	}, []);
+
+	const hoveredItem = hoverIdx !== null ? flat[hoverIdx] : null;
 
 	return (
 		<div>
@@ -563,19 +565,23 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 			</div>
 
 			{/* Hover tooltip (like header tooltips) */}
-			{hoverIdx !== null &&
+			{hoveredItem &&
 				supportsHover &&
 				lastPointerType === "mouse" &&
 				!isModalOpen &&
 				typeof document !== "undefined" &&
 				createPortal(
 					<div
-						className="pointer-events-none fixed z-[9999] max-w-[85vw] rounded-xl bg-global-bg/70 px-4 py-3 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10"
+						className="pointer-events-none fixed z-[9999] w-72 max-w-[85vw] rounded-xl bg-global-bg/70 p-4 text-xs text-global-text shadow-[0_10px_30px_-15px_rgba(0,0,0,0.55)] backdrop-blur-lg ring-1 ring-white/10"
 						style={getTooltipPosition()}
 					>
-						<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/60">
-							Click to learn more
-						</p>
+						<div className="space-y-1">
+							<p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-global-text/60">
+								{hoveredItem.__cat}
+							</p>
+							<p className="text-sm font-semibold text-accent-2">{hoveredItem.name}</p>
+							<p className="text-[10px] text-global-text/60">Click to learn more</p>
+						</div>
 					</div>,
 					document.body,
 				)}

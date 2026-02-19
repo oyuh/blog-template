@@ -1,9 +1,7 @@
 import typography from "@tailwindcss/typography";
-import type { Config } from "tailwindcss";
 
-// ❌ Do not call `heroui()` directly unless using its theme
-// ✅ Only include HeroUI content path for component usage
-const config: Config = {
+/** @type {import('tailwindcss').Config} */
+const config = {
 	darkMode: ["class", "dark"],
 	content: [
 		"./src/**/*.{js,ts,jsx,tsx,astro}",
@@ -113,10 +111,7 @@ const config: Config = {
 			}),
 		},
 	},
-	plugins: [
-		typography,
-		// ❌ remove heroui() plugin — just use the components directly
-	],
+	plugins: [typography],
 };
 
 export default config;
