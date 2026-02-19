@@ -7,6 +7,8 @@
 		"postinstall": "node scripts/patch-astrojs-mdx-server.cjs",
 		"template:dev": "node scripts/template-sandbox.cjs dev",
 		"template:build": "node scripts/template-sandbox.cjs build",
+		"ci:local:linux": "pnpm -s check && pnpm build",
+		"ci:local:win": "pnpm -s check ; pnpm build",
 		"build": "astro build --remote",
 		"postbuild": "node scripts/pagefind.mjs",
 		"preview": "node scripts/preview.mjs",
@@ -93,11 +95,7 @@
 		"typescript": "^5.9.3"
 	},
 	"pnpm": {
-		"onlyBuiltDependencies": [
-			"@biomejs/biome",
-			"esbuild",
-			"sharp"
-		],
+		"onlyBuiltDependencies": ["@biomejs/biome", "esbuild", "sharp"],
 		"overrides": {
 			"esbuild": "^0.25.10",
 			"sharp": "^0.33.5"

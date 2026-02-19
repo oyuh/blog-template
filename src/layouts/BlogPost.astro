@@ -166,10 +166,27 @@ const CommentsIsland =
 
 	/* Blockquotes: soft surface + subtle border */
 	.blog-prose blockquote {
-		border: 1px solid color-mix(in srgb, var(--color-quote) 20%, transparent);
-		padding: 0.75rem 1rem;
+		margin: 1.25rem 0;
+		padding: 0.85rem 1.1rem;
 		border-radius: 0.75rem;
-		background-color: color-mix(in srgb, var(--color-global-text) 3%, transparent);
+		/* Match the site's “soft card” surfaces */
+		background-color: color-mix(in srgb, var(--color-global-bg) 92%, var(--color-global-text) 8%);
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+		border-left: 4px solid color-mix(in srgb, var(--color-quote) 75%, transparent);
+	}
+
+	.blog-prose blockquote > :first-child {
+		margin-top: 0;
+	}
+
+	.blog-prose blockquote > :last-child {
+		margin-bottom: 0;
+	}
+
+	.blog-prose blockquote :is(p) {
+		font-style: italic;
+		/* Keep it readable and theme-consistent (mostly body text, slight quote tint) */
+		color: color-mix(in srgb, var(--color-global-text) 88%, var(--color-quote) 12%);
 	}
 
 	/* Inline code: remove “clickable” feel; match site surfaces */
