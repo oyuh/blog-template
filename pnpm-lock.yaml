@@ -115,8 +115,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
       postprocessing:
-        specifier: ^6.38.2
-        version: 6.38.2(three@0.180.0)
+        specifier: ^6.38.3
+        version: 6.38.3(three@0.180.0)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -5177,10 +5177,10 @@ packages:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postprocessing@6.38.2:
-    resolution: {integrity: sha512-7DwuT7Tkst41ZjSj287g7C9c5/D3Xx5rMgBosg0dadbUPoZD2HNzkadKPol1d2PJAoI9f+Jeh1/v9YfLzpFGVw==}
+  postprocessing@6.38.3:
+    resolution: {integrity: sha512-5qCFp8j62nWL6sSVv/RKuHscQUIV+VMMgWeHLYZQEBpAk7G+r3jA3bSKON7gZjiuxdZ/F4PXj2Jc1oPh/7Eg+g==}
     peerDependencies:
-      three: '>= 0.157.0 < 0.183.0'
+      three: '>= 0.157.0 < 0.184.0'
 
   precinct@12.2.0:
     resolution: {integrity: sha512-NFBMuwIfaJ4SocE9YXPU/n4AcNSoFMVFjP72nvl3cx69j/ke61/hPOWFREVxLkFhhEGnA8ZuVfTqJBa+PK3b5w==}
@@ -5746,6 +5746,7 @@ packages:
   tar@7.5.7:
     resolution: {integrity: sha512-fov56fJiRuThVFXD6o6/Q354S7pnWMJIVlDBYijsTNx6jKSE4pvrDTs6lUnmGvNyfJwFQQwWy3owKz1ucIhveQ==}
     engines: {node: '>=18'}
+    deprecated: Old versions of tar are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   text-decoder@1.2.3:
     resolution: {integrity: sha512-3/o9z3X0X0fTupwsYvR03pJ/DjWuqqrfwBgTQzdWDiQSm9KitAyz/9WqsT2JQW7KV2m+bC2ol/zqpW37NHxLaA==}
@@ -9229,8 +9230,8 @@ snapshots:
     dependencies:
       '@react-three/fiber': 9.5.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(three@0.180.0)
       maath: 0.6.0(@types/three@0.180.0)(three@0.180.0)
-      n8ao: 1.10.1(postprocessing@6.38.2(three@0.180.0))(three@0.180.0)
-      postprocessing: 6.38.2(three@0.180.0)
+      n8ao: 1.10.1(postprocessing@6.38.3(three@0.180.0))(three@0.180.0)
+      postprocessing: 6.38.3(three@0.180.0)
       react: 18.3.1
       three: 0.180.0
     transitivePeerDependencies:
@@ -12303,9 +12304,9 @@ snapshots:
 
   muggle-string@0.4.1: {}
 
-  n8ao@1.10.1(postprocessing@6.38.2(three@0.180.0))(three@0.180.0):
+  n8ao@1.10.1(postprocessing@6.38.3(three@0.180.0))(three@0.180.0):
     dependencies:
-      postprocessing: 6.38.2(three@0.180.0)
+      postprocessing: 6.38.3(three@0.180.0)
       three: 0.180.0
 
   nanoid@3.3.11: {}
@@ -12725,7 +12726,7 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postprocessing@6.38.2(three@0.180.0):
+  postprocessing@6.38.3(three@0.180.0):
     dependencies:
       three: 0.180.0
 
