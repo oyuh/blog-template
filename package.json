@@ -28,7 +28,7 @@
 		"@astrojs/vercel": "^8.2.11",
 		"@heroui/card": "^2.2.27",
 		"@heroui/progress": "^2.2.24",
-		"@heroui/react": "^2.8.8",
+		"@heroui/react": "^2.8.9",
 		"@iconify/react": "^6.0.2",
 		"@libsql/client": "^0.15.15",
 		"@react-three/fiber": "^9.5.0",
