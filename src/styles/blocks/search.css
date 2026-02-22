@@ -19,6 +19,18 @@ body[data-search-modal-open] {
 	overflow-x: hidden !important;
 }
 
+/* On larger screens, force viewport-fixed positioning so the dialog is never
+   clipped when the page is scrolled. Overrides the Tailwind sm:mt-16 margin
+   approach, which is scroll-position-dependent in some browsers. */
+@media (min-width: 640px) {
+	#search dialog[aria-label="search"][open] {
+		position: fixed !important;
+		top: 4rem !important;
+		margin-top: 0 !important;
+		margin-bottom: 0 !important;
+	}
+}
+
 /* Tags button: show selected-count and an active (accent/blue) background when tags are selected */
 #search [data-tags-button][data-has-selection="true"] {
 	background-color: oklch(from var(--color-accent) l c h / 0.12) !important;
