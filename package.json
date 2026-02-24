@@ -30,7 +30,7 @@
 		"@heroui/progress": "^2.2.24",
 		"@heroui/react": "^2.8.9",
 		"@iconify/react": "^6.0.2",
-		"@libsql/client": "^0.15.15",
+		"@libsql/client": "^0.17.0",
 		"@react-three/fiber": "^9.5.0",
 		"@react-three/postprocessing": "^3.0.4",
 		"@tailwindcss/vite": "4.1.13",
