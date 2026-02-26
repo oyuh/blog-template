@@ -75,7 +75,7 @@ export default defineConfig({
 				},
 			],
 			sitemap: true,
-			host: "https://lawsonhart.me",
+			host: "lawsonhart.me",
 		}),
 		// PWA manifest generation. Not strictly required for the site to run,
 		// but enabling it avoids browsers repeatedly requesting a missing manifest.

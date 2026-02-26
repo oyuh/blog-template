@@ -1,17 +1,14 @@
 ---
+import ClientErrorPage from "@/components/ClientErrorPage.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
-	description: "Oops! It looks like this page is lost in space!",
-	title: "Oops! You found a missing page!",
+	description: "Client error page",
+	title: "Client Error (404)",
 };
 
 ---
 
 <PageLayout meta={meta}>
-	<h1 class="title mb-6">404 | Oops something went wrong</h1>
-	<p class="mb-8">Please use the navigation to find your way back. <a class="mb-8 lawson-link" href="https://lawsonhart.me">Go Home?</a></p>
-	<div class="gif-container">
-		<img src="https://media.giphy.com/media/12KPpBIdG8kqIg/giphy.gif?cid=ecf05e470b0m36bfhv6h0qie83lnfiagez1g1ba1nvu84m25&ep=v1_gifs_search&rid=giphy.gif&ct=g" alt="Funny gif" />
-	</div>
+	<ClientErrorPage attemptedPath={Astro.url.pathname} statusCode={404} />
 </PageLayout>
