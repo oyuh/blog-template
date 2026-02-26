@@ -1,42 +1,11 @@
 ---
-import { getAllPosts } from "@/data/post";
-import { menuLinks } from "@/site.config";
-
 interface Props {
 	statusCode?: number;
 	attemptedPath: string;
 }
 
 const { statusCode = 404, attemptedPath } = Astro.props;
-
-const normalizedAttemptedPath = normalizeRoute(attemptedPath);
-const staticRoutes = [
-	"/",
-	...menuLinks.map((link) => link.path),
-	"/notes/",
-	"/tags/",
-	"/changelog/",
-	"/info-stats/",
-	"/themes/",
-	"/resume/",
-	"/policy/",
-	"/policy/privacy/",
-	"/policy/tos/",
-];
-
-const posts = await getAllPosts();
-const postRoutes = posts.slice(0, 24).map((post) => toCanonicalRoute(`/posts/${post.id}/`));
-const allCandidateRoutes = [...new Set([...staticRoutes.map(toCanonicalRoute), ...postRoutes])];
-
-const suggestedRoutes = allCandidateRoutes
-	.map((route) => ({
-		route,
-		score: routeScore(normalizedAttemptedPath, normalizeRoute(route)),
-	}))
-	.filter(({ route, score }) => route !== toCanonicalRoute(attemptedPath) && score <= scoreThreshold(normalizedAttemptedPath))
-	.sort((left, right) => left.score - right.score)
-	.slice(0, 2)
-	.map(({ route }) => route);
+const attemptedCanonicalPath = toCanonicalRoute(attemptedPath);
 
 function toCanonicalRoute(pathname: string): string {
 	if (!pathname || pathname === "/") {
@@ -45,81 +14,16 @@ function toCanonicalRoute(pathname: string): string {
 	const withLeadingSlash = pathname.startsWith("/") ? pathname : `/${pathname}`;
 	return withLeadingSlash.endsWith("/") ? withLeadingSlash : `${withLeadingSlash}/`;
 }
-
-function normalizeRoute(pathname: string): string {
-	return toCanonicalRoute(pathname)
-		.toLowerCase()
-		.replace(/\/+$/g, "")
-		.replace(/^\//, "");
-}
-
-function scoreThreshold(normalizedPathname: string): number {
-	if (!normalizedPathname) {
-		return 3;
-	}
-	return Math.max(4, Math.floor(normalizedPathname.length * 0.55));
-}
-
-function routeScore(normalizedSource: string, normalizedCandidate: string): number {
-	const levenshteinDistance = computeLevenshteinDistance(normalizedSource, normalizedCandidate);
-	const sourceSegments = normalizedSource.split("/").filter(Boolean);
-	const candidateSegments = normalizedCandidate.split("/").filter(Boolean);
-	const sharedSegments = sourceSegments.filter((segment) => candidateSegments.includes(segment)).length;
-	const hasSharedPrefix =
-		normalizedCandidate.startsWith(normalizedSource) || normalizedSource.startsWith(normalizedCandidate);
-
-	let score = levenshteinDistance - sharedSegments;
-	if (hasSharedPrefix) {
-		score -= 2;
-	}
-	return score;
-}
-
-function computeLevenshteinDistance(sourceValue: string, targetValue: string): number {
-	if (sourceValue === targetValue) {
-		return 0;
-	}
-	if (!sourceValue.length) {
-		return targetValue.length;
-	}
-	if (!targetValue.length) {
-		return sourceValue.length;
-	}
-
-	const rows = sourceValue.length + 1;
-	const columns = targetValue.length + 1;
-	const matrix = Array.from({ length: rows }, () => Array<number>(columns).fill(0));
-
-	for (let rowIndex = 0; rowIndex < rows; rowIndex += 1) {
-		matrix[rowIndex]![0] = rowIndex;
-	}
-	for (let columnIndex = 0; columnIndex < columns; columnIndex += 1) {
-		matrix[0]![columnIndex] = columnIndex;
-	}
-
-	for (let rowIndex = 1; rowIndex < rows; rowIndex += 1) {
-		for (let columnIndex = 1; columnIndex < columns; columnIndex += 1) {
-			const substitutionCost = sourceValue[rowIndex - 1] === targetValue[columnIndex - 1] ? 0 : 1;
-			matrix[rowIndex]![columnIndex] = Math.min(
-				matrix[rowIndex - 1]![columnIndex]! + 1,
-				matrix[rowIndex]![columnIndex - 1]! + 1,
-				matrix[rowIndex - 1]![columnIndex - 1]! + substitutionCost,
-			);
-		}
-	}
-
-	return matrix[rows - 1]![columns - 1]!;
-}
 ---
 
-<section class="mx-auto w-full max-w-3xl py-10 sm:py-14">
+<section class="mx-auto w-full max-w-3xl py-10 sm:py-14" data-attempted-path={attemptedCanonicalPath}>
 	<div class="rounded-xl border border-accent/20 bg-global-bg p-6 shadow-sm sm:p-8">
 		<p class="text-xs font-semibold uppercase tracking-wide text-accent">Client Error · {statusCode}</p>
 		<h1 class="title mt-2 mb-4">This page could not be loaded.</h1>
 		<p class="mb-3 text-base text-global-text/90">
 			The requested URL
 			<code class="mx-1 rounded-md border border-accent/20 bg-global-bg px-1.5 py-0.5 text-sm">
-				{toCanonicalRoute(attemptedPath)}
+				{attemptedCanonicalPath}
 			</code>
 			is unavailable.
 		</p>
@@ -143,28 +47,35 @@ function computeLevenshteinDistance(sourceValue: string, targetValue: string): n
 			</a>
 		</div>
 
-		{
-			suggestedRoutes.length > 0 && (
-				<div class="mt-7 border-t border-accent/15 pt-5">
-					<p class="mb-3 text-sm font-medium text-global-text">Did you mean:</p>
-					<div class="flex flex-wrap gap-3">
-						{suggestedRoutes.map((route) => (
-							<a
-								class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-								href={route}
-							>
-								Did you mean {route}
-							</a>
-						))}
-					</div>
-				</div>
-			)
-		}
+		<div class="mt-7 hidden border-t border-accent/15 pt-5" data-suggestion-root>
+			<div class="mb-3 flex items-center justify-between gap-3">
+				<p class="text-sm font-medium text-global-text">Did you mean:</p>
+				<span class="hidden text-xs text-global-text/60" data-suggestion-tier></span>
+			</div>
+			<p class="hidden text-xs text-global-text/70" data-suggestion-loading>Checking close matches…</p>
+			<div class="flex flex-wrap gap-3" data-suggestion-list></div>
+		</div>
 	</div>
 </section>
 
 <script>
+	type RouteSuggestion = {
+		route: string;
+		similarity: number;
+		tier: "primary" | "fallback";
+	};
+
 	const backButton = document.getElementById("go-back-button") as HTMLButtonElement | null;
+	const suggestionRoot = document.querySelector("[data-suggestion-root]") as HTMLDivElement | null;
+	const suggestionList = document.querySelector("[data-suggestion-list]") as HTMLDivElement | null;
+	const suggestionTier = document.querySelector("[data-suggestion-tier]") as HTMLSpanElement | null;
+	const suggestionLoading = document.querySelector("[data-suggestion-loading]") as HTMLParagraphElement | null;
+	const attemptedPath =
+		document
+			.querySelector("[data-attempted-path]")
+			?.getAttribute("data-attempted-path")
+			?.trim() || "/";
+
 	if (backButton) {
 		backButton.addEventListener("click", () => {
 			if (window.history.length > 1) {
@@ -173,5 +84,96 @@ function computeLevenshteinDistance(sourceValue: string, targetValue: string): n
 			}
 			window.location.assign("/");
 		});
+	}
+
+	if (suggestionRoot && suggestionList && suggestionTier && suggestionLoading) {
+		window.setTimeout(() => {
+			void loadSuggestions();
+		}, 0);
+	}
+
+	async function loadSuggestions(): Promise<void> {
+		if (!suggestionRoot || !suggestionList || !suggestionTier || !suggestionLoading) {
+			return;
+		}
+
+		suggestionRoot.classList.remove("hidden");
+		const loadingTimer = window.setTimeout(() => {
+			suggestionLoading.classList.remove("hidden");
+		}, 250);
+
+		const timeoutController = new AbortController();
+		const abortTimer = window.setTimeout(() => timeoutController.abort(), 2500);
+
+		try {
+			const response = await fetch(`/api/route-suggestions?path=${encodeURIComponent(attemptedPath)}`, {
+				cache: "no-store",
+				signal: timeoutController.signal,
+			});
+			if (!response.ok) {
+				hideSuggestions();
+				return;
+			}
+
+			const payload = (await response.json()) as { suggestions?: RouteSuggestion[] };
+			const suggestions = Array.isArray(payload.suggestions) ? payload.suggestions : [];
+
+			if (suggestions.length === 0) {
+				hideSuggestions();
+				return;
+			}
+
+			renderSuggestions(suggestions);
+		} catch {
+			hideSuggestions();
+		} finally {
+			window.clearTimeout(loadingTimer);
+			window.clearTimeout(abortTimer);
+			suggestionLoading.classList.add("hidden");
+		}
+	}
+
+	function hideSuggestions(): void {
+		if (!suggestionRoot || !suggestionList || !suggestionTier) {
+			return;
+		}
+		suggestionList.innerHTML = "";
+		suggestionTier.textContent = "";
+		suggestionTier.classList.add("hidden");
+		suggestionRoot.classList.add("hidden");
+	}
+
+	function renderSuggestions(suggestions: RouteSuggestion[]): void {
+		if (!suggestionList || !suggestionTier) {
+			return;
+		}
+
+		suggestionList.innerHTML = "";
+		const hasFallback = suggestions.some((item) => item.tier === "fallback");
+		suggestionTier.textContent = hasFallback ? "Fallback match (70%+)" : "Strong match (80%+)";
+		suggestionTier.classList.remove("hidden");
+
+		for (const suggestion of suggestions) {
+			const scorePercent = Math.round(suggestion.similarity * 100);
+			const link = document.createElement("a");
+			link.href = suggestion.route;
+			link.className =
+				"inline-flex min-w-[16rem] rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors";
+
+			const topRow = document.createElement("span");
+			topRow.className = "flex w-full items-center justify-between gap-3";
+
+			const routeLabel = document.createElement("span");
+			routeLabel.textContent = suggestion.route;
+			routeLabel.className = "truncate";
+
+			const scoreBadge = document.createElement("span");
+			scoreBadge.textContent = `${scorePercent}%`;
+			scoreBadge.className = "font-mono text-xs text-global-text/55";
+
+			topRow.append(routeLabel, scoreBadge);
+			link.append(topRow);
+			suggestionList.append(link);
+		}
 	}
 </script>
