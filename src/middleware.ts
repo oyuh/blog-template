@@ -2,6 +2,10 @@ import type { MiddlewareHandler } from "astro";
 
 export const onRequest: MiddlewareHandler = async (context, next) => {
 	const response = await next();
+	if (context.isPrerendered) {
+		return response;
+	}
+
 	const statusCode = response.status;
 	const pathname = context.url.pathname;
 	const acceptHeader = context.request.headers.get("accept") ?? "";

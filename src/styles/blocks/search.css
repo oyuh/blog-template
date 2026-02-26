@@ -76,6 +76,8 @@ body[data-search-modal-open] {
 /* Enhanced search input styling */
 #lawson__search .pagefind-ui__form {
 	position: relative;
+	--search-input-height: 3.25rem;
+	--search-overlay-control-size: 2.25rem;
 	margin-bottom: 1.5rem;
 }
 
@@ -93,8 +95,10 @@ body[data-search-modal-open] {
 
 #lawson__search .pagefind-ui__search-input {
 	width: 100%;
+	min-height: var(--search-input-height);
 	padding: 1rem 8rem 1rem 1.25rem;
 	font-size: 1.0625rem;
+	line-height: 1.25;
 	font-family: inherit;
 	font-weight: 400;
 	background-color: color-mix(in srgb, var(--pagefind-ui-background) 78%, transparent);
@@ -119,10 +123,10 @@ body[data-search-modal-open] {
 #lawson__search .pagefind-ui__search-clear {
 	position: absolute;
 	right: 0.5rem;
-	top: 0.5rem;
+	top: calc((var(--search-input-height) - var(--search-overlay-control-size)) / 2);
 	transform: none;
-	width: 2.25rem;
-	height: 2.25rem;
+	width: var(--search-overlay-control-size);
+	height: var(--search-overlay-control-size);
 	padding: 0;
 	background-color: transparent;
 	border: none;
@@ -361,10 +365,10 @@ body[data-search-modal-open] {
    We relocate it into the form so it sits on the search bar, then position it there. */
 #lawson__search .pagefind-ui__form .pagefind-ui__message {
 	position: absolute;
-	top: 0.5rem;
+	top: calc((var(--search-input-height) - var(--search-overlay-control-size)) / 2);
 	right: 3.25rem;
 	transform: none;
-	height: 2.25rem;
+	height: var(--search-overlay-control-size);
 	display: flex;
 	align-items: center;
 	justify-content: flex-end;
@@ -441,10 +445,13 @@ body[data-search-modal-open] {
 		font-size: 0.9375rem;
 	}
 
+	#lawson__search .pagefind-ui__form {
+		--search-input-height: 2.75rem;
+		--search-overlay-control-size: 1.75rem;
+	}
+
 	#lawson__search .pagefind-ui__search-clear {
 		right: 0.5rem;
-		width: 1.75rem;
-		height: 1.75rem;
 	}
 }
 
