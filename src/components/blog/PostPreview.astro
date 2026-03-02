@@ -14,6 +14,12 @@ type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
 const { post} = Astro.props;
 
 const technologies = (post.data.technologies ?? []).map((tech: string) => tech.trim()).filter(Boolean);
+const visibleTags = post.data.tags.slice(0, 4);
+const hiddenTags = post.data.tags.slice(4);
+const visibleTechnologies = technologies.slice(0, 5);
+const hiddenTechnologies = technologies.slice(5);
+const revealTags = hiddenTags.slice(0, 6);
+const revealTechnologies = hiddenTechnologies.slice(0, 6);
 
 // Get table of contents for preview and reading time
 interface TocDisplayItem {
@@ -75,7 +81,7 @@ displayToc = buildDisplayToc(toc);
 <a
     href={`/posts/${post.id}/`}
     data-astro-prefetch
-    class="group relative overflow-hidden bg-global-bg/50 border border-white/5 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md rounded-xl transition-all duration-300 hover:border-accent/20 hover:shadow-[0_8px_20px_-12px_rgba(0,0,0,0.45)] cursor-pointer w-full block ring-1 ring-white/5"
+    class="post-preview-card group relative overflow-hidden bg-global-bg/50 border border-white/5 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md rounded-xl transition-all duration-300 hover:border-accent/20 hover:shadow-[0_8px_20px_-12px_rgba(0,0,0,0.45)] cursor-pointer w-full block ring-1 ring-white/5"
     data-pagefind-body={true}
 >
     {post.data.coverImage && (
@@ -106,51 +112,107 @@ displayToc = buildDisplayToc(toc);
                 {post.data.description}
             </p>
 
-            <!-- Compact metadata footer - single line, minimal -->
-            <div class="flex items-center gap-2.5 flex-wrap mt-5 text-xs opacity-60">
-                <FormattedDate
-                    class="font-medium text-accent"
-                    date={post.data.publishDate}
-                    dateTimeOptions={{
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric"
-                    }}
-                />
+            <!-- Compact metadata footer -->
+            <div class="mt-5 flex items-center gap-2 flex-wrap text-xs text-global-text/60 transition-colors duration-200 group-hover:text-global-text/80">
+                <span class="inline-flex items-center gap-1">
+                    <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <FormattedDate
+                        class="font-medium"
+                        date={post.data.publishDate}
+                        dateTimeOptions={{
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric"
+                        }}
+                    />
+                </span>
+
                 {readingTime && (
                     <>
-                        <span class="text-global-text/40">·</span>
-                        <span class="font-medium">{readingTime}</span>
+                        <span class="text-global-text/35">·</span>
+                        <span class="inline-flex items-center gap-1 font-medium">
+                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {readingTime}
+                        </span>
                     </>
                 )}
+
                 {post.data.draft && (
                     <>
-                        <span class="text-global-text/40">·</span>
-                        <span class="font-semibold text-red-500">Draft</span>
+                        <span class="text-global-text/35">·</span>
+                        <span class="inline-flex items-center gap-1 font-semibold text-red-500">
+                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                            Draft
+                        </span>
                     </>
                 )}
-                <span class="text-global-text/40 mx-0.5">·</span>
-                {post.data.tags.slice(0, 3).map((tag: string, index: number) => (
+
+                {post.data.tags.length > 0 && (
                     <>
-                        <span class="font-medium group-hover:text-accent transition-colors">#{tag}</span>
-                        {index < Math.min(post.data.tags.length, 3) - 1 && <span class="text-global-text/40">,</span>}
+                        <span class="text-global-text/35">·</span>
+                        <span class="inline-flex items-center gap-1">
+                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a2 2 0 010 2.828l-6.172 6.172a2 2 0 01-2.828 0L4.293 12.293A1 1 0 014 11.586V6a3 3 0 013-3z" />
+                            </svg>
+                            <span class="flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
+                                {visibleTags.map((tag: string) => (
+                                    <span class="font-medium transition-colors duration-200 group-hover:text-accent">#{tag}</span>
+                                ))}
+                                {hiddenTags.length > 0 && (
+                                    <>
+                                        <span class="metadata-more">+{hiddenTags.length}</span>
+                                        <span class="metadata-reveal">
+                                            {revealTags.map((tag: string) => (
+                                                <span class="font-medium text-global-text/75 transition-colors duration-200 group-hover:text-accent">#{tag}</span>
+                                            ))}
+                                            {hiddenTags.length > revealTags.length && (
+                                                <span class="text-global-text/50">+{hiddenTags.length - revealTags.length}</span>
+                                            )}
+                                        </span>
+                                    </>
+                                )}
+                            </span>
+                        </span>
                     </>
-                ))}
-                {post.data.tags.length > 3 && (
-                    <span class="text-global-text/50">+{post.data.tags.length - 3}</span>
                 )}
+
                 {technologies.length > 0 && (
-                    <span class="ms-1 flex items-center gap-1">
-                        {technologies.slice(0, 6).map((tech: string) => {
-                            const iconName = getTechIconName(tech);
-                            return (
-                                <Icon aria-hidden="true" class="h-3.5 w-3.5 text-white/80" name={iconName} title={tech} />
-                            );
-                        })}
-                        {technologies.length > 6 && (
-                            <span class="text-global-text/50">+{technologies.length - 6}</span>
-                        )}
-                    </span>
+                    <>
+                        <span class="text-global-text/35">·</span>
+                        <span class="inline-flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
+                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
+                            </svg>
+                            {visibleTechnologies.map((tech: string) => {
+                                const iconName = getTechIconName(tech);
+                                return (
+                                    <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70 transition-colors duration-200 group-hover:text-accent" name={iconName} title={tech} />
+                                );
+                            })}
+                            {hiddenTechnologies.length > 0 && (
+                                <>
+                                    <span class="metadata-more">+{hiddenTechnologies.length}</span>
+                                    <span class="metadata-reveal">
+                                        {revealTechnologies.map((tech: string) => {
+                                            const iconName = getTechIconName(tech);
+                                            return (
+                                                <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70 transition-colors duration-200 group-hover:text-accent" name={iconName} title={tech} />
+                                            );
+                                        })}
+                                        {hiddenTechnologies.length > revealTechnologies.length && (
+                                            <span class="text-global-text/50">+{hiddenTechnologies.length - revealTechnologies.length}</span>
+                                        )}
+                                    </span>
+                                </>
+                            )}
+                        </span>
+                    </>
                 )}
             </div>
         </div>
@@ -191,3 +253,103 @@ displayToc = buildDisplayToc(toc);
         </div>
     )}
 </a>
+
+<style>
+    .post-preview-card {
+        --cursor-x: 50%;
+        --cursor-y: 50%;
+    }
+
+    .post-preview-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        padding: 1px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 220ms ease;
+        background: radial-gradient(
+            220px circle at var(--cursor-x) var(--cursor-y),
+            color-mix(in srgb, var(--color-accent) 75%, transparent),
+            transparent 68%
+        );
+        -webkit-mask:
+            linear-gradient(#000 0 0) content-box,
+            linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+    }
+
+    .post-preview-card:is(:hover, :focus-visible)::after {
+        opacity: 1;
+    }
+
+    .metadata-more {
+        display: inline-flex;
+        align-items: center;
+        overflow: hidden;
+        max-width: 2rem;
+        opacity: 1;
+        color: color-mix(in srgb, var(--color-accent-2) 45%, transparent);
+        transition:
+            max-width 240ms ease,
+            opacity 240ms ease,
+            transform 240ms ease;
+    }
+
+    .metadata-reveal {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        overflow: hidden;
+        white-space: nowrap;
+        max-width: 0;
+        opacity: 0;
+        transform: translateX(0.35rem);
+        transition:
+            max-width 280ms ease,
+            opacity 220ms ease,
+            transform 280ms ease;
+    }
+
+    .post-preview-card:is(:hover, :focus-visible) .metadata-more {
+        max-width: 0;
+        opacity: 0;
+        transform: translateX(-0.2rem);
+    }
+
+    .post-preview-card:is(:hover, :focus-visible) .metadata-reveal {
+        max-width: 22rem;
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+</style>
+
+<script>
+    const bindPostPreviewCursorEffect = () => {
+        if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+        for (const card of document.querySelectorAll<HTMLElement>(".post-preview-card")) {
+            if (card.dataset.cursorBound === "true") continue;
+            card.dataset.cursorBound = "true";
+
+            card.addEventListener("pointermove", (event) => {
+                const rect = card.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                card.style.setProperty("--cursor-x", `${x}px`);
+                card.style.setProperty("--cursor-y", `${y}px`);
+            });
+
+            card.addEventListener("pointerleave", () => {
+                card.style.setProperty("--cursor-x", "50%");
+                card.style.setProperty("--cursor-y", "50%");
+            });
+        }
+    };
+
+    bindPostPreviewCursorEffect();
+    document.addEventListener("astro:page-load", bindPostPreviewCursorEffect);
+</script>
