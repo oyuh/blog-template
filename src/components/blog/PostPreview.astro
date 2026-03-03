@@ -165,7 +165,7 @@ displayToc = buildDisplayToc(toc);
                                     <span class="font-medium transition-colors duration-200 group-hover:text-accent">#{tag}</span>
                                 ))}
                                 {hiddenTags.length > 0 && (
-                                    <>
+                                    <span class="metadata-swap">
                                         <span class="metadata-more">+{hiddenTags.length}</span>
                                         <span class="metadata-reveal">
                                             {revealTags.map((tag: string) => (
@@ -175,7 +175,7 @@ displayToc = buildDisplayToc(toc);
                                                 <span class="text-global-text/50">+{hiddenTags.length - revealTags.length}</span>
                                             )}
                                         </span>
-                                    </>
+                                    </span>
                                 )}
                             </span>
                         </span>
@@ -196,7 +196,7 @@ displayToc = buildDisplayToc(toc);
                                 );
                             })}
                             {hiddenTechnologies.length > 0 && (
-                                <>
+                                <span class="metadata-swap">
                                     <span class="metadata-more">+{hiddenTechnologies.length}</span>
                                     <span class="metadata-reveal">
                                         {revealTechnologies.map((tech: string) => {
@@ -209,7 +209,7 @@ displayToc = buildDisplayToc(toc);
                                             <span class="text-global-text/50">+{hiddenTechnologies.length - revealTechnologies.length}</span>
                                         )}
                                     </span>
-                                </>
+                                </span>
                             )}
                         </span>
                     </>
@@ -291,11 +291,18 @@ displayToc = buildDisplayToc(toc);
         overflow: hidden;
         max-width: 2rem;
         opacity: 1;
+        transform-origin: left center;
         color: color-mix(in srgb, var(--color-accent-2) 45%, transparent);
         transition:
-            max-width 240ms ease,
-            opacity 240ms ease,
-            transform 240ms ease;
+            max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 360ms ease,
+            transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .metadata-swap {
+        display: inline-flex;
+        align-items: center;
+        overflow: hidden;
     }
 
     .metadata-reveal {
@@ -308,9 +315,9 @@ displayToc = buildDisplayToc(toc);
         opacity: 0;
         transform: translateX(0.35rem);
         transition:
-            max-width 280ms ease,
-            opacity 220ms ease,
-            transform 280ms ease;
+            max-width 460ms cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 380ms ease,
+            transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .post-preview-card:is(:hover, :focus-visible) .metadata-more {
