@@ -101,23 +101,7 @@ const technologies = (data.technologies ?? []).map((tech) => tech.trim()).filter
 {
 	technologies.length > 0 && (
 		<div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-			<svg
-				aria-hidden="true"
-				class="inline-block h-5 w-5 text-accent-2/80"
-				fill="none"
-				focusable="false"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.5"
-				viewBox="0 0 24 24"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path d="M9 12h6" />
-				<path d="M12 9v6" />
-				<path d="M3 6h18" />
-				<path d="M3 18h18" />
-			</svg>
+			<Icon aria-hidden="true" class="inline-block h-5 w-5 text-accent-2/80" name="mdi:tools" />
 			<div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
 				{technologies.map((tech, i) => {
 					const iconName = getTechIconName(tech);

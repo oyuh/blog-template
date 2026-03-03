@@ -61,6 +61,7 @@ export default defineConfig({
 					"palette",
 					"cellphone",
 					"rss",
+					"tools",
 					"twitter",
 				],
 			},

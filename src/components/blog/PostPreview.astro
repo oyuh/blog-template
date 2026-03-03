@@ -115,7 +115,7 @@ displayToc = buildDisplayToc(toc);
             <!-- Compact metadata footer -->
             <div class="mt-5 flex items-center gap-2 flex-wrap text-xs text-global-text/60 transition-colors duration-200 group-hover:text-global-text/80">
                 <span class="inline-flex items-center gap-1">
-                    <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <FormattedDate
@@ -133,7 +133,7 @@ displayToc = buildDisplayToc(toc);
                     <>
                         <span class="text-global-text/35">·</span>
                         <span class="inline-flex items-center gap-1 font-medium">
-                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             {readingTime}
@@ -157,19 +157,19 @@ displayToc = buildDisplayToc(toc);
                     <>
                         <span class="text-global-text/35">·</span>
                         <span class="inline-flex items-center gap-1">
-                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a2 2 0 010 2.828l-6.172 6.172a2 2 0 01-2.828 0L4.293 12.293A1 1 0 014 11.586V6a3 3 0 013-3z" />
                             </svg>
                             <span class="flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
                                 {visibleTags.map((tag: string) => (
-                                    <span class="font-medium transition-colors duration-200 group-hover:text-accent">#{tag}</span>
+                                    <span class="font-medium">#{tag}</span>
                                 ))}
                                 {hiddenTags.length > 0 && (
                                     <span class="metadata-swap">
                                         <span class="metadata-more">+{hiddenTags.length}</span>
                                         <span class="metadata-reveal">
                                             {revealTags.map((tag: string) => (
-                                                <span class="font-medium text-global-text/75 transition-colors duration-200 group-hover:text-accent">#{tag}</span>
+                                                <span class="font-medium text-global-text/75">#{tag}</span>
                                             ))}
                                             {hiddenTags.length > revealTags.length && (
                                                 <span class="text-global-text/50">+{hiddenTags.length - revealTags.length}</span>
@@ -186,13 +186,14 @@ displayToc = buildDisplayToc(toc);
                     <>
                         <span class="text-global-text/35">·</span>
                         <span class="inline-flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
-                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
-                            </svg>
+                            <span class="metadata-tech-marker" aria-hidden="true">
+                                <Icon aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" name="mdi:tools" />
+                                <span class="metadata-tech-divider"></span>
+                            </span>
                             {visibleTechnologies.map((tech: string) => {
                                 const iconName = getTechIconName(tech);
                                 return (
-                                    <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70 transition-colors duration-200 group-hover:text-accent" name={iconName} title={tech} />
+                                    <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70" name={iconName} title={tech} />
                                 );
                             })}
                             {hiddenTechnologies.length > 0 && (
@@ -202,7 +203,7 @@ displayToc = buildDisplayToc(toc);
                                         {revealTechnologies.map((tech: string) => {
                                             const iconName = getTechIconName(tech);
                                             return (
-                                                <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70 transition-colors duration-200 group-hover:text-accent" name={iconName} title={tech} />
+                                                <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70" name={iconName} title={tech} />
                                             );
                                         })}
                                         {hiddenTechnologies.length > revealTechnologies.length && (
@@ -258,6 +259,7 @@ displayToc = buildDisplayToc(toc);
     .post-preview-card {
         --cursor-x: 50%;
         --cursor-y: 50%;
+        --metadata-hide-delay: 2.25s;
     }
 
     .post-preview-card::after {
@@ -285,6 +287,35 @@ displayToc = buildDisplayToc(toc);
         opacity: 1;
     }
 
+    .metadata-leading-icon {
+        color: color-mix(in srgb, var(--color-accent-2) 55%, transparent);
+        transition: color 220ms ease, filter 220ms ease;
+        filter: drop-shadow(0 0 0 transparent);
+    }
+
+    .metadata-tech-marker {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+
+    .metadata-tech-divider {
+        display: inline-block;
+        width: 1px;
+        height: 0.8rem;
+        background: color-mix(in srgb, var(--color-accent-2) 30%, transparent);
+        transition: background-color 220ms ease;
+    }
+
+    .post-preview-card:is(:hover, :focus-visible) .metadata-tech-divider {
+        background: color-mix(in srgb, var(--color-accent) 48%, transparent);
+    }
+
+    .post-preview-card:is(:hover, :focus-visible) .metadata-leading-icon {
+        color: var(--color-accent);
+        filter: drop-shadow(0 0 0.42rem color-mix(in srgb, var(--color-accent) 60%, transparent));
+    }
+
     .metadata-more {
         display: inline-flex;
         align-items: center;
@@ -297,6 +328,7 @@ displayToc = buildDisplayToc(toc);
             max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
             opacity 360ms ease,
             transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--metadata-hide-delay), var(--metadata-hide-delay), var(--metadata-hide-delay);
     }
 
     .metadata-swap {
@@ -318,18 +350,21 @@ displayToc = buildDisplayToc(toc);
             max-width 460ms cubic-bezier(0.22, 1, 0.36, 1),
             opacity 380ms ease,
             transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition-delay: var(--metadata-hide-delay), var(--metadata-hide-delay), var(--metadata-hide-delay);
     }
 
     .post-preview-card:is(:hover, :focus-visible) .metadata-more {
         max-width: 0;
         opacity: 0;
         transform: translateX(-0.2rem);
+        transition-delay: 0s, 0s, 0s;
     }
 
     .post-preview-card:is(:hover, :focus-visible) .metadata-reveal {
         max-width: 22rem;
         opacity: 1;
         transform: translateX(0);
+        transition-delay: 0s, 0s, 0s;
     }
 
 </style>
