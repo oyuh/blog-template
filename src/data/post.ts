@@ -11,7 +11,10 @@ export type TechnologyProject = {
 	};
 };
 
-export type TechnologyUsage = Record<string, { count: number; projects: TechnologyProject[] }>;
+export type TechnologyUsage = Record<
+	string,
+	{ name: string; count: number; projects: TechnologyProject[] }
+>;
 
 /** filter out draft posts based on the environment */
 export async function getAllPosts(): Promise<CollectionEntry<"post">[]> {
@@ -93,7 +96,7 @@ export function getUniqueTechnologiesWithCount(
 
 /** returns usage data for technologies, focusing on project posts for counts */
 export function getTechnologyUsage(posts: CollectionEntry<"post">[]): TechnologyUsage {
-	const usage = new Map<string, { count: number; projects: TechnologyProject[] }>();
+	const usage = new Map<string, { name: string; count: number; projects: TechnologyProject[] }>();
 	const projectPosts = posts.filter(
 		(post) => post.id.startsWith("projects/") || post.data.tags.includes("project"),
 	);
@@ -106,7 +109,7 @@ export function getTechnologyUsage(posts: CollectionEntry<"post">[]): Technology
 			if (!key) continue;
 			const coverImageSrc = post.data.coverImage?.src?.src;
 			const coverImageAlt = post.data.coverImage?.alt;
-			const entry = usage.get(key) ?? { count: 0, projects: [] };
+			const entry = usage.get(key) ?? { name: tech.trim(), count: 0, projects: [] };
 			entry.count += 1;
 			entry.projects.push({
 				id: post.id,

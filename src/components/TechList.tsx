@@ -46,6 +46,11 @@ const categories: Category[] = [
 				description: "A minimal and flexible Node.js web application framework.",
 			},
 			{
+				name: "Hono",
+				link: "https://hono.dev/",
+				description: "A lightweight web framework for building fast APIs and edge apps.",
+			},
+			{
 				name: "Vite",
 				link: "https://vitejs.dev/",
 				description: "A fast build tool and development server for modern web projects.",
@@ -71,6 +76,11 @@ const categories: Category[] = [
 				link: "https://ui.shadcn.com/",
 				description: "A beautifully styled component system for modern apps.",
 			},
+			{
+				name: "MDX",
+				link: "https://mdxjs.com/",
+				description: "Markdown with JSX support for rich content-driven applications.",
+			},
 		],
 	},
 	{
@@ -86,6 +96,17 @@ const categories: Category[] = [
 				name: "PostgreSQL",
 				link: "https://www.postgresql.org/",
 				description: "I use the serverless Postgres, powered by Neon, integrated into Vercel.",
+			},
+			{
+				name: "Drizzle",
+				link: "https://orm.drizzle.team/",
+				description: "A TypeScript-first ORM and schema toolkit for SQL databases.",
+			},
+			{
+				name: "Rocicorp Zero",
+				link: "https://zero.rocicorp.dev/",
+				description: "A sync engine for realtime query and mutation flows over your app data.",
+				aliases: ["zero"],
 			},
 			{
 				name: "Redis",
@@ -145,6 +166,12 @@ const categories: Category[] = [
 			// 	description: "A modern systems language focused on safety and speed.",
 			// },
 			{
+				name: "Node.js",
+				link: "https://nodejs.org/",
+				description: "The JavaScript runtime I use for APIs, tooling, and desktop app backends.",
+				aliases: ["nodejs", "node"],
+			},
+			{
 				name: "Java",
 				link: "https://www.oracle.com/java/",
 				description: "A versatile language used in enterprise and Android dev.",
@@ -185,6 +212,12 @@ const categories: Category[] = [
 				description: "Fast, disk space efficient package manager.",
 			},
 			{
+				name: "Turbo",
+				link: "https://turbo.build/repo",
+				description: "Monorepo build tooling for coordinating apps, packages, and task pipelines.",
+				aliases: ["turborepo"],
+			},
+			{
 				name: "Electron",
 				link: "https://www.electronjs.org/",
 				description: "Build cross-platform desktop apps with web technologies.",
@@ -210,6 +243,11 @@ const categories: Category[] = [
 				name: "Cloudflare",
 				link: "https://www.cloudflare.com/",
 				description: "A web infrastructure and website security company.",
+			},
+			{
+				name: "Pagefind",
+				link: "https://pagefind.app/",
+				description: "A static-site search indexer for fast client-side search.",
 			},
 		],
 	},
@@ -262,8 +300,26 @@ export default function TechList({ techUsage = {} }: TechListProps) {
 	const PANEL_STATE_KEY = "tech:panelState:v1";
 	const DEFAULT_PANEL_SIZE = { width: 520, height: 560 };
 	const DEFAULT_PANEL_POS = { x: 24, y: 96 };
+	const curatedKeys = new Set(
+		categories.flatMap((category) =>
+			category.items.flatMap((item) => [
+				normalizeTechName(item.name),
+				...(item.aliases ?? []).map(normalizeTechName),
+			]),
+		),
+	);
+	const projectSpecificItems: Tech[] = Object.entries(techUsage)
+		.filter(([key]) => !curatedKeys.has(key))
+		.sort(([, a], [, b]) => b.count - a.count || a.name.localeCompare(b.name))
+		.map(([, usage]) => ({
+			name: usage.name,
+			description: "Used in project posts on this site.",
+		}));
+	const allCategories = projectSpecificItems.length
+		? [...categories, { title: "Project-Specific Tools", items: projectSpecificItems }]
+		: categories;
 
-	const flat: FlatTech[] = categories.flatMap((c) =>
+	const flat: FlatTech[] = allCategories.flatMap((c) =>
 		c.items.map((i) => ({
 			...i,
 			icon: i.icon ?? getTechIconName(i.name, i.aliases),
