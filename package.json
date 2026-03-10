@@ -71,7 +71,7 @@
 	},
 	"devDependencies": {
 		"@astrojs/check": "^0.9.6",
-		"@biomejs/biome": "^1.9.4",
+		"@biomejs/biome": "^2.4.4",
 		"@iconify-json/mdi": "^1.2.3",
 		"@iconify-json/simple-icons": "^1.2.71",
 		"@netlify/functions": "^4.3.0",
