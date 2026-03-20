@@ -61,6 +61,14 @@ export const prerender = true;
             <span class="font-medium text-accent-2">web based applications</span>. When I’m not studying, I’m working with
             personal projects or just generally procrastinating.
           </p>
+
+          <div class="mt-4">
+          {resumePdfExists ? (
+            <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
+          ) : (
+            <p class="text-sm text-global-text/70">Resume PDF is not available.</p>
+          )}
+        </div>
         </div>
 
         <div class="border-t border-zinc-400 pt-6"></div>
@@ -79,14 +87,6 @@ export const prerender = true;
 
         <div class="space-y-8">
           <TechList client:load techUsage={technologyUsage} />
-        </div>
-
-        <div class="mt-4">
-          {resumePdfExists ? (
-            <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
-          ) : (
-            <p class="text-sm text-global-text/70">Resume PDF is not available.</p>
-          )}
         </div>
       </div>
     </section>
