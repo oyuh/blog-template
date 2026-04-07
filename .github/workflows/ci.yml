@@ -23,32 +23,26 @@ jobs:
         with:
           node-version: 20
 
-      - name: install pnpm
-        uses: pnpm/action-setup@v2
+      - name: install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          version: 8
-          run_install: false
+          bun-version: latest
 
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
+      - name: Setup bun cache
         uses: actions/cache@v3
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-store-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+            ${{ runner.os }}-bun-store-
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
 
         # use astro check for issues
       - name: Run check
-        run: pnpm -s check
+        run: bun run check
 
         # ensure build works
       - name: Run build
-        run: pnpm build
+        run: bun run build

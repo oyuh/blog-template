@@ -10,14 +10,14 @@ How it works:
 - Copies the repo into `.template-sandbox/<timestamp>`
 - Excluded paths simply won't exist in the sandbox copy
 - Links your existing `node_modules` into the sandbox to avoid reinstalling
-- Runs `pnpm dev` or `pnpm build` from inside the sandbox
+- Runs `bun dev` or `bun run build` from inside the sandbox
 
 Usage:
-	pnpm template:dev
-	pnpm template:build
+	bun template:dev
+	bun template:build
 
-	pnpm template:dev -- --exclude src/components/SpotifyStatus.tsx
-	pnpm template:build -- --exclude src/components/HolidayOverlay.tsx
+	bun template:dev -- --exclude src/components/SpotifyStatus.tsx
+	bun template:build -- --exclude src/components/HolidayOverlay.tsx
 
 Options:
 	--exclude <path>       Repeatable.
@@ -45,9 +45,9 @@ function usage(exitCode = 0) {
 		"  --exclude-list <file>   One relative path per line (# comments allowed)\n" +
 		"  --dry-run               Don't run, just print what would happen\n\n" +
 		"Examples:\n" +
-		"  pnpm template:dev\n" +
-		"  pnpm template:dev -- --exclude src/components/SpotifyStatus.tsx\n" +
-		"  pnpm template:build -- --exclude src/components/HolidayOverlay.tsx\n";
+		"  bun template:dev\n" +
+		"  bun template:dev -- --exclude src/components/SpotifyStatus.tsx\n" +
+		"  bun template:build -- --exclude src/components/HolidayOverlay.tsx\n";
 	process.stdout.write(msg);
 	process.exit(exitCode);
 }
@@ -184,16 +184,16 @@ async function linkNodeModules(repoRoot, sandboxRoot) {
 	const src = path.join(repoRoot, "node_modules");
 	const dest = path.join(sandboxRoot, "node_modules");
 	if (!(await pathExists(src))) {
-		throw new Error("node_modules not found. Run `pnpm install` first.");
+		throw new Error("node_modules not found. Run `bun install` first.");
 	}
 	await fsp.symlink(src, dest, process.platform === "win32" ? "junction" : "dir");
 }
 
-function runPnpm(command, { cwd } = {}) {
-	// On Windows, pnpm resolves to a .cmd shim. Spawning a .cmd with
+function runBun(command, { cwd } = {}) {
+	// On Windows, bun resolves to a .exe. Spawning with
 	// `shell: false` can throw `spawn EINVAL`, so use a shell on win32.
 	const isWindows = process.platform === "win32";
-	return spawn("pnpm", [command], {
+	return spawn("bun", ["run", command], {
 		cwd,
 		stdio: "inherit",
 		shell: isWindows,
@@ -212,7 +212,7 @@ async function main() {
 	// De-dupe
 	allExcludes = Array.from(new Set(allExcludes));
 
-	// Convenience: if you run `pnpm template:dev` with no flags, but a
+	// Convenience: if you run `bun template:dev` with no flags, but a
 	// `template-excludes.txt` exists at the repo root, use it.
 	if (allExcludes.length === 0) {
 		const defaultList = path.resolve(process.cwd(), "template-excludes.txt");
@@ -229,7 +229,7 @@ async function main() {
 
 	if (allExcludes.length === 0) {
 		process.stdout.write("[template-sandbox] No excludes provided; running normally.\n");
-		const child = runPnpm(command);
+		const child = runBun(command);
 		child.on("exit", (code) => process.exit(code ?? 0));
 		return;
 	}
@@ -263,7 +263,7 @@ async function main() {
 		}
 	};
 
-	const child = runPnpm(command, { cwd: sandboxRoot });
+	const child = runBun(command, { cwd: sandboxRoot });
 
 	const signals = ["SIGINT", "SIGTERM"];
 	for (const sig of signals) {

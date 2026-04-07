@@ -16,18 +16,18 @@ It’s meant to be cloned and customized (site config + content), while letting 
 ### Prerequisites
 
 - Node.js 20+ (recommended)
-- pnpm
+- bun
 
 ### Install
 
 ```sh
-pnpm install
+bun install
 ```
 
 ### Run locally
 
 ```sh
-pnpm dev
+bun dev
 ```
 
 Open http://localhost:4321
@@ -36,19 +36,19 @@ Open http://localhost:4321
 
 These are the main scripts you’ll use day-to-day:
 
-- `pnpm dev` / `pnpm start` — Run the dev server
-- `pnpm check` — Run `astro check`
-- `pnpm lint` — Run Biome lint
-- `pnpm format` — Format code + imports (Biome + Prettier)
+- `bun dev` / `bun start` — Run the dev server
+- `bun check` — Run `astro check`
+- `bun lint` — Run Biome lint
+- `bun format` — Format code + imports (Biome + Prettier)
 
 Template-focused helpers:
 
-- `pnpm template:dev` — Run the site from a sandbox copy with excluded paths removed
-- `pnpm template:build` — Build the sandbox copy (useful to verify the template export won’t break)
+- `bun template:dev` — Run the site from a sandbox copy with excluded paths removed
+- `bun template:build` — Build the sandbox copy (useful to verify the template export won't break)
 
 Notes:
 
-- `pnpm install` runs a `postinstall` patch for Astro MDX internals (see `scripts/patch-astrojs-mdx-server.cjs`).
+- `bun install` runs a `postinstall` patch for Astro MDX internals (see `scripts/patch-astrojs-mdx-server.cjs`).
 
 ## Configure your site
 
@@ -113,7 +113,7 @@ This repo has a simple workflow for keeping the **real site** private while prod
 2) Validate the template view:
 
 ```sh
-pnpm template:dev
+bun template:dev
 ```
 
 3) Export a filtered snapshot:

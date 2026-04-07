@@ -16,8 +16,8 @@ function run(command, args = []) {
 	});
 }
 
-const buildCode = await run("pnpm", ["run", "build"]);
+const buildCode = await run("bun", ["run", "build"]);
 if (buildCode !== 0) process.exit(buildCode);
 
-const previewCode = await run("pnpm", ["exec", "astro", "preview"]);
+const previewCode = await run("bun", ["run", "astro", "preview"]);
 process.exit(previewCode);
