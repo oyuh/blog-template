@@ -25,6 +25,7 @@ import rehypeUnwrapImages from "rehype-unwrap-images";
 import rehypeInlineImages from "./src/plugins/rehype-inline-images";
 
 import react from "@astrojs/react";
+import { boneyardPlugin } from "boneyard-js/vite";
 
 // `@astrojs/vercel` intentionally does not support `astro preview`.
 // Our `pnpm preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
@@ -154,7 +155,7 @@ export default defineConfig({
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
 		},
-		plugins: [tailwind(), rawFonts([".ttf", ".woff"])],
+		plugins: [tailwind(), rawFonts([".ttf", ".woff"]), boneyardPlugin() as any],
 	},
 });
 

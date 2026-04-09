@@ -5,6 +5,7 @@ export default function ScrollProgressBar() {
 	const currentProgress = useRef(0);
 	const targetProgress = useRef(0);
 	const rafId = useRef<number | null>(null);
+	const isAnimating = useRef(false);
 
 	useEffect(() => {
 		const lerp = (start: number, end: number, factor: number) => {
@@ -12,16 +13,31 @@ export default function ScrollProgressBar() {
 		};
 
 		const animate = () => {
-			if (!progressRef.current) return;
+			if (!progressRef.current) {
+				isAnimating.current = false;
+				return;
+			}
 
-			// Smooth interpolation with consistent factor for both directions
 			currentProgress.current = lerp(currentProgress.current, targetProgress.current, 0.25);
 
-			// Update DOM - use transform for better performance
-			progressRef.current.style.transform = `scaleY(${currentProgress.current / 100})`;
+			// Stop animating when close enough to target (within 0.1%)
+			if (Math.abs(currentProgress.current - targetProgress.current) < 0.1) {
+				currentProgress.current = targetProgress.current;
+				progressRef.current.style.transform = `scaleY(${currentProgress.current / 100})`;
+				isAnimating.current = false;
+				rafId.current = null;
+				return;
+			}
 
-			// Continue animation loop
+			progressRef.current.style.transform = `scaleY(${currentProgress.current / 100})`;
 			rafId.current = requestAnimationFrame(animate);
+		};
+
+		const startAnimating = () => {
+			if (!isAnimating.current) {
+				isAnimating.current = true;
+				rafId.current = requestAnimationFrame(animate);
+			}
 		};
 
 		const updateTarget = () => {
@@ -29,32 +45,27 @@ export default function ScrollProgressBar() {
 			const documentHeight = document.documentElement.scrollHeight;
 			const scrollTop = window.scrollY;
 
-			// Calculate progress as percentage
 			const scrollableHeight = documentHeight - windowHeight;
 			const progress = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0;
 			targetProgress.current = Math.min(100, Math.max(0, progress));
-		};
-
-		const handleScroll = () => {
-			updateTarget();
+			startAnimating();
 		};
 
 		// Initial calculation
 		updateTarget();
 		currentProgress.current = targetProgress.current;
+		if (progressRef.current) {
+			progressRef.current.style.transform = `scaleY(${currentProgress.current / 100})`;
+		}
 
-		// Start animation loop
-		rafId.current = requestAnimationFrame(animate);
-
-		// Update on scroll
-		window.addEventListener("scroll", handleScroll, { passive: true });
+		window.addEventListener("scroll", updateTarget, { passive: true });
 		window.addEventListener("resize", updateTarget, { passive: true });
 
 		return () => {
 			if (rafId.current) {
 				cancelAnimationFrame(rafId.current);
 			}
-			window.removeEventListener("scroll", handleScroll);
+			window.removeEventListener("scroll", updateTarget);
 			window.removeEventListener("resize", updateTarget);
 		};
 	}, []);
