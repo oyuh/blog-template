@@ -164,15 +164,13 @@ const CommentsIsland =
 		}
 	}
 
-	/* Blockquotes: soft surface + subtle border */
+	/* Blockquotes: minimal prose styling */
 	.blog-prose blockquote {
-		margin: 1.25rem 0;
-		padding: 0.85rem 1.1rem;
-		border-radius: 0.75rem;
-		/* Match the site's “soft card” surfaces */
-		background-color: color-mix(in srgb, var(--color-global-bg) 92%, var(--color-global-text) 8%);
-		border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
-		border-left: 4px solid color-mix(in srgb, var(--color-quote) 75%, transparent);
+		margin: 1.5rem 0;
+		padding: 0;
+		border: 0;
+		border-left: 0;
+		border-inline-start: 0;
 	}
 
 	.blog-prose blockquote > :first-child {
@@ -185,8 +183,17 @@ const CommentsIsland =
 
 	.blog-prose blockquote :is(p) {
 		font-style: italic;
-		/* Keep it readable and theme-consistent (mostly body text, slight quote tint) */
-		color: color-mix(in srgb, var(--color-global-text) 88%, var(--color-quote) 12%);
+		font-size: 1.01em;
+		line-height: 1.8;
+		letter-spacing: 0.01em;
+		color: color-mix(in srgb, var(--color-global-text) 94%, var(--color-quote) 6%);
+	}
+
+	.blog-prose blockquote p:first-of-type::before,
+	.blog-prose blockquote p:last-of-type::after {
+		color: color-mix(in srgb, var(--color-accent) 55%, var(--color-global-text) 45%);
+		opacity: 0.7;
+		font-weight: 600;
 	}
 
 	/* Inline code: remove “clickable” feel; match site surfaces */

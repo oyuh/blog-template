@@ -122,16 +122,37 @@ pre code {
 
 /* Blockquotes matching your site */
 blockquote {
-  border-left: 3px solid var(--accent) !important;
   margin: 1.5em 0 !important;
-  padding: 0.5em 1em !important;
-  background: rgba(87, 130, 255, 0.05) !important;
-  font-style: italic !important;
-  color: var(--quote) !important;
+  padding: 0 !important;
+  border: none !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
 blockquote p {
   color: var(--text) !important;
+  font-size: 1.01em !important;
+  font-style: italic !important;
+  letter-spacing: 0.01em !important;
+  line-height: 1.8 !important;
+}
+
+blockquote p + p {
+  margin-top: 0.85em !important;
+}
+
+blockquote p:first-of-type::before {
+  content: open-quote !important;
+}
+
+blockquote p:last-of-type::after {
+  content: close-quote !important;
+}
+
+blockquote p:first-of-type::before,
+blockquote p:last-of-type::after {
+  color: rgba(129, 164, 255, 0.7) !important;
+  font-weight: 600 !important;
 }
 
 /* Lists */

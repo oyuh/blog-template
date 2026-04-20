@@ -28,7 +28,7 @@ import react from "@astrojs/react";
 import { boneyardPlugin } from "boneyard-js/vite";
 
 // `@astrojs/vercel` intentionally does not support `astro preview`.
-// Our `pnpm preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
+// Our `bun preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
 const useNodeAdapter = process.env.ASTRO_ADAPTER === "node";
 
 export default defineConfig({
@@ -49,6 +49,8 @@ export default defineConfig({
 					"coffee",
 					"cloud",
 					"code-tags",
+					"mouse-left-click-outline",
+					"mouse-right-click-outline",
 					"cube-outline",
 					"database",
 					"discord",
@@ -77,7 +79,7 @@ export default defineConfig({
 				},
 			],
 			sitemap: true,
-			host: "lawsonhart.me",
+			host: true,
 		}),
 		// PWA manifest generation. Not strictly required for the site to run,
 		// but enabling it avoids browsers repeatedly requesting a missing manifest.
@@ -149,13 +151,13 @@ export default defineConfig({
 			// Prevent "Invalid hook call" by forcing Vite to always use a single
 			// React instance for both the renderer and all components.
 			dedupe: ["react", "react-dom"],
-			// pnpm uses symlinks; preserving them can lead to duplicated module instances.
+			// bun can use symlinks; preserving them can lead to duplicated module instances.
 			preserveSymlinks: false,
 		},
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
 		},
-		plugins: [tailwind(), rawFonts([".ttf", ".woff"]), boneyardPlugin() as any],
+		plugins: [tailwind(), rawFonts([".ttf", ".woff"]), boneyardPlugin()],
 	},
 });
 
