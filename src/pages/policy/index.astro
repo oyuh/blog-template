@@ -1,9 +1,10 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
+import PolicyNav from "@/components/policy/PolicyNav.astro";
 
 const meta = {
   title: "Policy Info",
-  description: "Clarifications on terminology and scope used in our Privacy Policy and Terms of Service.",
+  description: "Clarifications on terminology and scope used in the privacy policy and terms of service for lawsonhart.me and related services.",
 };
 
 export const prerender = true;
@@ -15,60 +16,70 @@ export const prerender = true;
 
     <div class="prose prose-base dark:prose-invert max-w-none">
       <p class="leading-relaxed">
-        This page defines terms used in the Privacy Policy and Terms of Service. If you want clarity on what <em>Service</em> or <em>Website</em> means here is where you check.
+        This page defines terms used in the Privacy Policy and Terms of Service. If you want clarity on
+        what <em>Service</em>, <em>Website</em>, the comments service, or the games service means, this is
+        where to check.
       </p>
 
-    <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-sm font-medium tracking-tight shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
-      <span class="text-accent-2">Last Updated</span>
-      <span class="text-global-text/80">September 19, 2025</span>
-      <span class="hidden sm:inline text-global-text/50">(Privacy Policy & Terms)</span>
-    </div>
+      <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-sm font-medium tracking-tight shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
+        <span class="text-accent-2">Last Updated</span>
+        <span class="text-global-text/80">April 26, 2026</span>
+        <span class="hidden sm:inline text-global-text/50">(Privacy Policy & Terms)</span>
+      </div>
 
-    <div class="flex flex-col sm:flex-row gap-3 mt-6">
-      <a href="/policy/tos" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-global-text hover:text-accent hover:bg-global-bg/75 transition shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
-        Terms of Service
-      </a>
-      <a href="/policy/privacy" class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-global-text hover:text-accent hover:bg-global-bg/75 transition shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
-        Privacy Policy
-      </a>
-    </div>
+      <PolicyNav current="info" />
 
-    <h2 class="text-accent-2">Domains I Operate</h2>
-    <ul class="not-prose grid gap-1 mt-2">
-      <li><code>*.lawsonhart.me</code></li>
-      <li><code>*.jamlog.lol</code></li>
-    </ul>
+      <h2 class="text-accent-2">Domains I Operate</h2>
+      <ul class="not-prose grid gap-1 mt-2">
+        <li><code>*.lawsonhart.me</code></li>
+        <li><code>*.jamlog.lol</code></li>
+      </ul>
 
-    <h2 class="text-accent-2">Defined Terms</h2>
-    <ul class="space-y-1">
-      <li><strong>We / I</strong>: Lawson Hart personally and where applicable partners or collaborators operating or maintaining the Website.</li>
-      <li><strong>Service</strong>: The website, apps, features, tools, and content provided under any listed domain.</li>
-      <li><strong>Website</strong>: Any page under a Lawson Hart operated domain (same scope as Service).</li>
-      <li><strong>You</strong>: The individual accessing the Website or an entity acting through an individual.</li>
-      <li><strong>Account</strong>: A profile that may be created to access specific parts of the Service.</li>
-      <li><strong>Content</strong>: Text, images, code, or media on the site.</li>
-      <li><strong>Device</strong>: Hardware you use to access the site (computer, phone, tablet and so on).</li>
-      <li><strong>Personal Data</strong>: Data that can identify you (email, IP address).</li>
-      <li><strong>Usage Data</strong>: Automatically collected info like visit time, browser, actions.</li>
-      <li><strong>Service Provider</strong>: Third parties that help deliver, analyze, or support the Website.</li>
-      <li><strong>Affiliates</strong>: Related entities (subsidiaries, joint ventures).</li>
-      <li><strong>Business Partners</strong>: External entities collaborating on services, features, or offers.</li>
-      <li><strong>Data</strong>: Refers to both Personal Data and Usage Data.</li>
-      <li><strong>Consent</strong>: Agreement to policies by using the Service.</li>
-      <li><strong>Termination</strong>: Restricting or revoking access to an account or the Website.</li>
-      <li><strong>External Links</strong>: Links to non operated sites; their content and policies are outside our control.</li>
-    </ul>
+      <h2 class="text-accent-2">Defined Terms</h2>
+      <ul class="space-y-1">
+        <li><strong>We / I</strong>: Lawson Hart personally and, where applicable, collaborators operating or maintaining the Website.</li>
+        <li><strong>Service</strong>: The website, apps, tools, comments features, games features, and content provided under any listed domain.</li>
+        <li><strong>Website</strong>: Any page or service under a Lawson Hart operated domain covered by these policies.</li>
+        <li><strong>Comments Service</strong>: The comments system and related auth, moderation, and discussion features, including <code>comments.lawsonhart.me</code>.</li>
+        <li><strong>Games Service</strong>: The games website and related multiplayer, session, chat, and gameplay features, including <code>games.lawsonhart.me</code>.</li>
+        <li><strong>You</strong>: The individual accessing the Website or an entity acting through an individual.</li>
+        <li><strong>Account</strong>: A profile or authenticated session used to access specific parts of the Service.</li>
+        <li><strong>Content</strong>: Text, images, code, media, comments, submissions, or other material shown on or sent through the site.</li>
+        <li><strong>User Submissions</strong>: Information you intentionally provide, such as comments, replies, reactions, chat, gameplay entries, and similar posted data.</li>
+        <li><strong>Device</strong>: Hardware you use to access the site, such as a computer, phone, or tablet.</li>
+        <li><strong>Personal Data</strong>: Data that can identify you, such as email address, IP address, GitHub account information, or other account-linked data.</li>
+        <li><strong>Usage Data</strong>: Automatically collected information such as browser details, visit time, timestamps, and actions taken while using the Service.</li>
+        <li><strong>Authentication Data</strong>: OAuth or authorization information, GitHub login identifiers, session identifiers, CSRF tokens, and related security metadata used to authenticate and protect the Service.</li>
+        <li><strong>Service Provider</strong>: Third parties that help deliver, authenticate, analyze, or support the Website.</li>
+        <li><strong>Data</strong>: Refers to both Personal Data and Usage Data, including User Submissions where context requires it.</li>
+        <li><strong>Consent</strong>: Agreement to these policies by accessing or using the Service.</li>
+        <li><strong>Termination</strong>: Restricting, suspending, or revoking access to an account or the Website.</li>
+        <li><strong>External Links</strong>: Links to non-operated sites; their content and policies are outside my control.</li>
+      </ul>
 
-    <h2 class="text-accent-2">Information Provided on the Site</h2>
-    <ul class="list-disc ms-5">
-      <li>Personal posts</li>
-      <li>Project showcases</li>
-      <li>Software tools or experimental pages</li>
-      <li>Links to third party resources or repositories</li>
-    </ul>
+      <h2 class="text-accent-2">Service-Specific Scope</h2>
+      <ul class="list-disc ms-5">
+        <li>The comments service may process GitHub authentication data and stores the comments, replies, and reactions you leave.</li>
+        <li>The games service may process browser information plus temporary gameplay submissions, chat, and room or session data that you provide while playing.</li>
+        <li>Most temporary gameplay submissions and room or session data are deleted after about 24 hours, while comments-related data may remain longer because it forms part of the public discussion or moderation record.</li>
+      </ul>
 
-    <h2 class="text-accent-2">Legal Contact</h2>
-    <p>Questions or clarifications: <a href="mailto:me@lawsonhart.me?subject=lawsonhart.me%20Policy%20Question" class="text-accent hover:underline"><code>me@lawsonhart.me</code></a></p>
+      <h2 class="text-accent-2">Information Provided on the Site</h2>
+      <ul class="list-disc ms-5">
+        <li>Personal posts and writing</li>
+        <li>Project showcases and developer notes</li>
+        <li>Software tools, experiments, comments, and interactive features</li>
+        <li>Games, multiplayer sessions, and related submissions</li>
+        <li>Links to third party resources or repositories</li>
+      </ul>
+
+      <h2 class="text-accent-2">Legal Contact</h2>
+      <p>
+        Questions or clarifications:
+        <a href="mailto:me@lawsonhart.me?subject=lawsonhart.me%20Policy%20Question" class="text-accent hover:underline">
+          <code>me@lawsonhart.me</code>
+        </a>
+      </p>
     </div>
   </article>
 </PageLayout>

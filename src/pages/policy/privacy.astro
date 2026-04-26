@@ -1,9 +1,10 @@
 ---
 import PageLayout from "@/layouts/Base.astro";
+import PolicyNav from "@/components/policy/PolicyNav.astro";
 
 const meta = {
   title: "Privacy Policy",
-  description: "How I handle your data and privacy. Last Updated: April 10, 2025",
+  description: "How I handle your data across lawsonhart.me, the comments service, and the games service. Last Updated: April 26, 2026",
 };
 
 export const prerender = true;
@@ -11,33 +12,87 @@ export const prerender = true;
 
 <PageLayout meta={meta}>
   <article data-pagefind-body>
-    <h1 class="text-4xl font-bold mb-6 text-accent-2 tracking-tight">Privacy Policy</h1>
+    <h1 class="text-4xl font-bold mb-4 text-accent-2 tracking-tight">Privacy Policy</h1>
 
     <div class="prose prose-base dark:prose-invert max-w-none">
-      <p>I collect limited personal data to operate and improve the site. Using the site means you agree to this policy.</p>
+      <p class="leading-relaxed">
+        This policy applies to <code>lawsonhart.me</code> and related services I operate under my domains,
+        including the comments service and games website. Using the site or those services means you agree
+        to this policy.
+      </p>
 
-    <h2 class="text-accent-2">What I Collect</h2>
-    <ul class="list-disc ms-5">
-      <li>Email (only if you submit it in a form)</li>
-      <li>Usage data (IP, browser info, visit duration)</li>
-    </ul>
+      <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-sm font-medium tracking-tight shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]">
+        <span class="text-accent-2">Last Updated</span>
+        <span class="text-global-text/80">April 26, 2026</span>
+        <span class="hidden sm:inline text-global-text/50">(Privacy Policy)</span>
+      </div>
 
-    <h2 class="text-accent-2">Why I Collect It</h2>
-    <ul class="list-disc ms-5">
-      <li>Understand usage</li>
-      <li>Respond to inquiries</li>
-      <li>Maintain security and performance</li>
-    </ul>
+      <PolicyNav current="privacy" />
 
+      <h2 class="text-accent-2">What I Collect</h2>
+      <ul class="list-disc ms-5">
+        <li>Contact information you intentionally send, such as email addresses in forms or messages</li>
+        <li>Usage data such as IP address, browser and device information, timestamps, referrers, and visit duration</li>
+        <li>Content you submit, including comments, replies, reactions, game submissions, chat or similar in-game text, and other information you choose to enter</li>
+        <li>Authentication and security data used by the comments service, including GitHub account identifiers, OAuth or authorization data, session identifiers, CSRF tokens, and related login metadata</li>
+      </ul>
 
-    <h2 class="text-accent-2">Your Rights</h2>
-    <p>You can request deletion or correction of your data. I will comply where legally required.</p>
+      <h2 class="text-accent-2">Comments Service</h2>
+      <p>
+        The comments service, including <code>comments.lawsonhart.me</code>, may process GitHub sign-in data
+        so you can authenticate and leave comments. That can include GitHub account details and related
+        authentication or security data needed to complete sign-in, maintain a session, prevent abuse, and
+        moderate the service.
+      </p>
+      <p>
+        If you post a comment, reply, or reaction, that content may be stored and displayed publicly along
+        with account-related profile information associated with your sign-in, such as your GitHub username
+        or avatar.
+      </p>
 
-    <h2 class="text-accent-2">Third Party Services</h2>
-    <p>Some usage data may go to trusted providers for analytics or infrastructure. No data is sold.</p>
+      <h2 class="text-accent-2">Games Service</h2>
+      <p>
+        The games website, including <code>games.lawsonhart.me</code>, collects browser and device
+        information already described above and may also collect temporary gameplay data that you submit,
+        such as room or session data, player-provided text, game submissions, chat messages, and similar
+        in-game activity.
+      </p>
+      <p>
+        Most temporary gameplay submissions and room or session data are deleted after about 24 hours.
+        Security, abuse-prevention, or operational logs may be kept longer when reasonably necessary.
+      </p>
 
-    <h2 class="text-accent-2">Children</h2>
-    <p>This site is not for users under 13. If a child’s data was submitted contact me.</p>
+      <h2 class="text-accent-2">Why I Collect It</h2>
+      <ul class="list-disc ms-5">
+        <li>Operate, authenticate, and secure the website and related services</li>
+        <li>Display comments, run gameplay features, and process the content you intentionally submit</li>
+        <li>Maintain performance, investigate bugs, prevent abuse, and enforce service rules</li>
+        <li>Understand usage patterns and improve the site</li>
+      </ul>
+
+      <h2 class="text-accent-2">Retention</h2>
+      <ul class="list-disc ms-5">
+        <li>Contact messages are kept only as long as needed to respond or maintain relevant records</li>
+        <li>Comments and related moderation or security records may be retained until deleted, removed, or no longer needed to operate the service</li>
+        <li>Most games submissions and temporary room or session data are deleted after about 24 hours</li>
+        <li>Some logs may be retained longer for security, abuse prevention, debugging, or legal compliance</li>
+      </ul>
+
+      <h2 class="text-accent-2">Third Party Services</h2>
+      <p>
+        Some data may be processed by trusted providers that help deliver hosting, infrastructure,
+        authentication, analytics, or storage. For example, GitHub may process authentication-related data
+        when you use GitHub sign-in for comments. I do not sell your data.
+      </p>
+
+      <h2 class="text-accent-2">Your Rights</h2>
+      <p>
+        You can request deletion or correction of your data. I will comply where legally required and where
+        operationally appropriate for public content or security records.
+      </p>
+
+      <h2 class="text-accent-2">Children</h2>
+      <p>This site is not for users under 13. If a child’s data was submitted, contact me.</p>
 
       <h2 class="text-accent-2">Changes</h2>
       <p>This policy may change. The date above updates when it does. Check back for the latest version.</p>

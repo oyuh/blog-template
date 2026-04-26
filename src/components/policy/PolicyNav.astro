@@ -1,0 +1,26 @@
+---
+type PolicyPage = "info" | "privacy" | "terms";
+
+const { current } = Astro.props as { current: PolicyPage };
+
+const links = [
+  { id: "info", href: "/policy", label: "Policy Info" },
+  { id: "privacy", href: "/policy/privacy", label: "Privacy Policy" },
+  { id: "terms", href: "/policy/tos", label: "Terms of Service" },
+].filter((link) => link.id !== current);
+---
+
+<nav aria-label="Policy navigation">
+  <div class="flex flex-col sm:flex-row gap-3 mt-6">
+    {
+      links.map((link) => (
+        <a
+          href={link.href}
+          class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-global-bg/60 ring-1 ring-white/5 backdrop-blur-md text-global-text hover:text-accent hover:bg-global-bg/75 transition shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)]"
+        >
+          {link.label}
+        </a>
+      ))
+    }
+  </div>
+</nav>
