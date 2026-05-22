@@ -4,7 +4,7 @@
 		"baseUrl": ".",
 		"lib": ["es2022", "dom", "dom.iterable"],
 		"paths": {
-			"@/*": ["src/*", "node_modules/@heroui/react/dist/styles.css"]
+			"@/*": ["src/*"]
 		},
 		"jsx": "react-jsx",
 		"jsxImportSource": "react"

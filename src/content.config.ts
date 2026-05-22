@@ -1,5 +1,6 @@
-import { defineCollection, z } from "astro:content";
+import { defineCollection } from "astro:content";
 import { glob } from "astro/loaders";
+import { z } from "astro/zod";
 
 function removeDupsAndLowerCase(array: string[]) {
 	return [...new Set(array.map((str) => str.toLowerCase()))];
@@ -45,7 +46,7 @@ const post = defineCollection({
 				.optional()
 				.transform((str) => (str ? new Date(str) : undefined)),
 			// Optional external link to try or use the product / project referenced in the post
-			tryLink: z.string().url().optional(),
+			tryLink: z.url().optional(),
 		}),
 });
 
@@ -55,7 +56,7 @@ const note = defineCollection({
 		description: z.string().optional(),
 		publishDate: z
 			.string()
-			.datetime({ offset: true }) // Ensures ISO 8601 format with offsets allowed (e.g. "2024-01-01T00:00:00Z" and "2024-01-01T00:00:00+02:00")
+			.pipe(z.iso.datetime({ offset: true })) // Accepts ISO 8601 with offsets, such as "2024-01-01T00:00:00Z" or "2024-01-01T00:00:00+02:00".
 			.transform((val) => new Date(val)),
 	}),
 });

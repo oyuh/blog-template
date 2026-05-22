@@ -1,25 +1,36 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+	"files": {
+		"includes": ["**", "!**/*.astro", "!**/*.css", "!public/admin", "!.vscode"]
+	},
 	"formatter": {
 		"indentStyle": "tab",
 		"indentWidth": 2,
 		"lineWidth": 100,
 		"formatWithErrors": true,
-		"ignore": ["*.astro"]
+		"includes": ["**", "!**/*.astro"]
 	},
-	"organizeImports": {
-		"enabled": true
-	},
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
 			"a11y": {
-				"noSvgWithoutTitle": "off"
+				"noSvgWithoutTitle": "off",
+				"noStaticElementInteractions": "off"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "off"
 			},
 			"suspicious": {
+				"noArrayIndexKey": "off",
 				"noExplicitAny": "warn"
 			}
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	},
 	"javascript": {

@@ -9,6 +9,7 @@ import icon from "astro-icon";
 import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
 import { defineConfig } from "astro/config";
+import type { AstroUserConfig } from "astro";
 import { expressiveCodeOptions } from "./src/site.config";
 import { siteConfig } from "./src/site.config";
 
@@ -30,6 +31,11 @@ import { boneyardPlugin } from "boneyard-js/vite";
 // `@astrojs/vercel` intentionally does not support `astro preview`.
 // Our `bun preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
 const useNodeAdapter = process.env.ASTRO_ADAPTER === "node";
+const vitePlugins = [
+	tailwind(),
+	rawFonts([".ttf", ".woff"]),
+	boneyardPlugin(),
+] as unknown as NonNullable<NonNullable<AstroUserConfig["vite"]>["plugins"]>;
 
 export default defineConfig({
 	site: siteConfig.url,
@@ -156,8 +162,9 @@ export default defineConfig({
 		},
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
+			include: ["@pagefind/default-ui", "aos", "baffle"],
 		},
-		plugins: [tailwind(), rawFonts([".ttf", ".woff"]), boneyardPlugin()],
+		plugins: vitePlugins,
 	},
 });
 

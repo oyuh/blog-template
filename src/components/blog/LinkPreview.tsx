@@ -21,7 +21,7 @@ export default function LinkPreview({ url, children, showPreview = false }: Link
 	const [showCard, setShowCard] = useState(showPreview);
 	const [hovered, setHovered] = useState(false);
 	const [mounted, setMounted] = useState(false);
-	const timeoutRef = useRef<NodeJS.Timeout>();
+	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const wrapperRef = useRef<HTMLSpanElement>(null);
 
 	useEffect(() => {
