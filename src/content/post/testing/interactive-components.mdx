@@ -1,6 +1,6 @@
 ---
 title: "Interactive Components Demo"
-description: "A showcase of interactive components including GitHub repo cards, link previews, and charts for blog posts"
+description: "A showcase of interactive components including GitHub repo cards, link previews, charts and data tables for blog posts"
 publishDate: "2025-01-15"
 tags: ["demo", "components", "interactive"]
 draft: true
@@ -8,10 +8,13 @@ draft: true
 
 import LinkPreview from '@/components/blog/LinkPreview.tsx';
 import Chart from '@/components/blog/Chart.tsx';
+import DataTable from '@/components/blog/DataTable.tsx';
 import InfoCard from '@/components/blog/InfoCard.tsx';
 import GitHubRepoCardOptional from '@/components/blog/GitHubRepoCardOptional.astro';
 
-This post demonstrates the new interactive components available for blog posts!
+This post demonstrates the interactive components available for blog posts. The charts and
+tables are powered by [Recharts](https://recharts.org), themed to match the site, and stretch
+to the full width of the article.
 
 ## GitHub Repository Cards
 
@@ -27,9 +30,7 @@ Here is the template-safe card wrapper in action:
 
 ## Link Previews
 
-Regular links now show previews on hover! Just use the LinkPreview component:
-
-Regular links now show previews on hover! Just use the LinkPreview component:
+Regular links show previews on hover — just wrap them in the `LinkPreview` component:
 
 <LinkPreview url="https://astro.build" client:load>Check out Astro</LinkPreview>
 
@@ -37,11 +38,14 @@ Or show a full card preview:
 
 <LinkPreview url="https://tailwindcss.com" showPreview client:load />
 
-## Charts and Graphs
+## Charts
 
-You can add interactive charts to visualize data:
+Charts are responsive, support multiple datasets, and ship with a small control bar: switch
+chart type, toggle a series from the legend, and flip the data into a table.
 
-### Line Chart
+### Single series
+
+The simplest case — one dataset. The original `data={[...]}` API still works:
 
 <Chart
   client:load
@@ -57,119 +61,118 @@ You can add interactive charts to visualize data:
   title="Monthly Visitors"
   xLabel="Month"
   yLabel="Visitors (thousands)"
-  height={300}
 />
 
-### Bar Chart
+### Multiple datasets + overlay compare
+
+Pass a `series` array to plot several datasets together. With two series visible, the
+**Δ Compare** toggle shades the gap between them so the difference is easy to read. Switch
+the type to *Bar* or *Area* with the control on the left.
 
 <Chart
   client:load
-  data={[
-    { x: 'Product A', y: 120 },
-    { x: 'Product B', y: 95 },
-    { x: 'Product C', y: 150 },
-    { x: 'Product D', y: 80 }
-  ]}
-  type="bar"
-  title="Product Sales Comparison"
-  xLabel="Products"
-  yLabel="Sales"
-  height={300}
-/>
-
-### Scatter Plot
-
-<Chart
-  client:load
-  data={[
-    { x: 1, y: 20 },
-    { x: 2, y: 35 },
-    { x: 3, y: 30 },
-    { x: 4, y: 45 },
-    { x: 5, y: 40 },
-    { x: 6, y: 55 },
-    { x: 7, y: 50 },
-    { x: 8, y: 65 }
-  ]}
-  type="scatter"
-  title="Data Distribution"
-  xLabel="X Axis"
-  yLabel="Y Axis"
-  height={300}
-/>
-
-## Usage
-
-### GitHub Repo Links
-
-Use the template-safe wrapper:
-
-```astro
-<GitHubRepoCardOptional repo="owner/repo" />
-<GitHubRepoCardOptional repo="owner/repo" compact />
-```
-
-### Link Preview
-
-```tsx
-// Hover preview (tooltip on hover)
-<LinkPreview url="https://example.com" client:load>Link Text</LinkPreview>
-
-// Always show card
-<LinkPreview url="https://example.com" showPreview client:load />
-```
-
-### Charts
-
-```tsx
-<Chart
-  client:load
-  data={[
-    { x: 'Label 1', y: 10 },
-    { x: 'Label 2', y: 20 }
-  ]}
-  type="line" // or "bar" or "scatter"
-  title="Chart Title"
-  xLabel="X Axis Label"
-  yLabel="Y Axis Label"
-  width={600}
-  height={400}
-/>
-```
-
-## Combining Components
-
-You can combine these components to create rich, interactive posts:
-
-Learn more about Astro at <LinkPreview url="https://docs.astro.build" client:load>the official docs</LinkPreview>!
-
-<Chart
-  client:load
-  data={[
-    { x: 'v1.0', y: 1000, label: 'v1.0' },
-    { x: 'v2.0', y: 5000, label: 'v2.0' },
-    { x: 'v3.0', y: 12000, label: 'v3.0' },
-    { x: 'v4.0', y: 25000, label: 'v4.0' }
-  ]}
   type="line"
-  title="Astro GitHub Stars Growth"
-  xLabel="Version"
-  yLabel="Stars"
-  height={300}
+  title="Weekly visitors by source"
+  xLabel="Week"
+  yLabel="Visitors"
+  height={360}
+  series={[
+    { name: 'Search', data: [
+      { x: 'W1', y: 420 }, { x: 'W2', y: 510 }, { x: 'W3', y: 480 },
+      { x: 'W4', y: 620 }, { x: 'W5', y: 700 }, { x: 'W6', y: 660 }
+    ]},
+    { name: 'Social', data: [
+      { x: 'W1', y: 180 }, { x: 'W2', y: 240 }, { x: 'W3', y: 300 },
+      { x: 'W4', y: 260 }, { x: 'W5', y: 340 }, { x: 'W6', y: 420 }
+    ]}
+  ]}
 />
 
-These components make your blog posts more engaging and informative!
+### Grouped vs stacked bars
+
+Multi-series bar charts start grouped; hit **Grouped → Stacked** to overlay the totals.
+
+<Chart
+  client:load
+  type="bar"
+  title="Content published per quarter"
+  xLabel="Quarter"
+  yLabel="Pieces"
+  height={360}
+  series={[
+    { name: 'Guides',   data: [{ x: 'Q1', y: 3 }, { x: 'Q2', y: 5 }, { x: 'Q3', y: 2 }, { x: 'Q4', y: 4 }] },
+    { name: 'Notes',    data: [{ x: 'Q1', y: 6 }, { x: 'Q2', y: 4 }, { x: 'Q3', y: 7 }, { x: 'Q4', y: 5 }] },
+    { name: 'Projects', data: [{ x: 'Q1', y: 1 }, { x: 'Q2', y: 2 }, { x: 'Q3', y: 1 }, { x: 'Q4', y: 3 }] }
+  ]}
+/>
+
+### Stacked area
+
+<Chart
+  client:load
+  type="area"
+  barMode="stacked"
+  smooth
+  title="Traffic mix over the year"
+  xLabel="Month"
+  yLabel="Sessions"
+  height={340}
+  series={[
+    { name: 'Direct',   data: [{ x: 'Jan', y: 120 }, { x: 'Feb', y: 150 }, { x: 'Mar', y: 170 }, { x: 'Apr', y: 160 }, { x: 'May', y: 190 }, { x: 'Jun', y: 210 }] },
+    { name: 'Search',   data: [{ x: 'Jan', y: 220 }, { x: 'Feb', y: 260 }, { x: 'Mar', y: 240 }, { x: 'Apr', y: 300 }, { x: 'May', y: 330 }, { x: 'Jun', y: 360 }] },
+    { name: 'Referral', data: [{ x: 'Jan', y: 80 },  { x: 'Feb', y: 90 },  { x: 'Mar', y: 110 }, { x: 'Apr', y: 100 }, { x: 'May', y: 130 }, { x: 'Jun', y: 150 }] }
+  ]}
+/>
+
+### Scatter
+
+<Chart
+  client:load
+  type="scatter"
+  title="Pull request size vs. review time"
+  xLabel="Lines changed"
+  yLabel="Review minutes"
+  height={340}
+  series={[
+    { name: 'PRs', data: [
+      { x: 12, y: 6 }, { x: 45, y: 14 }, { x: 80, y: 18 }, { x: 120, y: 22 },
+      { x: 160, y: 40 }, { x: 210, y: 35 }, { x: 260, y: 55 }, { x: 320, y: 70 }
+    ]}
+  ]}
+/>
+
+## Data tables
+
+Every chart can flip to a sortable table with the **View as table** button. You can also drop a
+standalone `DataTable` anywhere — click a header to sort:
+
+<DataTable
+  client:load
+  caption="Lighthouse scores by page"
+  columns={[
+    { key: 'page', label: 'Page' },
+    { key: 'perf', label: 'Performance', numeric: true },
+    { key: 'a11y', label: 'Accessibility', numeric: true },
+    { key: 'seo',  label: 'SEO', numeric: true }
+  ]}
+  rows={[
+    { page: 'Home',   perf: 98, a11y: 100, seo: 100 },
+    { page: 'Posts',  perf: 96, a11y: 100, seo: 100 },
+    { page: 'About',  perf: 99, a11y: 100, seo: 96 },
+    { page: 'Notes',  perf: 94, a11y: 98,  seo: 100 }
+  ]}
+/>
 
 ## Info Cards
 
-Highlight important information with styled cards:
+Highlight important information with callouts that match the site's admonition style:
 
 <InfoCard title="Important Note" type="info" client:load>
 This is an informational card that stands out from regular content.
 </InfoCard>
 
 <InfoCard title="Success!" type="success" client:load>
-Your operation completed successfully. Great job!
+Your operation completed successfully.
 </InfoCard>
 
 <InfoCard title="Warning" type="warning" client:load>
@@ -181,5 +184,65 @@ Something went wrong. Please try again.
 </InfoCard>
 
 <InfoCard title="Custom Icon" type="info" icon="🚀" client:load>
-You can even use custom emojis as icons!
+Pass an `icon` prop to override the default glyph.
 </InfoCard>
+
+## Usage
+
+### Charts
+
+```tsx
+// Single dataset (legacy API)
+<Chart
+  client:load
+  data={[{ x: 'Label 1', y: 10 }, { x: 'Label 2', y: 20 }]}
+  type="line" // "line" | "bar" | "area" | "scatter"
+  title="Chart Title"
+  xLabel="X Axis"
+  yLabel="Y Axis"
+  height={340}
+/>
+
+// Multiple datasets
+<Chart
+  client:load
+  type="bar"
+  series={[
+    { name: 'Series A', data: [{ x: 'Q1', y: 3 }, { x: 'Q2', y: 5 }] },
+    { name: 'Series B', data: [{ x: 'Q1', y: 6 }, { x: 'Q2', y: 4 }] }
+  ]}
+  barMode="grouped" // or "stacked"
+  smooth             // smooth line/area curves
+/>
+```
+
+Useful props: `controls={false}` hides the control bar, `enableTable={false}` removes the table
+toggle, and `allowedTypes={['line','bar']}` limits the type switcher.
+
+### Data tables
+
+```tsx
+<DataTable
+  client:load
+  caption="Optional caption"
+  columns={[
+    { key: 'name', label: 'Name' },
+    { key: 'count', label: 'Count', numeric: true }
+  ]}
+  rows={[{ name: 'A', count: 12 }, { name: 'B', count: 7 }]}
+/>
+```
+
+### GitHub repo links
+
+```astro
+<GitHubRepoCardOptional repo="owner/repo" />
+<GitHubRepoCardOptional repo="owner/repo" compact />
+```
+
+### Link preview
+
+```tsx
+<LinkPreview url="https://example.com" client:load>Link Text</LinkPreview>
+<LinkPreview url="https://example.com" showPreview client:load />
+```

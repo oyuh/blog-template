@@ -46,7 +46,7 @@ const post = defineCollection({
 				.optional()
 				.transform((str) => (str ? new Date(str) : undefined)),
 			// Optional external link to try or use the product / project referenced in the post
-			tryLink: z.url().optional(),
+			tryLink: z.string().url().optional(),
 		}),
 });
 
@@ -56,7 +56,7 @@ const note = defineCollection({
 		description: z.string().optional(),
 		publishDate: z
 			.string()
-			.pipe(z.iso.datetime({ offset: true })) // Accepts ISO 8601 with offsets, such as "2024-01-01T00:00:00Z" or "2024-01-01T00:00:00+02:00".
+			.datetime({ offset: true }) // Accepts ISO 8601 with offsets, such as "2024-01-01T00:00:00Z" or "2024-01-01T00:00:00+02:00".
 			.transform((val) => new Date(val)),
 	}),
 });

@@ -65,6 +65,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 	if (error || (!loading && !repoData)) {
 		return (
 			<div
+				className="not-prose"
 				style={{
 					padding: "1rem",
 					margin: "1rem 0",
@@ -92,6 +93,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 			<Skeleton name="github-repo-card-compact" loading={loading} animate="pulse" transition={300}>
 				{repoData && (
 					<a
+						className="not-prose"
 						href={repoData.html_url}
 						target="_blank"
 						rel="noopener noreferrer"
@@ -121,6 +123,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 								width: "20px",
 								height: "20px",
 								borderRadius: "3px",
+								margin: 0,
 							}}
 						/>
 						<span
@@ -146,6 +149,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 		<Skeleton name="github-repo-card" loading={loading} animate="pulse" transition={300}>
 			{repoData && (
 				<a
+					className="not-prose"
 					href={repoData.html_url}
 					target="_blank"
 					rel="noopener noreferrer"
@@ -189,6 +193,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 								height: "32px",
 								borderRadius: "4px",
 								flexShrink: 0,
+								margin: 0,
 							}}
 						/>
 						<div style={{ flex: 1, minWidth: 0 }}>

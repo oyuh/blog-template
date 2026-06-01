@@ -13,53 +13,159 @@ const { class: className } = Astro.props;
 </div>
 
 <script>
-	// Auto-enhance GitHub links
+	const GH_REPO_RE = /github\.com\/([^\/]+)\/([^\/\?#]+)/;
+	// Cache repo lookups so hovering the same link twice doesn't refetch.
+	const ghCache = new Map<string, GhRepo | "error">();
+
+	interface GhRepo {
+		full_name: string;
+		description: string | null;
+		stargazers_count: number;
+		forks_count: number;
+		language: string | null;
+		owner: { login: string; avatar_url: string };
+	}
+
+	let ghTooltip: HTMLDivElement | null = null;
+	let showTimer: ReturnType<typeof setTimeout> | null = null;
+	let hideTimer: ReturnType<typeof setTimeout> | null = null;
+	let activeRepo: string | null = null;
+
+	function escapeHtml(value: string) {
+		const div = document.createElement("div");
+		div.textContent = value;
+		return div.innerHTML;
+	}
+
+	function ensureTooltip() {
+		if (ghTooltip) return ghTooltip;
+		const el = document.createElement("div");
+		el.className = "gh-link-tooltip";
+		el.setAttribute("role", "tooltip");
+		el.style.display = "none";
+		document.body.appendChild(el);
+		ghTooltip = el;
+		return el;
+	}
+
+	function renderTooltip(data: GhRepo) {
+		const lang = data.language
+			? `<span class="gh-tt-lang"><i class="gh-tt-dot"></i>${escapeHtml(data.language)}</span>`
+			: "";
+		const desc = data.description
+			? `<p class="gh-tt-desc">${escapeHtml(data.description)}</p>`
+			: "";
+		return `
+			<div class="gh-tt-head">
+				<img class="gh-tt-avatar" src="${escapeHtml(data.owner.avatar_url)}" alt="" />
+				<span class="gh-tt-source">github.com</span>
+			</div>
+			<div class="gh-tt-name">${escapeHtml(data.full_name)}</div>
+			${desc}
+			<div class="gh-tt-meta">
+				${lang}
+				<span>★ ${data.stargazers_count.toLocaleString()}</span>
+				<span>⑂ ${data.forks_count.toLocaleString()}</span>
+			</div>`;
+	}
+
+	function positionTooltip(link: HTMLElement) {
+		const el = ensureTooltip();
+		const rect = link.getBoundingClientRect();
+		const tip = el.getBoundingClientRect();
+		let left = rect.left + rect.width / 2 - tip.width / 2;
+		left = Math.max(8, Math.min(left, window.innerWidth - tip.width - 8));
+		let top = rect.top - tip.height - 8;
+		if (top < 8) top = rect.bottom + 8; // flip below when no room above
+		el.style.left = `${left}px`;
+		el.style.top = `${top}px`;
+	}
+
+	async function showTooltip(link: HTMLElement, repo: string) {
+		const el = ensureTooltip();
+		let data = ghCache.get(repo);
+		if (!data) {
+			try {
+				const res = await fetch(`https://api.github.com/repos/${repo}`);
+				data = res.ok ? ((await res.json()) as GhRepo) : "error";
+			} catch {
+				data = "error";
+			}
+			ghCache.set(repo, data);
+		}
+		// Bail if the pointer moved on to a different link while we were fetching.
+		if (activeRepo !== repo || data === "error") {
+			if (data === "error" && activeRepo === repo) hideTooltip();
+			return;
+		}
+		el.innerHTML = renderTooltip(data);
+		el.style.display = "block";
+		el.classList.remove("is-visible");
+		positionTooltip(link);
+		// next frame so the fade animation runs from the final position
+		requestAnimationFrame(() => el.classList.add("is-visible"));
+	}
+
+	function hideTooltip() {
+		activeRepo = null;
+		if (!ghTooltip) return;
+		ghTooltip.classList.remove("is-visible");
+		hideTimer = setTimeout(() => {
+			if (ghTooltip) ghTooltip.style.display = "none";
+		}, 150);
+	}
+
+	function bindLink(link: HTMLElement, repo: string) {
+		link.addEventListener("mouseenter", () => {
+			if (hideTimer) clearTimeout(hideTimer);
+			activeRepo = repo;
+			showTimer = setTimeout(() => showTooltip(link, repo), 300);
+		});
+		link.addEventListener("mouseleave", () => {
+			if (showTimer) clearTimeout(showTimer);
+			hideTooltip();
+		});
+	}
+
 	function enhanceGitHubLinks() {
-		const content = document.getElementById('blog-content');
+		const content = document.getElementById("blog-content");
 		if (!content) return;
 
-		const links = content.querySelectorAll('a[href*="github.com"]');
-
+		const links = content.querySelectorAll<HTMLAnchorElement>('a[href*="github.com"]');
 		links.forEach((link) => {
-			const href = link.getAttribute('href');
+			const href = link.getAttribute("href");
 			if (!href) return;
 
-			// Match GitHub repo URLs
-			const match = href.match(/github\.com\/([^\/]+)\/([^\/\?#]+)/);
-			if (match && match[1] && match[2]) {
-				const owner = match[1];
-				const repo = match[2];
+			const match = href.match(GH_REPO_RE);
+			if (!match || !match[1] || !match[2]) return;
+			if (href.includes("/issues") || href.includes("/pull") || href.includes("/actions")) return;
 
-				// Don't enhance if it's linking to issues, pulls, etc.
-				if (href.includes('/issues') || href.includes('/pull') || href.includes('/actions')) {
-					return;
-				}
+			const repo = `${match[1]}/${match[2]}`;
+			link.classList.add("github-link");
+			link.setAttribute("data-github-repo", repo);
 
-				// Add a GitHub icon indicator
-				link.classList.add('github-link');
+			if (!link.querySelector(".github-icon")) {
+				const icon = document.createElement("span");
+				icon.className = "github-icon";
+				icon.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; margin-right: 4px; vertical-align: text-bottom;">
+					<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+				</svg>`;
+				link.insertBefore(icon, link.firstChild);
+			}
 
-				// Add data attribute for potential future enhancements
-				link.setAttribute('data-github-repo', `${owner}/${repo}`);
-
-				// Add a small GitHub icon before the link text
-				if (!link.querySelector('.github-icon')) {
-					const icon = document.createElement('span');
-					icon.className = 'github-icon';
-					icon.innerHTML = `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="display: inline-block; margin-right: 4px; vertical-align: text-bottom;">
-						<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
-					</svg>`;
-					link.insertBefore(icon, link.firstChild);
-				}
+			if (!link.dataset.ghBound) {
+				link.dataset.ghBound = "true";
+				bindLink(link, repo);
 			}
 		});
 	}
 
-	// Run on page load
 	enhanceGitHubLinks();
 
-	// Re-run if content dynamically changes
 	if (document.addEventListener) {
-		document.addEventListener('astro:page-load', enhanceGitHubLinks);
+		document.addEventListener("astro:page-load", enhanceGitHubLinks);
+		// Hide on scroll so a fixed tooltip never floats away from its link.
+		window.addEventListener("scroll", () => activeRepo && hideTooltip(), { passive: true });
 	}
 </script>
 
