@@ -19,7 +19,7 @@ const allPostsByDate = allPosts
     <section class="relative index-content">
         <div class="relative z-10 py-6">
             <div class="mb-6">
-                <h1 class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
+                <h1 data-hero-howdy class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
                     Howdy!
                     <span class="inline-block origin-bottom-right animate-wave">👋</span>
                 </h1>
@@ -27,13 +27,16 @@ const allPostsByDate = allPosts
 
             <div class="max-w-full mb-6">
                 <div class="mb-6">
-                    <p class="text-xl text-global-text leading-relaxed mb-4 min-h-[3.5em]">
-                        I'm a <span class="font-semibold text-accent-2">computer science based full-stack developer/ software engineer</span>.
-                        <SplashText class="font-medium" intervalMs={3000} />
+                    <p data-hero-role class="hero-role text-xl text-global-text leading-relaxed mb-2">
+                        I'm a <span class="font-semibold text-accent-2">computer science based full-stack developer / software engineer</span>.
                     </p>
 
+                    <p class="splash-line">
+                        <span aria-hidden="true" class="splash-marker">//</span>
+                        <SplashText class="splash-text" />
+                    </p>
 
-                    <p class="text-base text-global-text/80 flex items-center gap-2">
+                    <p class="text-base text-global-text/80 flex items-center gap-2 mt-4">
                         <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
                         </svg>
@@ -103,6 +106,47 @@ const allPostsByDate = allPosts
     .bg-grid-pattern {
         background-image: radial-gradient(circle, rgba(87, 130, 255, 0.1) 1px, transparent 1px);
         background-size: 20px 20px;
+    }
+
+    /* The role line is the headline statement: JS sizes it to fill the body
+       width on one line, and scales "Howdy!" up from there. Until JS runs (and
+       on narrow screens) it stays at its Tailwind size and wraps normally. */
+    .hero-role.hero-fit {
+        white-space: nowrap;
+    }
+
+    /* Rotating "ironic" tagline, framed as a self-deprecating code comment.
+       Kept at a modest fixed size on its own line. */
+    .splash-line {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+        margin-bottom: 0.25rem;
+        min-height: 3.25rem;
+        font-size: 1.125rem;
+        line-height: 1.6;
+        font-style: italic;
+        color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+    }
+
+    .splash-marker {
+        flex-shrink: 0;
+        font-family: "Atkinson Hyperlegible Mono", monospace;
+        font-style: normal;
+        font-weight: 600;
+        color: var(--color-accent);
+        opacity: 0.85;
+        user-select: none;
+    }
+
+    .splash-text {
+        font-weight: 500;
+    }
+
+    @media (max-width: 640px) {
+        .splash-line {
+            min-height: 4.5rem;
+        }
     }
 
     /* CTA Button - Arrow bounce animation */
@@ -196,4 +240,8 @@ const allPostsByDate = allPosts
 
     // Mark body as index page for header animation timing
     document.body.classList.add('index-page');
+</script>
+
+<script>
+    import "@/scripts/heroFit";
 </script>

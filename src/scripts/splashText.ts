@@ -25,6 +25,12 @@ function getIntervalMs(el: HTMLElement): number {
 	return Number.isFinite(num) && num > 0 ? num : 5000;
 }
 
+function getHoldMs(el: HTMLElement): number {
+	const raw = el.getAttribute("data-splash-hold-ms");
+	const num = raw ? Number(raw) : Number.NaN;
+	return Number.isFinite(num) && num >= 0 ? num : 0;
+}
+
 function pickNext(texts: string[], current: string): string {
 	if (texts.length === 0) return current;
 	if (texts.length === 1) return texts[0] ?? current;
@@ -42,6 +48,7 @@ function initOne(el: HTMLElement) {
 
 	const texts = getTexts(el);
 	const intervalMs = getIntervalMs(el);
+	const holdMs = getHoldMs(el);
 	const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 	let stop = false;
@@ -74,16 +81,24 @@ function initOne(el: HTMLElement) {
 		currentText = next;
 	};
 
-	// Kick off with a non-repeating first value
-	const first = pickNext(texts, currentText);
-	animateTo(first);
+	let intervalId: number | undefined;
 
-	const intervalId = window.setInterval(() => {
+	const startRotation = () => {
+		if (stop) return;
+		// First change after the hold window: move off the featured phrase.
 		animateTo(pickNext(texts, currentText));
-	}, intervalMs);
+		intervalId = window.setInterval(() => {
+			animateTo(pickNext(texts, currentText));
+		}, intervalMs);
+	};
+
+	// Keep the featured phrase on screen for the hold window, then rotate
+	// randomly through every phrase (the featured one included).
+	const holdId = window.setTimeout(startRotation, holdMs);
 
 	const cleanup = () => {
 		stop = true;
+		window.clearTimeout(holdId);
 		if (intervalId) window.clearInterval(intervalId);
 		try {
 			b?.stop();

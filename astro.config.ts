@@ -1,32 +1,28 @@
 import fs from "node:fs";
+// Rehype plugins
+import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import node from "@astrojs/node";
+import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import tailwind from "@tailwindcss/vite";
+import type { AstroUserConfig } from "astro";
+import { defineConfig } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
-import { defineConfig } from "astro/config";
-import type { AstroUserConfig } from "astro";
-import { expressiveCodeOptions } from "./src/site.config";
-import { siteConfig } from "./src/site.config";
-
-// Remark plugins
-import remarkDirective from "remark-directive"; /* Handle ::: directives as nodes */
-import { remarkAdmonitions } from "./src/plugins/remark-admonitions"; /* Add admonitions */
-import remarkInlineImages from "./src/plugins/remark-inline-images";
-
-// Rehype plugins
-import { rehypeHeadingIds } from "@astrojs/markdown-remark";
+import { boneyardPlugin } from "boneyard-js/vite";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeUnwrapImages from "rehype-unwrap-images";
+// Remark plugins
+import remarkDirective from "remark-directive"; /* Handle ::: directives as nodes */
 import rehypeInlineImages from "./src/plugins/rehype-inline-images";
-
-import react from "@astrojs/react";
-import { boneyardPlugin } from "boneyard-js/vite";
+import { remarkAdmonitions } from "./src/plugins/remark-admonitions"; /* Add admonitions */
+import remarkInlineImages from "./src/plugins/remark-inline-images";
+import { expressiveCodeOptions, siteConfig } from "./src/site.config";
 
 // `@astrojs/vercel` intentionally does not support `astro preview`.
 // Our `bun preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
