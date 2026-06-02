@@ -206,13 +206,12 @@ const toc = generateToc(headings);
     const setActive = (id: string | null) => {
       if (activeId === id) return;
       if (activeId && anchorMap.has(activeId)) {
-        const el = anchorMap.get(activeId)!;
-        el.classList.remove('text-accent', 'bg-accent/5', 'border-accent/20');
+        anchorMap.get(activeId)!.removeAttribute('data-active');
       }
       activeId = id;
       if (activeId && anchorMap.has(activeId)) {
         const el = anchorMap.get(activeId)!;
-        el.classList.add('text-accent', 'bg-accent/5', 'border-accent/20');
+        el.setAttribute('data-active', 'true');
 
         // Update current section index
         const allIds = Array.from(anchorMap.keys());

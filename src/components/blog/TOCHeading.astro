@@ -10,39 +10,108 @@ const {
 } = Astro.props;
 ---
 
-<li class="relative">
-	<!-- IDE-style indentation lines -->
-	{depth > 1 && (
-		<div class="absolute left-0 top-0 bottom-0 flex">
-			{Array.from({ length: depth - 1 }, (_, i) => (
-				<div
-					class="w-4 border-l border-global-text/10 first:border-l-0"
-					style={`margin-left: ${i * 16}px`}
-				></div>
-			))}
-		</div>
-	)}
-
-	<a
-		class={`
-			block py-2 px-3 text-sm text-global-text hover:text-accent transition-all duration-200 rounded-lg hover:bg-accent/8 hover:scale-[1.02] relative leading-relaxed
-			${depth === 1 ? 'font-semibold text-accent-2 text-base' : ''}
-			${depth === 2 ? 'font-medium' : ''}
-			${depth >= 3 ? 'text-global-text/75 text-xs' : ''}
-		`}
-		style={`margin-left: ${Math.max(0, (depth - 1) * 18)}px; padding-left: ${depth > 1 ? '24px' : '12px'}`}
-		href={`#${slug}`}
-		data-toc-link
-		data-depth={depth}
-	>
+<li class="toc-item">
+	<a class="toc-link" href={`#${slug}`} data-toc-link data-depth={depth}>
 		{text}
 	</a>
 
 	{!!children.length && (
-		<ol>
+		<ol class="toc-children">
 			{children.map((subheading) => (
 				<Astro.self heading={subheading} />
 			))}
 		</ol>
 	)}
 </li>
+
+<style is:global>
+	/* Shared TOC link styling for both the desktop sidebar and mobile sheet. */
+	a[data-toc-link] {
+		display: block;
+		border-radius: 0.5rem;
+		padding: 0.3rem 0.55rem;
+		line-height: 1.35;
+		text-decoration: none;
+		word-break: break-word;
+		transition:
+			color 0.18s ease,
+			background-color 0.18s ease;
+	}
+
+	/*
+	 * Depth hierarchy — a distinct size + colour for every heading level (h1–h6).
+	 * The site font (Atkinson Hyperlegible) only ships 400 + 700, so weight steps
+	 * between bold (h1–h2) and regular (h3–h6); size and colour carry the rest.
+	 */
+	a[data-toc-link][data-depth="1"] {
+		font-size: 1rem;
+		font-weight: 700;
+		letter-spacing: 0.01em;
+		color: var(--color-accent-2);
+	}
+
+	a[data-toc-link][data-depth="2"] {
+		font-size: 0.9rem;
+		font-weight: 700;
+		color: var(--color-accent-2);
+	}
+
+	a[data-toc-link][data-depth="3"] {
+		font-size: 0.82rem;
+		font-weight: 400;
+		color: color-mix(in srgb, var(--color-global-text) 92%, transparent);
+	}
+
+	a[data-toc-link][data-depth="4"] {
+		font-size: 0.76rem;
+		font-weight: 400;
+		color: color-mix(in srgb, var(--color-global-text) 74%, transparent);
+	}
+
+	a[data-toc-link][data-depth="5"] {
+		font-size: 0.72rem;
+		font-weight: 400;
+		color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	}
+
+	a[data-toc-link][data-depth="6"] {
+		font-size: 0.68rem;
+		font-weight: 400;
+		font-style: italic;
+		color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+	}
+
+	@media (hover: hover) {
+		a[data-toc-link]:hover {
+			color: var(--color-accent);
+			background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		}
+	}
+
+	a[data-toc-link][data-active="true"] {
+		color: var(--color-accent);
+		background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+		font-weight: 600;
+	}
+
+	/*
+	 * Nested levels are indented behind a vertical guide line so the depth of
+	 * each heading is obvious at a glance.
+	 */
+	ol.toc-children {
+		margin-top: 0.125rem;
+		margin-left: 0.5rem;
+		padding-left: 0.6rem;
+		border-left: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+	}
+
+	ol.toc-children > li + li {
+		margin-top: 0.125rem;
+	}
+
+	/* Brighten the guide line that leads to the currently-active heading. */
+	ol.toc-children:has(> li > a[data-active="true"]),
+	ol.toc-children:has(a[data-active="true"]) {
+		border-left-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+	}
+</style>

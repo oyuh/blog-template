@@ -46,6 +46,7 @@ const CommentsIsland =
 	<!-- Cover image hero background (full viewport width, behind header) -->
 	{post.data.coverImage && (
 		<div
+			id="blog-cover"
 			class="fixed inset-x-0 top-0 z-0 overflow-hidden"
 			style={{ height: "60vh" }}
 		>
@@ -65,11 +66,11 @@ const CommentsIsland =
 	<article class="relative z-10 grow break-words" data-pagefind-body data-blog-post="true">
 		<div id="blog-hero" class="mb-12"><Masthead content={post} readingTime={readingTime} /></div>
 		<div class="flex flex-col gap-10 lg:flex-row lg:items-start">
-			<EnhancedProse class="blog-prose prose prose-base max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:relative prose-headings:scroll-mt-24 sm:prose-th:before:content-none">
+			<EnhancedProse class="blog-prose prose prose-base min-w-0 lg:flex-1 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:relative prose-headings:scroll-mt-24 sm:prose-th:before:content-none">
 				<slot />
 			</EnhancedProse>
 			{!!headings.length && (
-				<TOCBar headings={headings}>
+				<TOCBar headings={headings} hasCoverImage={!!post.data.coverImage}>
 					{CommentsIsland && (
 						<div data-pagefind-ignore>
 							<CommentsIsland siteKey={siteKey} resourceType="post" resourceId={post.id} variant="sidebar" />
@@ -116,6 +117,31 @@ const CommentsIsland =
 </BaseLayout>
 
 <style is:global>
+	/* Cover image: quick fade out when hidden via the toggle button.
+	   `.bg-anim` is added after first paint so a persisted-hidden state
+	   doesn't animate on load. */
+	#blog-cover.bg-anim {
+		transition: opacity 0.25s ease;
+	}
+
+	#blog-cover[data-hidden='true'] {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	/* Hide-background toggle: swap eye / eye-off based on pressed state. */
+	.bg-toggle .bg-toggle-eye {
+		display: none;
+	}
+
+	.bg-toggle[aria-pressed='true'] .bg-toggle-eye-off {
+		display: none;
+	}
+
+	.bg-toggle[aria-pressed='true'] .bg-toggle-eye {
+		display: inline;
+	}
+
 	/* Blog post prose: keep interactions subtle + theme-first */
 	.blog-prose :is(h1, h2, h3, h4, h5, h6)[role='button'] {
 		cursor: pointer;
@@ -391,5 +417,63 @@ const CommentsIsland =
 			setupHeadingLinks();
 			setupExpressiveCodeToasts();
 		});
+	}
+</script>
+
+<script>
+	// Hide / show the cover background image. The control lives in the masthead
+	// (across from "Try it live") and hands off to a compact icon next to the
+	// TOC collapse button once you scroll past it.
+	const cover = document.getElementById("blog-cover");
+	if (cover) {
+		const toggles = Array.from(
+			document.querySelectorAll<HTMLButtonElement>("[data-bg-toggle]"),
+		);
+		const mastheadBtn = document.getElementById("masthead-bg-toggle");
+		const tocBtn = document.getElementById("toc-bg-toggle");
+		const key = `blog-bg-hidden:${location.pathname}`;
+
+		let hidden = false;
+		try {
+			hidden = localStorage.getItem(key) === "true";
+		} catch {}
+
+		const apply = (next: boolean) => {
+			hidden = next;
+			cover.dataset.hidden = String(next);
+			const label = next ? "Show background" : "Hide background";
+			toggles.forEach((btn) => {
+				btn.setAttribute("aria-pressed", String(next));
+				btn.setAttribute("title", label);
+				if (btn.id === "toc-bg-toggle") btn.setAttribute("aria-label", label);
+				const text = btn.querySelector(".bg-toggle-label");
+				if (text) text.textContent = label;
+			});
+			try {
+				localStorage.setItem(key, String(next));
+			} catch {}
+		};
+
+		apply(hidden);
+		// Enable the fade only after the first paint so a remembered state
+		// doesn't visibly animate on load.
+		requestAnimationFrame(() => cover.classList.add("bg-anim"));
+
+		toggles.forEach((btn) => btn.addEventListener("click", () => apply(!hidden)));
+
+		// Reveal the compact sidebar toggle once the masthead one scrolls away.
+		if (mastheadBtn && tocBtn) {
+			const showToc = (show: boolean) => {
+				tocBtn.classList.toggle("hidden", !show);
+				tocBtn.classList.toggle("inline-flex", show);
+			};
+			const io = new IntersectionObserver(
+				(entries) => {
+					for (const entry of entries) showToc(!entry.isIntersecting);
+				},
+				{ rootMargin: "-80px 0px 0px 0px" },
+			);
+			io.observe(mastheadBtn);
+		}
 	}
 </script>

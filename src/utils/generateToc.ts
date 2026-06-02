@@ -23,9 +23,9 @@ function injectChild(items: TocItem[], item: TocItem): void {
 
 export function generateToc(
 	headings: ReadonlyArray<MarkdownHeading>,
-	{ maxHeadingLevel = 4, minHeadingLevel = 2 }: TocOpts = {},
+	{ maxHeadingLevel = 6, minHeadingLevel = 1 }: TocOpts = {},
 ) {
-	// by default this ignores/filters out h1 and h5 heading(s)
+	// Include every heading level (h1–h6) so each gets its own depth styling.
 	const bodyHeadings = headings.filter(
 		({ depth }) => depth >= minHeadingLevel && depth <= maxHeadingLevel,
 	);

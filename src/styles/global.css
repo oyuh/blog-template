@@ -39,6 +39,42 @@
 	}
 }
 
+/* Comments pop-out: quick scale/fade-in so it doesn't appear abruptly. */
+@keyframes comments-pop-in {
+	from {
+		opacity: 0;
+		transform: scale(0.96) translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.comments-pop-in {
+	animation: comments-pop-in 0.18s ease-out;
+}
+
+/* TOC sidebar: fade in whichever face (full panel / compact buttons) is shown. */
+@keyframes toc-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(-4px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.comments-pop-in,
+	#toc-panel,
+	#toc-collapsed {
+		animation: none !important;
+	}
+}
+
 /* Shared toast styling (used by blog header-copy toast + holiday notifications) */
 .lawson-toast {
 	/* Slightly tinted surface so it stands out on both light + dark */
