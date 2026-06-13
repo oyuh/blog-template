@@ -117,10 +117,10 @@ const mobileMenuLinks = [{ path: "/", title: "Home" }, ...filteredMenuLinks];
                 <div class="mobile-menu-panel__actions">
                     <span class="mobile-action-chip"><ThemeToggleOptional /></span>
                     {SpotifyStatusIsland && (
-                        <span class="mobile-action-chip"><SpotifyStatusIsland /></span>
+                        <span class="mobile-action-chip" data-spotify-status><SpotifyStatusIsland /></span>
                     )}
                     {HolidayStatusIsland && (
-                        <span class="mobile-action-chip"><HolidayStatusIsland /></span>
+                        <span class="mobile-action-chip" data-holiday-status><HolidayStatusIsland /></span>
                     )}
                 </div>
                 {GitHubInfo && <GitHubInfo />}

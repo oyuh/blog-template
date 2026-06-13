@@ -1,4 +1,5 @@
 ---
+import SiteSettings from "@/components/SiteSettings.astro";
 import { menuLinks, siteConfig } from "@/site.config";
 
 type AstroComponent = (props: Record<string, unknown>) => unknown;
@@ -15,6 +16,18 @@ const year = new Date().getFullYear();
 		<div class="sm:hidden flex flex-col items-center gap-2 text-center">
 			<img src="/logo.svg" alt="Lawson Hart Logo" class="h-8 w-auto" />
 			<span class="text-sm font-medium leading-relaxed">&copy; {siteConfig.author} {year}</span>
+			<button
+				type="button"
+				data-site-settings-open
+				class="footer-settings-cog mt-1 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 transition-colors duration-200 hover:text-accent hover:bg-accent/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+				aria-label="Open site settings"
+			>
+				<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+					<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+				</svg>
+				Settings
+			</button>
 		</div>
 		<!-- Main content: Nav links separated by logo -->
 		<div class="hidden sm:flex items-center justify-center flex-wrap gap-y-4">
@@ -57,6 +70,19 @@ const year = new Date().getFullYear();
 							</>
 						))
 					}
+					<span class="text-zinc-300 dark:text-zinc-600">•</span>
+					<button
+						type="button"
+						data-site-settings-open
+						class="footer-settings-cog inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 transition-colors duration-200 hover:text-accent hover:bg-accent/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+						aria-label="Open site settings"
+						title="Site settings"
+					>
+						<svg class="h-[1.05rem] w-[1.05rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+							<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+						</svg>
+					</button>
 				</div>
 			</div>
 		</div>
@@ -66,6 +92,9 @@ const year = new Date().getFullYear();
 			{GitHubInfo && <GitHubInfo />}
 		</div>
 	</div>
+
+	<!-- Personal site settings modal (triggered by the cog buttons above) -->
+	<SiteSettings />
 </footer>
 
 <style>

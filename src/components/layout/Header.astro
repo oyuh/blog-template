@@ -131,8 +131,16 @@ const showDevToastControls = import.meta.env.DEV;
                             </div>
                         </details>
                     )}
-                    {HolidayStatusIsland && <HolidayStatusIsland />}
-                    {SpotifyStatusIsland && <SpotifyStatusIsland />}
+                    {HolidayStatusIsland && (
+                        <span data-holiday-status class="inline-flex items-center">
+                            <HolidayStatusIsland />
+                        </span>
+                    )}
+                    {SpotifyStatusIsland && (
+                        <span data-spotify-status class="inline-flex items-center">
+                            <SpotifyStatusIsland />
+                        </span>
+                    )}
                     <!-- Search button -->
                     <Search />
                 </div>

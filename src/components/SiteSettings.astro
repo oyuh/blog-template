@@ -1,0 +1,357 @@
+---
+// Personal site settings modal.
+//
+// Renders the dialog + controller once (included in the Footer). The cog trigger
+// buttons live wherever they're needed and just carry `data-site-settings-open`;
+// this controller wires them all up. Preferences persist via `src/utils/siteSettings.ts`.
+//
+// Styling intentionally mirrors the site's other modals (e.g. SpotifyStatus):
+// translucent zinc panel, `text-accent-2` titles, `border-white/10` dividers.
+---
+
+<div
+	id="site-settings-overlay"
+	class="fixed inset-0 z-[1000] hidden items-center justify-center bg-black/30 p-4 backdrop-blur-sm dark:bg-black/50"
+	aria-hidden="true"
+>
+	<div class="absolute inset-0" data-site-settings-close></div>
+
+	<div
+		class="settings-panel relative w-full max-w-md overflow-hidden rounded-xl border border-zinc-200/50 bg-zinc-50/70 shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] backdrop-blur-md dark:border-zinc-700/50 dark:bg-zinc-800/50 dark:shadow-[0_20px_25px_-5px_rgba(0,0,0,0.25),0_10px_10px_-5px_rgba(0,0,0,0.1)]"
+		role="dialog"
+		aria-modal="true"
+		aria-labelledby="site-settings-title"
+		tabindex="-1"
+	>
+		<!-- Header -->
+		<div class="flex items-center justify-between border-b border-white/10 px-6 py-5">
+			<h2 id="site-settings-title" class="text-xl font-semibold text-accent-2">Site settings</h2>
+			<button
+				type="button"
+				data-site-settings-close
+				class="rounded-md p-2 text-global-text/60 transition-all duration-200 hover:bg-accent/10 hover:text-global-text"
+				aria-label="Close settings"
+			>
+				<svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+				</svg>
+			</button>
+		</div>
+
+		<!-- Body -->
+		<div class="px-6">
+			<!-- Holiday themes -->
+			<section class="flex items-center justify-between gap-4 border-b border-white/10 py-4">
+				<div class="min-w-0">
+					<div class="flex items-center gap-2.5 text-[0.95rem] font-semibold text-global-text">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 shrink-0 text-accent" aria-hidden="true">
+							<path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
+						</svg>
+						<span>Holiday themes</span>
+					</div>
+					<p class="mt-1.5 text-xs leading-relaxed text-global-text/60">Seasonal overlays and the sparkle button in the header.</p>
+				</div>
+				<div class="settings-segment" role="radiogroup" aria-label="Holiday themes">
+					<button type="button" class="settings-segment__btn" data-setting="holiday" data-value="enabled" role="radio">On</button>
+					<button type="button" class="settings-segment__btn" data-setting="holiday" data-value="disabled" role="radio">Off</button>
+					<button type="button" class="settings-segment__btn" data-setting="holiday" data-value="removed" role="radio">Remove</button>
+				</div>
+			</section>
+
+			<!-- Spotify status -->
+			<section class="flex items-center justify-between gap-4 border-b border-white/10 py-4">
+				<div class="min-w-0">
+					<div class="flex items-center gap-2.5 text-[0.95rem] font-semibold text-global-text">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 shrink-0 text-accent" aria-hidden="true">
+							<path d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2Zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2ZM9 10l12-3" />
+						</svg>
+						<span>Spotify status</span>
+					</div>
+					<p class="mt-1.5 text-xs leading-relaxed text-global-text/60">When off, it leaves the header and stops contacting the music API.</p>
+				</div>
+				<button type="button" class="settings-switch" data-setting="spotify" role="switch" aria-label="Spotify status">
+					<span class="settings-switch__thumb"></span>
+				</button>
+			</section>
+
+			<!-- Comments -->
+			<section class="flex items-center justify-between gap-4 py-4">
+				<div class="min-w-0">
+					<div class="flex items-center gap-2.5 text-[0.95rem] font-semibold text-global-text">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 shrink-0 text-accent" aria-hidden="true">
+							<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
+						</svg>
+						<span>Comments</span>
+					</div>
+					<p class="mt-1.5 text-xs leading-relaxed text-global-text/60">When off, comments are hidden everywhere and no comment requests are made.</p>
+				</div>
+				<button type="button" class="settings-switch" data-setting="comments" role="switch" aria-label="Comments">
+					<span class="settings-switch__thumb"></span>
+				</button>
+			</section>
+		</div>
+
+		<!-- Footer -->
+		<div class="border-t border-white/10 px-6 py-3">
+			<p id="site-settings-saved" class="text-[11px] text-global-text/50">Changes are saved on this device.</p>
+		</div>
+	</div>
+</div>
+
+<style is:global>
+	/* ---- Visibility effects driven by <html> classes (see siteSettings.ts) ---- */
+	html.settings-holiday-removed [data-holiday-status] {
+		display: none !important;
+	}
+
+	html.settings-spotify-disabled [data-spotify-status] {
+		display: none !important;
+	}
+
+	html.settings-comments-disabled #toc-comments-btn,
+	html.settings-comments-disabled #mobile-comments-btn {
+		display: none !important;
+	}
+</style>
+
+<style>
+	#site-settings-overlay[data-open="true"] {
+		display: flex;
+	}
+
+	.settings-panel {
+		transform: translateY(10px) scale(0.985);
+		opacity: 0;
+		transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease;
+	}
+
+	#site-settings-overlay[data-open="true"] .settings-panel {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+
+	/* Segmented control (holiday) — built from site tokens */
+	.settings-segment {
+		display: inline-flex;
+		flex-shrink: 0;
+		padding: 0.2rem;
+		border-radius: 0.6rem;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 12%, transparent);
+		background: color-mix(in srgb, var(--color-global-text) 5%, transparent);
+	}
+
+	.settings-segment__btn {
+		appearance: none;
+		border: none;
+		background: transparent;
+		padding: 0.35rem 0.6rem;
+		border-radius: 0.45rem;
+		font-size: 0.75rem;
+		font-weight: 600;
+		color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+		cursor: pointer;
+		transition: color 0.18s ease, background 0.18s ease;
+	}
+
+	.settings-segment__btn:hover {
+		color: var(--color-global-text);
+	}
+
+	.settings-segment__btn[aria-checked="true"] {
+		color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-global-bg) 85%, transparent);
+		box-shadow: 0 1px 4px -2px rgba(0, 0, 0, 0.35);
+	}
+
+	.settings-segment__btn:focus-visible {
+		outline: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+		outline-offset: 1px;
+	}
+
+	/* Toggle switch (spotify, comments) */
+	.settings-switch {
+		position: relative;
+		flex-shrink: 0;
+		width: 2.85rem;
+		height: 1.6rem;
+		border-radius: 9999px;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+		background: color-mix(in srgb, var(--color-global-text) 14%, transparent);
+		cursor: pointer;
+		transition: background 0.2s ease, border-color 0.2s ease;
+	}
+
+	.settings-switch[aria-checked="true"] {
+		background: var(--color-accent);
+		border-color: var(--color-accent);
+	}
+
+	.settings-switch:focus-visible {
+		outline: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
+		outline-offset: 2px;
+	}
+
+	.settings-switch__thumb {
+		position: absolute;
+		top: 50%;
+		left: 0.18rem;
+		width: 1.15rem;
+		height: 1.15rem;
+		border-radius: 9999px;
+		background: #fff;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+		transform: translateY(-50%);
+		transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.settings-switch[aria-checked="true"] .settings-switch__thumb {
+		transform: translate(1.25rem, -50%);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.settings-panel,
+		.settings-switch__thumb {
+			transition: none !important;
+		}
+	}
+</style>
+
+<script>
+	import {
+		applySettingsToDocument,
+		readSettingsSavedAt,
+		readSiteSettings,
+		setSiteSetting,
+		type SiteSettingKey,
+		type SiteSettings,
+	} from "@/utils/siteSettings";
+
+	function setupSiteSettings() {
+		const overlay = document.getElementById("site-settings-overlay");
+		if (!overlay || overlay.dataset.bound === "true") return;
+		overlay.dataset.bound = "true";
+
+		const panel = overlay.querySelector<HTMLElement>(".settings-panel");
+		const savedLabel = overlay.querySelector<HTMLElement>("#site-settings-saved");
+		const openTriggers = () =>
+			Array.from(document.querySelectorAll<HTMLElement>("[data-site-settings-open]"));
+		const closeTriggers = Array.from(
+			overlay.querySelectorAll<HTMLElement>("[data-site-settings-close]"),
+		);
+		const segmentButtons = Array.from(
+			overlay.querySelectorAll<HTMLButtonElement>(".settings-segment__btn"),
+		);
+		const switches = Array.from(overlay.querySelectorAll<HTMLButtonElement>(".settings-switch"));
+
+		let lastFocused: HTMLElement | null = null;
+
+		const renderSavedLabel = () => {
+			if (!savedLabel) return;
+			const ts = readSettingsSavedAt();
+			savedLabel.textContent = ts
+				? `Last saved ${new Date(ts).toLocaleString(undefined, {
+						month: "short",
+						day: "numeric",
+						hour: "numeric",
+						minute: "2-digit",
+					})}`
+				: "Changes are saved on this device.";
+		};
+
+		// Paint the controls to match the current settings.
+		const render = (settings: SiteSettings) => {
+			for (const btn of segmentButtons) {
+				const isActive = btn.dataset.value === settings[btn.dataset.setting as SiteSettingKey];
+				btn.setAttribute("aria-checked", String(isActive));
+			}
+			for (const sw of switches) {
+				const key = sw.dataset.setting as SiteSettingKey;
+				sw.setAttribute("aria-checked", String(settings[key] === "enabled"));
+			}
+			renderSavedLabel();
+		};
+
+		const open = () => {
+			lastFocused = document.activeElement as HTMLElement | null;
+			render(readSiteSettings());
+			overlay.dataset.open = "true";
+			overlay.setAttribute("aria-hidden", "false");
+			document.body.style.overflow = "hidden";
+			panel?.focus({ preventScroll: true });
+		};
+
+		const close = () => {
+			overlay.dataset.open = "false";
+			overlay.setAttribute("aria-hidden", "true");
+			document.body.style.overflow = "";
+			lastFocused?.focus?.({ preventScroll: true });
+		};
+
+		const onTriggerClick = (event: Event) => {
+			event.preventDefault();
+			open();
+		};
+
+		// Re-bind triggers each page load in case islands hydrate later; idempotent.
+		const bindOpenTriggers = () => {
+			for (const trigger of openTriggers()) {
+				if (trigger.dataset.settingsBound === "true") continue;
+				trigger.dataset.settingsBound = "true";
+				trigger.addEventListener("click", onTriggerClick);
+			}
+		};
+		bindOpenTriggers();
+		document.addEventListener("astro:page-load", bindOpenTriggers);
+
+		for (const trigger of closeTriggers) {
+			trigger.addEventListener("click", (e) => {
+				e.preventDefault();
+				close();
+			});
+		}
+
+		document.addEventListener("keydown", (event) => {
+			if (event.key === "Escape" && overlay.dataset.open === "true") close();
+		});
+
+		for (const btn of segmentButtons) {
+			btn.addEventListener("click", () => {
+				const key = btn.dataset.setting as SiteSettingKey;
+				const value = btn.dataset.value as SiteSettings[typeof key];
+				render(setSiteSetting(key, value));
+			});
+		}
+
+		for (const sw of switches) {
+			sw.addEventListener("click", () => {
+				const key = sw.dataset.setting as SiteSettingKey;
+				const next = sw.getAttribute("aria-checked") === "true" ? "disabled" : "enabled";
+				render(setSiteSetting(key, next as SiteSettings[typeof key]));
+			});
+		}
+
+		// Keep the header holiday (sparkle) button and this menu in sync both ways.
+		// The button toggles `holidays-user-disabled` and emits `holiday-toggle`; mirror
+		// that into our stored setting. We never override an explicit "removed" choice,
+		// and only write when the value actually changes (so this can't loop with the
+		// `holiday-toggle` that `setSiteSetting` itself dispatches).
+		document.addEventListener("holiday-toggle", (event) => {
+			const detail = (event as CustomEvent<{ userDisabled?: boolean }>).detail || {};
+			if (typeof detail.userDisabled !== "boolean") return;
+			const current = readSiteSettings().holiday;
+			if (current === "removed") return;
+			const nextHoliday = detail.userDisabled ? "disabled" : "enabled";
+			if (nextHoliday !== current) {
+				setSiteSetting("holiday", nextHoliday);
+				render(readSiteSettings());
+			}
+		});
+
+		// Ensure <html> classes reflect storage even if the inline head script was skipped.
+		applySettingsToDocument(readSiteSettings());
+		render(readSiteSettings());
+	}
+
+	setupSiteSettings();
+	document.addEventListener("astro:page-load", setupSiteSettings);
+</script>

@@ -36,6 +36,29 @@ const enableVercelAnalytics =
 
 		{enableVercelAnalytics && <Analytics />}
 
+		{/* Apply personal site settings before paint to avoid a flash of removed/disabled UI.
+		    Mirrors `applySettingsToDocument` in src/utils/siteSettings.ts. */}
+		<script is:inline>
+			(function () {
+				function applySiteSettings() {
+					try {
+						var raw = localStorage.getItem("site-settings:v1");
+						var s = raw ? JSON.parse(raw) : {};
+						var holiday = s.holiday || "disabled"; // default: holidays paused
+						var root = document.documentElement;
+						root.classList.toggle("settings-holiday-removed", holiday === "removed");
+						root.classList.toggle("settings-spotify-disabled", s.spotify === "disabled");
+						root.classList.toggle("settings-comments-disabled", s.comments === "disabled");
+						// Pause the holiday overlay before its islands initialize. Only force
+						// the pause; while "enabled" we leave the flag for the sparkle button.
+						if (holiday !== "enabled") localStorage.setItem("holidays-user-disabled", "true");
+					} catch (e) {}
+				}
+				applySiteSettings();
+				document.addEventListener("astro:after-swap", applySiteSettings);
+			})();
+		</script>
+
 		<script is:inline>
 			(function () {
 				function sendTitle() {
