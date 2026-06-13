@@ -1,6 +1,6 @@
 import fs from "node:fs";
 // Rehype plugins
-import { rehypeHeadingIds } from "@astrojs/markdown-remark";
+import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import node from "@astrojs/node";
 import react from "@astrojs/react";
@@ -122,29 +122,34 @@ export default defineConfig({
 		react(),
 	],
 	markdown: {
-		rehypePlugins: [
-			rehypeHeadingIds,
-			[rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["not-prose"] } }],
-			[
-				rehypeExternalLinks,
-				{
-					rel: ["noreferrer", "noopener"],
-					target: "_blank",
-				},
+		// Astro 6.4 deprecated the top-level `remarkPlugins`/`rehypePlugins`/`remarkRehype`
+		// keys; the pipeline is now configured via the `unified()` processor factory
+		// from `@astrojs/markdown-remark`. `gfm` and `smartypants` keep their defaults (`true`).
+		processor: unified({
+			rehypePlugins: [
+				rehypeHeadingIds,
+				[rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["not-prose"] } }],
+				[
+					rehypeExternalLinks,
+					{
+						rel: ["noreferrer", "noopener"],
+						target: "_blank",
+					},
+				],
+				rehypeUnwrapImages,
+				rehypeInlineImages({ publicPrefix: "/content-assets" }),
 			],
-			rehypeUnwrapImages,
-			rehypeInlineImages({ publicPrefix: "/content-assets" }),
-		],
-		remarkPlugins: [
-			remarkDirective,
-			remarkAdmonitions,
-			remarkInlineImages({ publicPrefix: "/content-assets" }),
-		],
-		remarkRehype: {
-			footnoteLabelProperties: {
-				className: [""],
+			remarkPlugins: [
+				remarkDirective,
+				remarkAdmonitions,
+				remarkInlineImages({ publicPrefix: "/content-assets" }),
+			],
+			remarkRehype: {
+				footnoteLabelProperties: {
+					className: [""],
+				},
 			},
-		},
+		}),
 	},
 	// https://docs.astro.build/en/guides/prefetch/
 	prefetch: true,
