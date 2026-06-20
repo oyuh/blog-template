@@ -78,7 +78,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 					style={{
 						margin: 0,
 						color: "color-mix(in srgb, var(--color-global-text) 60%, transparent)",
-						fontFamily: '"Atkinson Hyperlegible Mono", monospace',
+						fontFamily: '"Geist Mono Variable", monospace',
 						fontSize: "0.875rem",
 					}}
 				>
@@ -131,7 +131,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 								fontWeight: 500,
 								fontSize: "0.875rem",
 								color: "var(--color-accent-2)",
-								fontFamily: '"Atkinson Hyperlegible Mono", monospace',
+								fontFamily: '"Geist Mono Variable", monospace',
 							}}
 						>
 							{repoData.full_name}
@@ -166,14 +166,12 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 					}}
 					onMouseEnter={(e) => {
 						e.currentTarget.style.borderColor = "var(--color-accent)";
-						e.currentTarget.style.transform = "translateY(-2px)";
 						e.currentTarget.style.background =
-							"color-mix(in srgb, var(--color-accent) 3%, transparent)";
+							"color-mix(in srgb, var(--color-accent) 6%, transparent)";
 					}}
 					onMouseLeave={(e) => {
 						e.currentTarget.style.borderColor =
 							"color-mix(in srgb, var(--color-global-text) 15%, transparent)";
-						e.currentTarget.style.transform = "translateY(0)";
 						e.currentTarget.style.background = "transparent";
 					}}
 				>
@@ -204,7 +202,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 									color: "var(--color-accent-2)",
 									margin: 0,
 									marginBottom: "0.25rem",
-									fontFamily: '"Atkinson Hyperlegible Mono", monospace',
+									fontFamily: '"Geist Mono Variable", monospace',
 								}}
 							>
 								{repoData.full_name}
@@ -234,7 +232,7 @@ export default function GitHubRepoCard({ repo, compact = false }: GitHubRepoCard
 							alignItems: "center",
 							paddingTop: "0.5rem",
 							borderTop: "1px solid color-mix(in srgb, var(--color-global-text) 8%, transparent)",
-							fontFamily: '"Atkinson Hyperlegible Mono", monospace',
+							fontFamily: '"Geist Mono Variable", monospace',
 						}}
 					>
 						{repoData.language && (

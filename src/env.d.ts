@@ -25,17 +25,6 @@ declare module "astro-webmanifest" {
 	export default webmanifest;
 }
 
-// Holiday system global interface
-declare global {
-	interface Window {
-		holiday: {
-			enableHoliday: (holidayId?: string) => void;
-			disableHoliday: (holidayId?: string) => void;
-			listHolidays: () => void;
-		};
-	}
-}
-
 interface ImportMetaEnv {
 	readonly BASE_URL: string;
 	readonly PUBLIC_TEMPLATE_REPO_URL?: string;

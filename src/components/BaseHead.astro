@@ -26,6 +26,10 @@ const enableSpeedInsights =
 <link rel="icon" href="/favicon-32x32.png" type="image/png" />
 <link href="/icons/apple-touch-icon.png" rel="apple-touch-icon" />
 
+{/* Preload the footer logo so it's ready the instant the footer paints. It's a tiny
+    (~2KB) optimized PNG used in the footer on every page. */}
+<link rel="preload" href="/logo.png" as="image" type="image/png" />
+
 {/* Canonical URL */}
 <link href={canonicalURL} rel="canonical" />
 

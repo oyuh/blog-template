@@ -16,8 +16,8 @@ Usage:
 	bun template:dev
 	bun template:build
 
-	bun template:dev -- --exclude src/components/SpotifyStatus.tsx
-	bun template:build -- --exclude src/components/HolidayOverlay.tsx
+	bun template:dev -- --exclude src/components/SpotifyLogo.tsx
+	bun template:build -- --exclude src/components/GitHubInfo.tsx
 
 Options:
 	--exclude <path>       Repeatable.
@@ -47,7 +47,7 @@ function usage(exitCode = 0) {
 		"Examples:\n" +
 		"  bun template:dev\n" +
 		"  bun template:dev -- --exclude src/components/SpotifyStatus.tsx\n" +
-		"  bun template:build -- --exclude src/components/HolidayOverlay.tsx\n";
+		"  bun template:build -- --exclude src/components/GitHubInfo.tsx\n";
 	process.stdout.write(msg);
 	process.exit(exitCode);
 }

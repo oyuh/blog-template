@@ -26,6 +26,8 @@
     "@astrojs/rss": "4.0.18",
     "@astrojs/sitemap": "3.7.3",
     "@astrojs/vercel": "^10.0.8",
+    "@fontsource-variable/geist-mono": "^5.2.8",
+    "@fontsource-variable/plus-jakarta-sans": "^5.2.8",
     "@heroui/card": "^2.2.28",
     "@heroui/progress": "^2.2.25",
     "@heroui/react": "^3.1.0",

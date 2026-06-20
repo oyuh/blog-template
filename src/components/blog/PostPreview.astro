@@ -1,8 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "@/components/FormattedDate.astro";
-import { type TocItem, generateToc } from "@/utils/generateToc";
+import { calculateReadingTime } from "@/utils/readingTime";
 import { getTechIconName } from "@/utils/techIcons";
+import { tiltFromSeed } from "@/utils/tilt";
 import { Icon } from "astro-icon/components";
 import type { HTMLTag, Polymorphic } from "astro/types";
 
@@ -11,387 +12,293 @@ type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
 	withDesc?: boolean;
 };
 
-const { post} = Astro.props;
+const { post, as: Tag = "div" } = Astro.props;
 
 const technologies = (post.data.technologies ?? []).map((tech: string) => tech.trim()).filter(Boolean);
-const visibleTags = post.data.tags.slice(0, 4);
-const hiddenTags = post.data.tags.slice(4);
-const visibleTechnologies = technologies.slice(0, 5);
-const hiddenTechnologies = technologies.slice(5);
-const revealTags = hiddenTags.slice(0, 6);
-const revealTechnologies = hiddenTechnologies.slice(0, 6);
+const tags = post.data.tags ?? [];
 
-// Get table of contents for preview and reading time
-interface TocDisplayItem {
-    depth: number;
-    text: string;
-    slug: string;
-    children: TocDisplayItem[];
-}
+// Tags (plain text) + technologies (icon + name) feed the hover card marquee.
+const marqueeCount = tags.length + technologies.length;
 
-const buildDisplayToc = (items: TocItem[]): TocDisplayItem[] =>
-    items.map((item) => {
-        const heading = item as unknown as {
-            depth?: number;
-            text?: string;
-            slug: string;
-            children?: TocItem[];
-        };
+// Reading time — shared helper (guards an undefined body) so the row matches the
+// post header exactly. NOTE: the old `post.render()` API was removed in the content
+// layer; calling it threw every time and then `post.body.split()` crashed on posts
+// whose body is undefined (e.g. some MDX project posts surfaced on tag/tech pages).
+const readingTime = calculateReadingTime(post);
 
-        return {
-            depth: heading.depth ?? 2,
-            text: heading.text ?? heading.slug,
-            slug: heading.slug,
-            children: buildDisplayToc(heading.children ?? []),
-        };
-    });
+const hasTip = Boolean(post.data.coverImage || post.data.description || marqueeCount);
 
-let toc: TocItem[] = [];
-let displayToc: TocDisplayItem[] = [];
-let readingTime = "";
-
-try {
-	const rendered = await post.render();
-	const { headings, remarkPluginFrontmatter } = rendered;
-	toc = generateToc(headings);
-	readingTime = remarkPluginFrontmatter?.readingTime || "";
-
-	// Fallback: estimate reading time if not available
-	if (!readingTime) {
-		// Simple word count estimation from post body
-		const wordCount = post.body.split(/\s+/).length;
-		const minutes = Math.ceil(wordCount / 200); // 200 words per minute
-		readingTime = `${minutes} min read`;
-	}
-} catch (e) {
-	// If we can't get headings or reading time, use fallback
-	toc = [];
-	try {
-		const wordCount = post.body.split(/\s+/).length;
-		const minutes = Math.ceil(wordCount / 200);
-		readingTime = `${minutes} min read`;
-    } catch {
-        readingTime = "";
-    }
-}
-
-displayToc = buildDisplayToc(toc);
+// Gentle, per-post random tilt (stable for a given post).
+const tilt = tiltFromSeed(post.id);
 ---
 
-<a
-    href={`/posts/${post.id}/`}
-    data-astro-prefetch
-    class="post-preview-card group relative overflow-hidden bg-global-bg/50 border border-white/5 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md rounded-xl transition-all duration-300 hover:border-accent/20 hover:shadow-[0_8px_20px_-12px_rgba(0,0,0,0.45)] cursor-pointer w-full block ring-1 ring-white/5"
-    data-pagefind-body={true}
->
-    {post.data.coverImage && (
-        <div class="pointer-events-none absolute inset-0 overflow-hidden rounded-xl">
-            <!-- Ensure solid background base -->
-            <div class="absolute inset-0 bg-global-bg"></div>
-            <!-- Blurred cover image on right side - now fills 48% minimum for wider layout -->
-            <div
-                class="absolute inset-y-0 right-0 w-[55%] min-w-[48%] bg-cover bg-right blur-[1.5px] opacity-45 transition-all duration-300 group-hover:opacity-65 group-hover:scale-105"
-                style={`background-image: url(${post.data.coverImage.src.src});`}
-            ></div>
-            <!-- Strong fade gradient to protect text - adjusted for wider coverage -->
-            <div class="absolute inset-0 bg-gradient-to-l from-transparent from-5% via-global-bg/25 via-25% to-global-bg to-50%"></div>
-        </div>
-    )}
+<div class="post-row group">
+	<a href={`/posts/${post.id}/`} data-astro-prefetch class="post-row__link" data-pagefind-body={true}>
+		<Tag class="post-row__title">{post.data.title}</Tag>
+		<span class="post-row__date">
+			{post.data.draft && <span class="post-row__draft">Draft</span>}
+			<FormattedDate
+				date={post.data.publishDate}
+				dateTimeOptions={{ day: "numeric", month: "short", year: "numeric" }}
+			/>
+		</span>
+	</a>
 
-    <!-- Main card content -->
-    <div class="relative p-6 flex gap-6">
-        <!-- Left side: Content (prioritize title and description) -->
-    <div class="flex-1 flex flex-col min-w-0 lg:pr-12">
-            <!-- Title gets top priority - LARGER -->
-            <h2 class="text-2xl lg:text-3xl font-bold text-accent-2 mb-3 group-hover:text-accent transition-colors leading-tight">
-                {post.data.title}
-            </h2>
+	{hasTip && (
+		<div class="post-row__tip" style={`--tilt:${tilt}deg`} aria-hidden="true">
+			{post.data.coverImage && (
+				<div class="post-row__tip-img" style={`background-image:url(${post.data.coverImage.src.src});`} />
+			)}
+			<div class="post-row__tip-body">
+				<div class="post-row__tip-meta">
+					{readingTime && (
+						<span class="post-row__tip-read">
+							<svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+							</svg>
+							{readingTime}
+						</span>
+					)}
+					<span class="post-row__tip-date">
+						<FormattedDate
+							date={post.data.publishDate}
+							dateTimeOptions={{ day: "numeric", month: "short", year: "numeric" }}
+						/>
+					</span>
+				</div>
+				{post.data.description && (
+					<p class="post-row__tip-desc">{post.data.description}</p>
+				)}
+			</div>
 
-            <!-- Description gets second priority with generous space - LARGER -->
-            <p class="text-base lg:text-lg text-global-text/90 leading-relaxed mb-auto max-w-3xl">
-                {post.data.description}
-            </p>
-
-            <!-- Compact metadata footer -->
-            <div class="mt-5 flex items-center gap-2 flex-wrap text-xs text-global-text/60 transition-colors duration-200 group-hover:text-global-text/80">
-                <span class="inline-flex items-center gap-1">
-                    <svg aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <FormattedDate
-                        class="font-medium"
-                        date={post.data.publishDate}
-                        dateTimeOptions={{
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric"
-                        }}
-                    />
-                </span>
-
-                {readingTime && (
-                    <>
-                        <span class="text-global-text/35">·</span>
-                        <span class="inline-flex items-center gap-1 font-medium">
-                            <svg aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            {readingTime}
-                        </span>
-                    </>
-                )}
-
-                {post.data.draft && (
-                    <>
-                        <span class="text-global-text/35">·</span>
-                        <span class="inline-flex items-center gap-1 font-semibold text-red-500">
-                            <svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            Draft
-                        </span>
-                    </>
-                )}
-
-                {post.data.tags.length > 0 && (
-                    <>
-                        <span class="text-global-text/35">·</span>
-                        <span class="inline-flex items-center gap-1">
-                            <svg aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a2 2 0 010 2.828l-6.172 6.172a2 2 0 01-2.828 0L4.293 12.293A1 1 0 014 11.586V6a3 3 0 013-3z" />
-                            </svg>
-                            <span class="flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
-                                {visibleTags.map((tag: string) => (
-                                    <span class="font-medium">#{tag}</span>
-                                ))}
-                                {hiddenTags.length > 0 && (
-                                    <span class="metadata-swap">
-                                        <span class="metadata-more">+{hiddenTags.length}</span>
-                                        <span class="metadata-reveal">
-                                            {revealTags.map((tag: string) => (
-                                                <span class="font-medium text-global-text/75">#{tag}</span>
-                                            ))}
-                                            {hiddenTags.length > revealTags.length && (
-                                                <span class="text-global-text/50">+{hiddenTags.length - revealTags.length}</span>
-                                            )}
-                                        </span>
-                                    </span>
-                                )}
-                            </span>
-                        </span>
-                    </>
-                )}
-
-                {technologies.length > 0 && (
-                    <>
-                        <span class="text-global-text/35">·</span>
-                        <span class="inline-flex items-center gap-1.5 whitespace-nowrap overflow-hidden">
-                            <span class="metadata-tech-marker" aria-hidden="true">
-                                <Icon aria-hidden="true" class="metadata-leading-icon h-3.5 w-3.5" name="mdi:tools" />
-                                <span class="metadata-tech-divider"></span>
-                            </span>
-                            {visibleTechnologies.map((tech: string) => {
-                                const iconName = getTechIconName(tech);
-                                return (
-                                    <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70" name={iconName} title={tech} />
-                                );
-                            })}
-                            {hiddenTechnologies.length > 0 && (
-                                <span class="metadata-swap">
-                                    <span class="metadata-more">+{hiddenTechnologies.length}</span>
-                                    <span class="metadata-reveal">
-                                        {revealTechnologies.map((tech: string) => {
-                                            const iconName = getTechIconName(tech);
-                                            return (
-                                                <Icon aria-hidden="true" class="h-3.5 w-3.5 text-global-text/70" name={iconName} title={tech} />
-                                            );
-                                        })}
-                                        {hiddenTechnologies.length > revealTechnologies.length && (
-                                            <span class="text-global-text/50">+{hiddenTechnologies.length - revealTechnologies.length}</span>
-                                        )}
-                                    </span>
-                                </span>
-                            )}
-                        </span>
-                    </>
-                )}
-            </div>
-        </div>
-
-        <!-- Spacer preserved via padding on content -->
-    </div>
-
-    <!-- Hover Table of Contents tooltip -->
-    {displayToc.length > 0 && (
-        <div class="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-50 pointer-events-none">
-            <div class="bg-global-bg/80 border border-white/10 rounded-xl shadow-[0_8px_20px_-12px_rgba(0,0,0,0.45)] backdrop-blur-md p-4 w-72 max-h-96 overflow-y-auto ring-1 ring-white/5">
-                <h4 class="text-sm font-semibold text-accent-2 mb-3 border-b border-white/10 pb-2">Table of Contents</h4>
-                <nav class="space-y-1">
-                    {displayToc.map((heading) => (
-                        <div>
-                            <div
-                                class="text-xs text-global-text py-1.5 px-2 rounded-md hover:bg-accent/5 transition-colors"
-                                style={`padding-left: ${(heading.depth - 2) * 0.75 + 0.5}rem`}
-                            >
-                                {heading.text}
-                            </div>
-                            {heading.children.length > 0 && (
-                                <div class="space-y-1">
-                                    {heading.children.map((child) => (
-                                        <div
-                                            class="text-xs text-global-text/75 py-1 px-2 rounded-md hover:bg-accent/5 transition-colors"
-                                            style={`padding-left: ${(child.depth - 2) * 0.75 + 0.5}rem`}
-                                        >
-                                            {child.text}
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </nav>
-            </div>
-        </div>
-    )}
-</a>
+			{marqueeCount > 0 && (
+				<div class="post-row__marquee">
+					<div class="post-row__marquee-track">
+						{[0, 1].map(() => (
+							<span class="post-row__marquee-group" aria-hidden="true">
+								{tags.map((tag: string) => (
+									<>
+										<span class="post-row__marquee-item">#{tag}</span>
+										<span class="post-row__marquee-sep">·</span>
+									</>
+								))}
+								{technologies.map((tech: string) => (
+									<>
+										<span class="post-row__marquee-item post-row__marquee-tech">
+											<Icon class="post-row__marquee-icon" name={getTechIconName(tech)} />
+											{tech}
+										</span>
+										<span class="post-row__marquee-sep">·</span>
+									</>
+								))}
+							</span>
+						))}
+					</div>
+				</div>
+			)}
+		</div>
+	)}
+</div>
 
 <style>
-    .post-preview-card {
-        --cursor-x: 50%;
-        --cursor-y: 50%;
-        --metadata-hide-delay: 2.25s;
-    }
+	.post-row {
+		position: relative;
+	}
 
-    .post-preview-card::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        padding: 1px;
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity 220ms ease;
-        background: radial-gradient(
-            220px circle at var(--cursor-x) var(--cursor-y),
-            color-mix(in srgb, var(--color-accent) 75%, transparent),
-            transparent 68%
-        );
-        -webkit-mask:
-            linear-gradient(#000 0 0) content-box,
-            linear-gradient(#000 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-    }
+	.post-row__link {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 1.25rem;
+		padding: 0.7rem 0.25rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-global-text) 12%, transparent);
+		text-decoration: none;
+	}
 
-    .post-preview-card:is(:hover, :focus-visible)::after {
-        opacity: 1;
-    }
+	.post-row__title {
+		margin: 0;
+		min-width: 0;
+		font-size: 1.05rem;
+		font-weight: 500;
+		line-height: 1.35;
+		color: var(--color-accent-2);
+		text-underline-offset: 3px;
+	}
 
-    .metadata-leading-icon {
-        color: color-mix(in srgb, var(--color-accent-2) 55%, transparent);
-        transition: color 220ms ease, filter 220ms ease;
-        filter: drop-shadow(0 0 0 transparent);
-    }
+	/* Hover = underline, not a colour change. */
+	.post-row:hover .post-row__title,
+	.post-row__link:focus-visible .post-row__title {
+		text-decoration: underline;
+	}
 
-    .metadata-tech-marker {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-    }
+	.post-row__date {
+		flex: none;
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.5rem;
+		font-size: 0.8rem;
+		font-variant-numeric: tabular-nums;
+		color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+		white-space: nowrap;
+	}
 
-    .metadata-tech-divider {
-        display: inline-block;
-        width: 1px;
-        height: 0.8rem;
-        background: color-mix(in srgb, var(--color-accent-2) 30%, transparent);
-        transition: background-color 220ms ease;
-    }
+	.post-row__draft {
+		font-weight: 700;
+		font-size: 0.7rem;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-red-500, oklch(62% 0.18 25));
+	}
 
-    .post-preview-card:is(:hover, :focus-visible) .metadata-tech-divider {
-        background: color-mix(in srgb, var(--color-accent) 48%, transparent);
-    }
+	/* ---- Tilted hover card (right side, flat — no glow / no shadow) ---------- */
+	.post-row__tip {
+		position: absolute;
+		bottom: calc(100% - 0.25rem);
+		right: 0.25rem;
+		z-index: 50;
+		width: 19rem;
+		max-width: min(19rem, calc(100vw - 2rem));
+		overflow: hidden;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+		border-radius: 0.5rem;
+		background: var(--color-global-bg);
+		opacity: 0;
+		transform: translateY(8px) rotate(var(--tilt, -2deg)) scale(0.98);
+		transform-origin: bottom right;
+		pointer-events: none;
+		transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+	}
 
-    .post-preview-card:is(:hover, :focus-visible) .metadata-leading-icon {
-        color: var(--color-accent);
-        filter: drop-shadow(0 0 0.42rem color-mix(in srgb, var(--color-accent) 60%, transparent));
-    }
+	.post-row:hover .post-row__tip,
+	.post-row__link:focus-visible ~ .post-row__tip {
+		opacity: 1;
+		transform: translateY(0) rotate(var(--tilt, -2deg)) scale(1);
+	}
 
-    .metadata-more {
-        display: inline-flex;
-        align-items: center;
-        overflow: hidden;
-        max-width: 2rem;
-        opacity: 1;
-        transform-origin: left center;
-        color: color-mix(in srgb, var(--color-accent-2) 45%, transparent);
-        transition:
-            max-width 420ms cubic-bezier(0.22, 1, 0.36, 1),
-            opacity 360ms ease,
-            transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
-        transition-delay: var(--metadata-hide-delay), var(--metadata-hide-delay), var(--metadata-hide-delay);
-    }
+	/* Cover image is full at the top and fades out toward the bottom. */
+	.post-row__tip-img {
+		width: 100%;
+		aspect-ratio: 5 / 2;
+		background-size: cover;
+		background-position: center;
+		-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+		mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+	}
 
-    .metadata-swap {
-        display: inline-flex;
-        align-items: center;
-        overflow: hidden;
-    }
+	.post-row__tip-body {
+		padding: 0.6rem 0.85rem 0.55rem;
+	}
 
-    .metadata-reveal {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375rem;
-        overflow: hidden;
-        white-space: nowrap;
-        max-width: 0;
-        opacity: 0;
-        transform: translateX(0.35rem);
-        transition:
-            max-width 460ms cubic-bezier(0.22, 1, 0.36, 1),
-            opacity 380ms ease,
-            transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
-        transition-delay: var(--metadata-hide-delay), var(--metadata-hide-delay), var(--metadata-hide-delay);
-    }
+	.post-row__tip-meta {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		font-size: 0.72rem;
+		color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	}
 
-    .post-preview-card:is(:hover, :focus-visible) .metadata-more {
-        max-width: 0;
-        opacity: 0;
-        transform: translateX(-0.2rem);
-        transition-delay: 0s, 0s, 0s;
-    }
+	.post-row__tip-read {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		font-weight: 600;
+		color: var(--color-accent);
+	}
 
-    .post-preview-card:is(:hover, :focus-visible) .metadata-reveal {
-        max-width: 22rem;
-        opacity: 1;
-        transform: translateX(0);
-        transition-delay: 0s, 0s, 0s;
-    }
+	.post-row__tip-date {
+		font-variant-numeric: tabular-nums;
+	}
 
+	.post-row__tip-desc {
+		margin: 0.4rem 0 0;
+		font-size: 0.82rem;
+		line-height: 1.5;
+		color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	/* ---- Sliding tag + tech strip — plain text, separators, slow ------------- */
+	.post-row__marquee {
+		overflow: hidden;
+		border-top: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
+		padding: 0.45rem 0;
+		-webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+		mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+	}
+
+	.post-row__marquee-track {
+		display: flex;
+		width: max-content;
+		animation: post-row-marquee 36s linear infinite;
+	}
+
+	.post-row__marquee-group {
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.post-row__marquee-item {
+		flex: none;
+		padding-inline: 0.45rem;
+		font-size: 0.74rem;
+		font-weight: 500;
+		white-space: nowrap;
+		color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
+	}
+
+	.post-row__marquee-tech {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.post-row__marquee-icon {
+		width: 0.95rem;
+		height: 0.95rem;
+		color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
+	}
+
+	.post-row__marquee-sep {
+		flex: none;
+		color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+		font-weight: 700;
+	}
+
+	@keyframes post-row-marquee {
+		from { transform: translateX(0); }
+		to { transform: translateX(-50%); }
+	}
+
+	/* Touch / no-hover devices: the card is decorative, so suppress it. */
+	@media (hover: none) {
+		.post-row__tip {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.post-row__marquee-track {
+			animation: none;
+		}
+		.post-row__tip {
+			transition: opacity 0.15s ease;
+		}
+	}
 </style>
 
 <script>
-    const bindPostPreviewCursorEffect = () => {
-        if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+	// Re-randomise each card's tilt on every load so it's never the same twice.
+	import { randomTilt } from "@/utils/tilt";
 
-        for (const card of document.querySelectorAll<HTMLElement>(".post-preview-card")) {
-            if (card.dataset.cursorBound === "true") continue;
-            card.dataset.cursorBound = "true";
+	const applyTilts = () => {
+		for (const tip of document.querySelectorAll<HTMLElement>(".post-row__tip")) {
+			tip.style.setProperty("--tilt", `${randomTilt()}deg`);
+		}
+	};
 
-            card.addEventListener("pointermove", (event) => {
-                const rect = card.getBoundingClientRect();
-                const x = event.clientX - rect.left;
-                const y = event.clientY - rect.top;
-                card.style.setProperty("--cursor-x", `${x}px`);
-                card.style.setProperty("--cursor-y", `${y}px`);
-            });
-
-            card.addEventListener("pointerleave", () => {
-                card.style.setProperty("--cursor-x", "50%");
-                card.style.setProperty("--cursor-y", "50%");
-            });
-        }
-    };
-
-    bindPostPreviewCursorEffect();
-    document.addEventListener("astro:page-load", bindPostPreviewCursorEffect);
+	applyTilts();
+	document.addEventListener("astro:page-load", applyTilts);
 </script>

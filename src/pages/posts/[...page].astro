@@ -2,20 +2,26 @@
 import type { CollectionEntry } from "astro:content";
 import Pagination from "@/components/Paginator.astro";
 import PostPreview from "@/components/blog/PostPreview.astro";
-import { getAllPosts, getUniqueTags, groupPostsByYear } from "@/data/post";
+import { getAllPosts, getTechnologyUsage, getUniqueTags, groupPostsByYear } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 import { collectionDateSort } from "@/utils/date";
+import { getTechIconName, techSlug } from "@/utils/techIcons";
 import type { GetStaticPaths, Page } from "astro";
 import { Icon } from "astro-icon/components";
 
 export const getStaticPaths = (async ({ paginate }) => {
 	const MAX_POSTS_PER_PAGE = 10;
 	const MAX_TAGS = 7;
+	const MAX_TECHS = 8;
 	const allPosts = await getAllPosts();
 	const uniqueTags = getUniqueTags(allPosts).slice(0, MAX_TAGS);
+	const uniqueTechs = Object.values(getTechnologyUsage(allPosts))
+		.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+		.slice(0, MAX_TECHS)
+		.map((u) => ({ name: u.name, slug: techSlug(u.name) }));
 	return paginate(allPosts.sort(collectionDateSort), {
 		pageSize: MAX_POSTS_PER_PAGE,
-		props: { uniqueTags },
+		props: { uniqueTags, uniqueTechs },
 	});
 }) satisfies GetStaticPaths;
 
@@ -24,9 +30,10 @@ export const prerender = true;
 interface Props {
 	page: Page<CollectionEntry<"post">>;
 	uniqueTags: string[];
+	uniqueTechs: { name: string; slug: string }[];
 }
 
-const { page, uniqueTags } = Astro.props;
+const { page, uniqueTags, uniqueTechs } = Astro.props;
 
 const meta = {
 	description: "Read my collection of posts and the things that interest me",
@@ -53,7 +60,7 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 //post page
 ---
 
-<PageLayout meta={meta}>
+<PageLayout meta={meta} centerMain>
 	<div class="mb-6 flex items-center gap-3">
 		<h1 class="title">Posts</h1>
 		<a class="text-accent" href="/rss.xml" target="_blank">
@@ -70,7 +77,7 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 							<span class="sr-only">Posts in</span>
 							{yearKey}
 						</h2>
-						<ul class="mt-5 mb-16 space-y-4 text-start">
+						<ul class="mt-5 mb-16 text-start">
 							{groupedByYear[yearKey]?.map((p) => (
 								<li class="w-full">
 									<PostPreview post={p} />
@@ -83,44 +90,77 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 			<Pagination {...paginationProps} />
 		</div>
 		{
-			!!uniqueTags.length && (
-				<aside>
-					<h2 class="title mb-4 flex items-center gap-2 text-lg">
-						Tags
-						<svg
-							aria-hidden="true"
-							class="h-6 w-6"
-							fill="none"
-							stroke="currentColor"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="1.5"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path d="M0 0h24v24H0z" fill="none" stroke="none" />
-							<path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z" />
-							<path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116" />
-							<path d="M6 9h-.01" />
-						</svg>
-					</h2>
-					<ul class="flex flex-wrap gap-2">
-						{uniqueTags.map((tag) => (
-							<li>
-								<a class="lawson-link flex items-center justify-center" href={`/tags/${tag}/`}>
-									<span aria-hidden="true">#</span>
-									<span class="sr-only">View all posts with the tag</span>
-									{tag}
+			(!!uniqueTags.length || !!uniqueTechs.length) && (
+				<aside class="flex flex-col gap-10">
+					{!!uniqueTags.length && (
+						<div>
+							<h2 class="title mb-4 flex items-center gap-2 text-lg">
+								Tags
+								<svg
+									aria-hidden="true"
+									class="h-6 w-6"
+									fill="none"
+									stroke="currentColor"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="1.5"
+									viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path d="M0 0h24v24H0z" fill="none" stroke="none" />
+									<path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z" />
+									<path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116" />
+									<path d="M6 9h-.01" />
+								</svg>
+							</h2>
+							<ul class="flex flex-wrap gap-2">
+								{uniqueTags.map((tag) => (
+									<li>
+										<a class="lawson-link flex items-center justify-center" href={`/tags/${tag}/`}>
+											<span aria-hidden="true">#</span>
+											<span class="sr-only">View all posts with the tag</span>
+											{tag}
+										</a>
+									</li>
+								))}
+							</ul>
+							<span class="mt-4 block sm:text-end">
+								<a class="underline-hover text-sm font-medium text-accent" href="/tags/">
+									View all <span aria-hidden="true">→</span>
+									<span class="sr-only">blog tags</span>
 								</a>
-							</li>
-						))}
-					</ul>
-					<span class="mt-4 block sm:text-end">
-						<a class="hover:text-link" href="/tags/">
-							View all <span aria-hidden="true">→</span>
-							<span class="sr-only">blog tags</span>
-						</a>
-					</span>
+							</span>
+						</div>
+					)}
+
+					{!!uniqueTechs.length && (
+						<div>
+							<h2 class="title mb-4 flex items-center gap-2 text-lg">
+								Tech
+								<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:tools" />
+							</h2>
+							<ul class="flex flex-wrap gap-2">
+								{uniqueTechs.map((tech) => (
+									<li>
+										<a
+											class="lawson-link inline-flex items-center gap-1.5"
+											href={`/tech/${tech.slug}/`}
+										>
+											<Icon aria-hidden="true" class="h-4 w-4" focusable="false" name={getTechIconName(tech.name)} />
+											<span class="sr-only">View all posts using</span>
+											{tech.name}
+										</a>
+									</li>
+								))}
+							</ul>
+							<span class="mt-4 block sm:text-end">
+								<a class="underline-hover text-sm font-medium text-accent" href="/tech/">
+									View all <span aria-hidden="true">→</span>
+									<span class="sr-only">technologies</span>
+								</a>
+							</span>
+						</div>
+					)}
 				</aside>
 			)
 		}

@@ -5,7 +5,14 @@
       "name": "dev",
       "runtimeExecutable": "bun",
       "runtimeArgs": ["run", "dev"],
-      "port": 4321
+      "port": 4321,
+      "autoPort": true
+    },
+    {
+      "name": "built",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["./dist/server/entry.mjs"],
+      "port": 4330
     }
   ]
 }

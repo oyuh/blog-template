@@ -85,7 +85,7 @@ export default function ResumeDownload({
 
 			{isOpen && (
 				<div
-					className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-4"
+					className="fixed inset-0 z-[9999] flex items-center justify-center bg-global-bg/70 px-4"
 					onClick={handleBackdropClick}
 					onKeyDown={handleBackdropKeyDown}
 					tabIndex={-1}
@@ -95,9 +95,9 @@ export default function ResumeDownload({
 						open
 						aria-labelledby="resume-modal-title"
 						aria-modal="true"
-						className="relative w-full max-w-4xl rounded-2xl bg-global-bg p-4 shadow-2xl ring-1 ring-white/10"
+						className="relative w-full max-w-4xl rounded-2xl border border-global-text/15 bg-global-bg p-4"
 					>
-						<div className="flex items-center justify-between gap-4 border-b border-white/5 pb-3">
+						<div className="flex items-center justify-between gap-4 border-b border-global-text/10 pb-3">
 							<div>
 								<p id="resume-modal-title" className="text-lg font-semibold text-accent-2">
 									Resume preview
@@ -111,7 +111,7 @@ export default function ResumeDownload({
 									<a
 										href={pdfUrl}
 										download
-										className="inline-flex items-center gap-2 rounded-lg border border-accent px-3 py-1.5 text-sm font-medium text-accent transition hover:bg-accent hover:text-white"
+										className="inline-flex items-center gap-2 rounded-lg border border-accent/45 px-3 py-1.5 text-sm font-medium text-accent transition-colors hover:border-accent hover:bg-accent/10"
 									>
 										<svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 											<path
@@ -128,7 +128,7 @@ export default function ResumeDownload({
 									type="button"
 									onClick={() => setIsOpen(false)}
 									ref={closeBtnRef}
-									className="inline-flex items-center rounded-lg border border-white/10 px-3 py-1.5 text-sm text-global-text transition hover:bg-white/5"
+									className="inline-flex items-center rounded-lg border border-global-text/15 px-3 py-1.5 text-sm text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
 								>
 									Close
 								</button>
@@ -142,7 +142,7 @@ export default function ResumeDownload({
 							</p>
 						) : (
 							<>
-								<div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-white/5">
+								<div className="mt-4 overflow-hidden rounded-xl border border-global-text/15 bg-global-text/[0.03]">
 									<iframe title="Resume preview" src={pdfUrl} className="h-[70vh] w-full" />
 								</div>
 								<p className="mt-3 text-xs text-global-text/60">

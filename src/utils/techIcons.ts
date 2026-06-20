@@ -83,6 +83,17 @@ export const getGenericIconForTech = (normalizedName: string): string => {
 	return "mdi:code-tags";
 };
 
+/** URL slug for a technology name — shared by the /tech/[tech]/ routes and the
+ *  TechList shift-click handler so they always agree. e.g. "Next.js" → "next-js",
+ *  "C++" → "cpp", "Tailwind CSS" → "tailwind-css". */
+export const techSlug = (name: string): string =>
+	name
+		.toLowerCase()
+		.trim()
+		.replace(/\+/g, "p")
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-+|-+$/g, "");
+
 export const getTechIconName = (name: string, aliases?: string[]): string => {
 	const keys = [normalizeTechName(name), ...(aliases ?? []).map(normalizeTechName)];
 	for (const key of keys) {

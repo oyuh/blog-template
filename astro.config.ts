@@ -33,9 +33,34 @@ const vitePlugins = [
 	boneyardPlugin(),
 ] as unknown as NonNullable<NonNullable<AstroUserConfig["vite"]>["plugins"]>;
 
+// Markdown pipeline plugins. Defined once and applied to BOTH the core `.md`
+// pipeline (via the `processor` below) AND the top-level keys — `@astrojs/mdx`
+// reads the top-level `remarkPlugins`/`rehypePlugins`/`gfm`, NOT `markdown.processor`,
+// so `.mdx` posts need them here or they lose `:::` directives, GFM tables, etc.
+type MarkdownConfig = NonNullable<AstroUserConfig["markdown"]>;
+const remarkPlugins: NonNullable<MarkdownConfig["remarkPlugins"]> = [
+	remarkDirective,
+	remarkAdmonitions,
+	remarkInlineImages({ publicPrefix: "/content-assets" }),
+];
+const rehypePlugins: NonNullable<MarkdownConfig["rehypePlugins"]> = [
+	rehypeHeadingIds,
+	[rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["not-prose"] } }],
+	[rehypeExternalLinks, { rel: ["noreferrer", "noopener"], target: "_blank" }],
+	rehypeUnwrapImages,
+	rehypeInlineImages({ publicPrefix: "/content-assets" }),
+];
+const remarkRehypeOptions: NonNullable<MarkdownConfig["remarkRehype"]> = {
+	footnoteLabelProperties: { className: [""] },
+};
+
 export default defineConfig({
 	site: siteConfig.url,
 	output: "server",
+	// The dev toolbar loads a burst of scripts ~0.8s in and injects its own element,
+	// which forces a reflow that the centred layout amplifies. It's dev-only and we
+	// don't use it, so disable it.
+	devToolbar: { enabled: false },
 	adapter: useNodeAdapter ? node({ mode: "standalone" }) : vercel(),
 	image: {
 		service: { entrypoint: "astro/assets/services/noop" },
@@ -47,6 +72,7 @@ export default defineConfig({
 				"simple-icons": ["*"],
 				// MDI is used across the site (social links, rss icons, and Java icon)
 				mdi: [
+					"account-circle",
 					"api",
 					"coffee",
 					"cloud",
@@ -122,33 +148,17 @@ export default defineConfig({
 		react(),
 	],
 	markdown: {
-		// Astro 6.4 deprecated the top-level `remarkPlugins`/`rehypePlugins`/`remarkRehype`
-		// keys; the pipeline is now configured via the `unified()` processor factory
-		// from `@astrojs/markdown-remark`. `gfm` and `smartypants` keep their defaults (`true`).
+		// Top-level keys feed `@astrojs/mdx` (it doesn't read `processor`); `gfm`
+		// stays on for GFM tables. `processor` feeds the core `.md` pipeline.
+		remarkPlugins,
+		rehypePlugins,
+		remarkRehype: remarkRehypeOptions,
+		gfm: true,
 		processor: unified({
-			rehypePlugins: [
-				rehypeHeadingIds,
-				[rehypeAutolinkHeadings, { behavior: "wrap", properties: { className: ["not-prose"] } }],
-				[
-					rehypeExternalLinks,
-					{
-						rel: ["noreferrer", "noopener"],
-						target: "_blank",
-					},
-				],
-				rehypeUnwrapImages,
-				rehypeInlineImages({ publicPrefix: "/content-assets" }),
-			],
-			remarkPlugins: [
-				remarkDirective,
-				remarkAdmonitions,
-				remarkInlineImages({ publicPrefix: "/content-assets" }),
-			],
-			remarkRehype: {
-				footnoteLabelProperties: {
-					className: [""],
-				},
-			},
+			remarkPlugins,
+			rehypePlugins,
+			remarkRehype: remarkRehypeOptions,
+			gfm: true,
 		}),
 	},
 	// https://docs.astro.build/en/guides/prefetch/
@@ -163,7 +173,7 @@ export default defineConfig({
 		},
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
-			include: ["@pagefind/default-ui", "aos", "baffle"],
+			include: ["aos", "baffle"],
 		},
 		plugins: vitePlugins,
 	},

@@ -1,98 +1,46 @@
 ---
+// Contact links as legible, labelled cards (platform + handle). Flat + themed to
+// match the rest of the site; accent on hover.
 import { Icon } from "astro-icon/components";
 
-/**
-	Uses https://www.astroicon.dev/getting-started/
-	Find icons via guide: https://www.astroicon.dev/guides/customization/#open-source-icon-sets
-	Only installed pack is: @iconify-json/mdi
-*/
-const socialLinks: {
+type Social = {
 	friendlyName: string;
 	link: string;
 	name: string;
 	label: string;
-}[] = [
-    {
-		friendlyName: "Twitter/X",
-		link: "https://x.com/sumboutlaw/",
-		name: "mdi:twitter",
-		label: "@sumboutlaw",
-	},
-    {
-		friendlyName: "LinkedIn",
-		link: "https://www.linkedin.com/in/lawson-hart/",
-		name: "mdi:linkedin",
-		label: "lawson-hart",
-	},
-    {
-		friendlyName: "Discord",
-		link: "https://discordapp.com/users/527167786200465418",
-		name: "mdi:discord",
-		label: "@wthlaw",
-	},
-    {
-		friendlyName: "Instagram",
-		link: "https://www.instagram.com/lawsonwtf/",
-		name: "mdi:instagram",
-		label: "@lawsonwtf",
-	},
-    {
-		friendlyName: "Email",
-		link: "mailto:me@lawsonhart.me",
-		name: "mdi:email",
-		label: "me@lawsonhart.me",
-	},
-    {
-		friendlyName: "Buy Me A Coffee",
-		link: "https://www.buymeacoffee.com/lawsonhart",
-		name: "mdi:coffee",
-		label: "lawsonhart",
-	},
+};
+
+const socials: Social[] = [
+	{ friendlyName: "Email", link: "mailto:me@lawsonhart.me", name: "mdi:email", label: "me@lawsonhart.me" },
+	{ friendlyName: "Discord", link: "https://discordapp.com/users/527167786200465418", name: "mdi:discord", label: "@wthlaw" },
+	{ friendlyName: "GitHub", link: "https://github.com/oyuh/", name: "mdi:github", label: "@oyuh" },
+	{ friendlyName: "LinkedIn", link: "https://www.linkedin.com/in/lawson-hart/", name: "mdi:linkedin", label: "lawson-hart" },
+	{ friendlyName: "Twitter / X", link: "https://x.com/sumboutlaw/", name: "mdi:twitter", label: "@sumboutlaw" },
+	{ friendlyName: "Instagram", link: "https://www.instagram.com/lawsonwtf/", name: "mdi:instagram", label: "@lawsonwtf" },
+	{ friendlyName: "Buy Me A Coffee", link: "https://www.buymeacoffee.com/lawsonhart", name: "mdi:coffee", label: "lawsonhart" },
 ];
 ---
 
-<div class="flex flex-wrap items-end gap-x-2 overflow-visible">
-	<p></p>
-	<ul class="flex flex-1 items-center gap-x-2 sm:flex-initial overflow-visible">
-    <li class="group relative flex flex-col items-center overflow-visible">
-      <a
-				class="inline-flex items-center justify-center rounded-md p-1 transition-all duration-150 hover:text-link group-hover:bg-accent/10 group-hover:scale-105 group-focus-within:bg-accent/10 group-focus-within:scale-105"
-        href="https://github.com/oyuh/"
-        rel="noreferrer"
-        target="_blank"
-				title="@oyuh"
-				aria-label="GitHub (@oyuh)"
-      >
-        <Icon aria-hidden="true" class="h-8 w-8" focusable="false" name="mdi:github" />
-        <span class="sr-only">GitHub</span>
-      </a>
-      <span
-        class="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-global-bg/80 px-1.5 py-0.5 text-[10px] font-medium text-accent-2 ring-1 ring-white/10 backdrop-blur-sm opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
-      >
-        @oyuh
-      </span>
-    </li>
-    {
-			socialLinks.map(({ friendlyName, link, name, label }) => (
-				<li class="group relative flex flex-col items-center overflow-visible">
-					<a
-						class="inline-flex items-center justify-center rounded-md p-1 transition-all duration-150 hover:text-link group-hover:bg-accent/10 group-hover:scale-105 group-focus-within:bg-accent/10 group-focus-within:scale-105"
-						href={link}
-						rel="noreferrer"
-						target="_blank"
-						title={label}
-						aria-label={`${friendlyName} (${label})`}
-					>
-						<Icon aria-hidden="true" class="h-8 w-8" focusable="false" name={name} />
-						<span class="sr-only">{friendlyName}</span>
-					</a>
-					<span
-						class="pointer-events-none absolute top-full left-1/2 z-50 mt-1 -translate-x-1/2 whitespace-nowrap rounded-md bg-global-bg/80 px-1.5 py-0.5 text-[10px] font-medium text-accent-2 ring-1 ring-white/10 backdrop-blur-sm opacity-0 translate-y-1 transition-all duration-200 ease-out group-hover:opacity-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:translate-y-0"
-					>
-						{label}
+<ul class="contact-list">
+	{
+		socials.map((s) => (
+			<li>
+				<a
+					class="contact-card"
+					href={s.link}
+					target={s.link.startsWith("mailto:") ? undefined : "_blank"}
+					rel="noreferrer"
+					aria-label={`${s.friendlyName}: ${s.label}`}
+				>
+					<span class="contact-card__icon">
+						<Icon aria-hidden="true" name={s.name} />
 					</span>
-				</li>
-			))
-		}
-	</ul>
-</div>
+					<span class="contact-card__text">
+						<span class="contact-card__name">{s.friendlyName}</span>
+						<span class="contact-card__handle">{s.label}</span>
+					</span>
+				</a>
+			</li>
+		))
+	}
+</ul>

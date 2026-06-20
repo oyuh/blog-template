@@ -1,0 +1,195 @@
+---
+// Scattered "collage" of technology icons (same visual language as the home hero
+// socials). Hover → a tilted tooltip (like the home post cards). Click → the tech's
+// resource link. Shift+click → the /tech/<slug>/ page listing posts using it. No
+// modal / popup window — that was removed.
+import type { TechnologyUsage } from "@/data/post";
+import { getTechIconName, techSlug } from "@/utils/techIcons";
+import { Icon } from "astro-icon/components";
+
+type Tech = { name: string; link?: string; description?: string; aliases?: string[] };
+type Category = { title: string; items: Tech[] };
+
+interface Props {
+	techUsage?: TechnologyUsage;
+}
+
+const { techUsage = {} } = Astro.props;
+const norm = (name: string) => name.toLowerCase().trim();
+
+const categories: Category[] = [
+	{
+		title: "Web Development",
+		items: [
+			{ name: "React", link: "https://reactjs.org/", description: "A popular JavaScript library for building user interfaces." },
+			{ name: "Next.js", link: "https://nextjs.org/", description: "A React-based full-stack framework with server-side rendering." },
+			{ name: "Express", link: "https://expressjs.com/", description: "A minimal and flexible Node.js web application framework." },
+			{ name: "Hono", link: "https://hono.dev/", description: "A lightweight web framework for building fast APIs and edge apps." },
+			{ name: "Vite", link: "https://vitejs.dev/", description: "A fast build tool and development server for modern web projects." },
+			{ name: "Astro", link: "https://astro.build/", description: "A static site builder optimized for speed and partial hydration." },
+			{ name: "Tailwind CSS", link: "https://tailwindcss.com/", description: "A utility-first CSS framework for rapidly building UIs.", aliases: ["tailwind"] },
+			{ name: "HeroUI", link: "https://www.heroui.com/", description: "A UI component library built on Tailwind CSS and Radix. (Previously NextUI)" },
+			{ name: "ShadCN UI", link: "https://ui.shadcn.com/", description: "A beautifully styled component system for modern apps." },
+			{ name: "MDX", link: "https://mdxjs.com/", description: "Markdown with JSX support for rich content-driven applications." },
+		],
+	},
+	{
+		title: "Databases & Storage",
+		items: [
+			{ name: "PostgreSQL", link: "https://www.postgresql.org/", description: "I use the serverless Postgres, powered by Neon, integrated into Vercel." },
+			{ name: "Drizzle", link: "https://orm.drizzle.team/", description: "A TypeScript-first ORM and schema toolkit for SQL databases." },
+			{ name: "Rocicorp Zero", link: "https://zero.rocicorp.dev/", description: "A sync engine for realtime query and mutation flows over your app data.", aliases: ["zero"] },
+			{ name: "Redis", link: "https://redis.io/", description: "An in-memory data structure store for caching and queues." },
+			{ name: "MongoDB", link: "https://www.mongodb.com/", description: "A NoSQL database known for flexibility and scalability." },
+		],
+	},
+	{
+		title: "Programming Languages & Tools",
+		items: [
+			{ name: "TypeScript", link: "https://www.typescriptlang.org/", description: "JavaScript with type safety — modern dev standard.", aliases: ["ts"] },
+			{ name: "Python", link: "https://www.python.org/", description: "A general-purpose language known for readability." },
+			{ name: "Node.js", link: "https://nodejs.org/", description: "The JavaScript runtime I use for APIs, tooling, and desktop app backends.", aliases: ["nodejs", "node"] },
+			{ name: "Java", link: "https://www.oracle.com/java/", description: "A versatile language used in enterprise and Android dev." },
+			{ name: "C++", link: "https://isocpp.org/", description: "A powerful systems programming language with performance focus.", aliases: ["cpp"] },
+			{ name: "Git", link: "https://git-scm.com/", description: "Version control system for tracking changes in code." },
+			{ name: "pnpm", link: "https://pnpm.io/", description: "Fast, disk space efficient package manager." },
+			{ name: "Turbo", link: "https://turbo.build/repo", description: "Monorepo build tooling for coordinating apps, packages, and task pipelines.", aliases: ["turborepo"] },
+			{ name: "Electron", link: "https://www.electronjs.org/", description: "Build cross-platform desktop apps with web technologies.", aliases: ["electron.js", "electronjs"] },
+			{ name: "Kotlin", link: "https://kotlinlang.org/", description: "A modern programming language for JVM and Android." },
+		],
+	},
+	{
+		title: "Infrastructure & Deployment",
+		items: [
+			{ name: "Vercel", link: "https://vercel.com/", description: "A platform for frontend frameworks and static sites." },
+			{ name: "Cloudflare", link: "https://www.cloudflare.com/", description: "A web infrastructure and website security company." },
+			{ name: "Pagefind", link: "https://pagefind.app/", description: "A static-site search indexer for fast client-side search." },
+		],
+	},
+	{
+		title: "Operating Systems",
+		items: [
+			{ name: "Ubuntu", link: "https://ubuntu.com/", description: "A popular Linux distribution for developers and servers." },
+			{ name: "Windows", link: "https://www.microsoft.com/windows/", description: "Mainstream OS with vast software support." },
+			{ name: "MacOS", link: "https://www.apple.com/macos/", description: "Apple's polished desktop operating system." },
+		],
+	},
+];
+
+const getUsage = (item: Tech) => {
+	for (const key of [norm(item.name), ...(item.aliases ?? []).map(norm)]) {
+		if (techUsage[key]) return techUsage[key];
+	}
+	return null;
+};
+
+// Append technologies that show up in posts but aren't in the curated list above.
+const curatedKeys = new Set(
+	categories.flatMap((c) => c.items.flatMap((i) => [norm(i.name), ...(i.aliases ?? []).map(norm)])),
+);
+const projectSpecificItems: Tech[] = Object.entries(techUsage)
+	.filter(([key]) => !curatedKeys.has(key))
+	.sort(([, a], [, b]) => b.count - a.count || a.name.localeCompare(b.name))
+	.map(([, usage]) => ({ name: usage.name, description: "Used in project posts on this site." }));
+
+const allCategories = projectSpecificItems.length
+	? [...categories, { title: "Project-Specific Tools", items: projectSpecificItems }]
+	: categories;
+
+// Stable-ish scattered size per icon (re-tilted on the client, see <script>).
+const sizeFor = (name: string) => {
+	let h = 0;
+	for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+	return ["is-lg", "is-md", "is-sm"][h % 3];
+};
+const rndTilt = (min: number, range: number) => {
+	const sign = Math.random() < 0.5 ? -1 : 1;
+	return Math.round(sign * (min + Math.random() * range) * 100) / 100;
+};
+
+const items = allCategories.flatMap((c) =>
+	c.items.map((i) => {
+		const usage = getUsage(i);
+		const hasProjects = (usage?.projects?.length ?? 0) > 0;
+		return {
+			name: i.name,
+			category: c.title,
+			icon: getTechIconName(i.name, i.aliases),
+			link: i.link,
+			description: i.description,
+			hasProjects,
+			slug: techSlug(i.name),
+			tilt: rndTilt(3, 6),
+			tipTilt: rndTilt(2, 4),
+			size: sizeFor(i.name),
+		};
+	}),
+);
+---
+
+<div class="tech-collage" data-tech-collage>
+	{
+		items.map((t) => (
+			<div class="tech-collage__cell">
+				<a
+					class:list={["tech-collage__item", t.size, t.hasProjects && "is-project"]}
+					style={`--tilt:${t.tilt}deg`}
+					href={t.link ?? "#"}
+					target="_blank"
+					rel="noreferrer"
+					data-tech-slug={t.hasProjects ? t.slug : undefined}
+					aria-label={t.name}
+				>
+					<Icon name={t.icon} class="tech-collage__icon" aria-hidden="true" />
+					<span class="sr-only">{t.name}</span>
+				</a>
+				<span class="tech-collage__tip" style={`--tip-tilt:${t.tipTilt}deg`} aria-hidden="true">
+					<span class="tech-collage__tip-cat">{t.category}</span>
+					<span class="tech-collage__tip-name">{t.name}</span>
+					{t.description && <span class="tech-collage__tip-desc">{t.description}</span>}
+				</span>
+			</div>
+		))
+	}
+</div>
+
+<p class="tech-collage__hint">
+	<span class="tech-collage__kbd">Shift</span> +
+	<Icon name="mdi:mouse-left-click-outline" class="tech-collage__hint-icon" aria-hidden="true" />
+	an icon for its posts
+	<span class="tech-collage__hint-sep">·</span>
+	<span class="tech-collage__dot is-project" aria-hidden="true"></span> has posts
+</p>
+
+<script>
+	function setupTechCollage() {
+		const rnd = (min: number, range: number) => {
+			const sign = Math.random() < 0.5 ? -1 : 1;
+			return `${(sign * (min + Math.random() * range)).toFixed(2)}deg`;
+		};
+		for (const root of document.querySelectorAll<HTMLElement>("[data-tech-collage]")) {
+			// Re-roll tilts each load so the cluster is never identical twice.
+			for (const item of root.querySelectorAll<HTMLElement>(".tech-collage__item")) {
+				item.style.setProperty("--tilt", rnd(3, 6));
+			}
+			for (const tip of root.querySelectorAll<HTMLElement>(".tech-collage__tip")) {
+				tip.style.setProperty("--tip-tilt", rnd(2, 4));
+			}
+			if (root.dataset.bound === "true") continue;
+			root.dataset.bound = "true";
+			// Shift+click → posts page (overrides the browser's open-in-new-window).
+			root.addEventListener("click", (e) => {
+				const item = (e.target as HTMLElement).closest<HTMLAnchorElement>(".tech-collage__item");
+				if (!item || !e.shiftKey) return;
+				const slug = item.getAttribute("data-tech-slug");
+				if (slug) {
+					e.preventDefault();
+					window.location.href = `/tech/${slug}/`;
+				}
+			});
+		}
+	}
+
+	setupTechCollage();
+	document.addEventListener("astro:page-load", setupTechCollage);
+</script>

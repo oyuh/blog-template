@@ -7,7 +7,7 @@
 /* use a selector-based strategy for dark mode */
 @variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* Animations for holiday toast notification */
+/* Animations for toast notifications */
 @keyframes slideInRight {
 	from {
 		opacity: 0;
@@ -39,23 +39,7 @@
 	}
 }
 
-/* Comments pop-out: quick scale/fade-in so it doesn't appear abruptly. */
-@keyframes comments-pop-in {
-	from {
-		opacity: 0;
-		transform: scale(0.96) translateY(6px);
-	}
-	to {
-		opacity: 1;
-		transform: none;
-	}
-}
-
-.comments-pop-in {
-	animation: comments-pop-in 0.18s ease-out;
-}
-
-/* TOC sidebar: fade in whichever face (full panel / compact buttons) is shown. */
+/* TOC sidebar: fade in the list when it's revealed. */
 @keyframes toc-fade-in {
 	from {
 		opacity: 0;
@@ -68,28 +52,22 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.comments-pop-in,
-	#toc-panel,
-	#toc-collapsed {
+	.toc-dock__nav {
 		animation: none !important;
 	}
 }
 
-/* Shared toast styling (used by blog header-copy toast + holiday notifications) */
+/* Shared toast styling (used by blog header-copy toast + other notifications) */
 .lawson-toast {
-	/* Slightly tinted surface so it stands out on both light + dark */
-	background: color-mix(in srgb, var(--color-global-bg) 90%, var(--color-global-text) 10%);
+	/* Solid surface (no translucency) so it stands out on both light + dark */
+	background: color-mix(in srgb, var(--color-global-bg) 92%, var(--color-global-text) 8%);
 	color: var(--color-global-text);
 	border-radius: 0.75rem;
 	padding: 0.75rem 1.25rem;
 	font-size: 0.875rem;
 	font-weight: 600;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 20%, transparent);
-	box-shadow:
-		0 18px 40px -24px color-mix(in srgb, var(--color-global-text) 55%, transparent),
-		0 0 0 1px color-mix(in srgb, var(--color-global-bg) 65%, transparent);
-	backdrop-filter: blur(14px);
-	-webkit-backdrop-filter: blur(14px);
+	box-shadow: 0 18px 40px -24px color-mix(in srgb, var(--color-global-text) 55%, transparent);
 	max-width: min(34rem, calc(100vw - 2rem));
 }
 
@@ -145,13 +123,14 @@
 
 /* you could refactor below to use light-dark(), depending on your target audience */
 @theme {
+	/* Light mode: the original near-white background; very dark text. Blue is an accent only. */
 	--color-global-bg: oklch(98.48% 0 0);
-	--color-global-text: oklch(26.99% 0.0096 235.05);
+	--color-global-text: oklch(22% 0.014 256);
 	--color-link: oklch(57.24% 0.1 238.12);
 	--color-accent: oklch(57.24% 0.1 238.12);
 	/* Slightly darker variant of the main blue for badges */
 	--color-accent-dark: oklch(47.24% 0.1 238.12);
-	--color-accent-2: oklch(18.15% 0 0);
+	--color-accent-2: oklch(18% 0.012 256);
 	--color-quote: oklch(57.24% 0.1 238.12);
 
 	/* Categorical chart palette — anchored on the accent blue, kept at a
@@ -164,77 +143,45 @@
 	--chart-6: oklch(63% 0.1 150); /* green */
 }
 
-/* Atkinson Hyperlegible (main font) */
-@font-face {
-	font-family: "Atkinson Hyperlegible";
-	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-Regular-102a.woff2") format("woff2");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible";
-	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-Italic-102a.woff2") format("woff2");
-	font-weight: 400;
-	font-style: italic;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible";
-	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-Bold-102a.woff2") format("woff2");
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible";
-	src: url("../assets/AtkinsonHyperlegibleFont/Web Fonts/WOFF2/Atkinson-Hyperlegible-BoldItalic-102a.woff2") format("woff2");
-	font-weight: 700;
-	font-style: italic;
-	font-display: swap;
-}
+/* Fonts are self-hosted via @fontsource-variable, imported in Base.astro:
+   - Plus Jakarta Sans Variable (main)
+   - Geist Mono Variable (code) */
 
-/* Atkinson Hyperlegible Mono (code font) */
-@font-face {
-	font-family: "Atkinson Hyperlegible Mono";
-	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Regular.otf") format("opentype");
-	font-weight: 400;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible Mono";
-	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-RegularItalic.otf") format("opentype");
-	font-weight: 400;
-	font-style: italic;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible Mono";
-	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Medium.otf") format("opentype");
-	font-weight: 500;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible Mono";
-	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-SemiBold.otf") format("opentype");
-	font-weight: 600;
-	font-style: normal;
-	font-display: swap;
-}
-@font-face {
-	font-family: "Atkinson Hyperlegible Mono";
-	src: url("../assets/AtkinsonHyperlegibleMono/AtkinsonHyperlegibleMono-Bold.otf") format("opentype");
-	font-weight: 700;
-	font-style: normal;
-	font-display: swap;
-}
-
-/* Set main font */
+/* Set main font (default weight 400) */
 html,
 body {
-	font-family: "Atkinson Hyperlegible", system-ui, sans-serif;
+	font-family: "Plus Jakarta Sans Variable", system-ui, sans-serif;
+	font-weight: 400;
+}
+
+/* Theme toggle transition: the new theme wipes down from the top. Scoped to
+   `html.theme-vt` (set by ThemeProvider) so it never affects page-nav transitions. */
+@media (prefers-reduced-motion: no-preference) {
+	html.theme-vt::view-transition-old(root),
+	html.theme-vt::view-transition-new(root) {
+		animation-duration: 0.45s;
+		animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	/* Old theme stays put underneath; the new one reveals over it. */
+	html.theme-vt::view-transition-old(root) {
+		animation-name: none;
+		z-index: 1;
+	}
+
+	html.theme-vt::view-transition-new(root) {
+		animation-name: theme-wipe-down;
+		z-index: 2;
+	}
+}
+
+@keyframes theme-wipe-down {
+	from {
+		clip-path: inset(0 0 100% 0);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+	}
 }
 
 /* Set code font */
@@ -243,7 +190,7 @@ pre,
 kbd,
 samp {
 	font-family:
-		"Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+		"Geist Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
 		"Courier New", monospace;
 }
 
@@ -258,13 +205,14 @@ samp {
 
 		&[data-theme="dark"] {
 			color-scheme: dark;
+			/* Dark mode: the original gray background; near-white text. Blue stays an accent only. */
 			--color-global-bg: oklch(0.24 0.0045 265.31);
-			--color-global-text: oklch(83.54% 0 264);
+			--color-global-text: oklch(95% 0.008 250);
 			--color-link: oklch(57.24% 0.1 238.12);
 			--color-accent: oklch(57.24% 0.1 238.12);
 			/* Slightly darker variant tuned for dark backgrounds (still readable) */
 			--color-accent-dark: oklch(52% 0.1 238.12);
-			--color-accent-2: oklch(94.66% 0 0);
+			--color-accent-2: oklch(97% 0.006 250);
 			--color-quote: oklch(57.24% 0.1 238.12);
 
 			/* Lift lightness a touch so the palette stays legible on the dark surface */
@@ -307,7 +255,19 @@ samp {
 	}
 
 	.title {
-		@apply text-accent-2 text-2xl font-semibold;
+		@apply text-accent-2 text-2xl font-bold;
+	}
+
+	/* Site-wide text-link hover: keep the colour, reveal an underline (matches the
+	   home page, header, and footer). Use on any plain text link or heading link. */
+	.underline-hover {
+		text-decoration: none;
+		text-underline-offset: 3px;
+	}
+
+	.underline-hover:hover,
+	.underline-hover:focus-visible {
+		text-decoration: underline;
 	}
 
 	.admonition {
@@ -566,7 +526,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 
 .link-preview-card:hover {
 	border-color: var(--color-accent);
-	transform: translateY(-2px);
+	background: color-mix(in srgb, var(--color-accent) 5%, transparent);
 }
 
 .link-preview-card img {
@@ -583,7 +543,6 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	background: var(--color-global-bg);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
 	border-radius: 0.75rem;
-	box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
 	z-index: 1000;
 	opacity: 0;
 	animation: fadeInUp 0.3s ease forwards;
@@ -634,7 +593,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	display: flex;
 	align-items: center;
 	gap: 0.4rem;
-	font: 0.78rem "Atkinson Hyperlegible Mono", monospace;
+	font: 0.78rem "Geist Mono Variable", monospace;
 	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 	margin-bottom: 0.35rem;
 }
@@ -694,12 +653,11 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	background: var(--color-global-bg);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
 	border-radius: 0.75rem;
-	box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
 	pointer-events: none;
 	opacity: 0;
 	transform: translateY(6px);
 	transition: opacity 0.18s ease, transform 0.18s ease;
-	font-family: "Atkinson Hyperlegible", sans-serif;
+	font-family: "Plus Jakarta Sans Variable", sans-serif;
 }
 
 .gh-link-tooltip.is-visible {
@@ -722,12 +680,12 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 }
 
 .gh-tt-source {
-	font: 0.78rem "Atkinson Hyperlegible Mono", monospace;
+	font: 0.78rem "Geist Mono Variable", monospace;
 	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 }
 
 .gh-tt-name {
-	font-family: "Atkinson Hyperlegible Mono", monospace;
+	font-family: "Geist Mono Variable", monospace;
 	font-weight: 600;
 	font-size: 0.9rem;
 	color: var(--color-accent-2);
@@ -753,7 +711,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.85rem;
-	font: 0.78rem "Atkinson Hyperlegible Mono", monospace;
+	font: 0.78rem "Geist Mono Variable", monospace;
 	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
 }
 
@@ -782,6 +740,11 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	background: color-mix(in srgb, var(--color-accent) 3%, transparent);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
 	border-radius: 0.75rem;
+	transition: border-color 0.2s ease;
+}
+
+.chart-card:hover {
+	border-color: color-mix(in srgb, var(--color-accent) 38%, transparent);
 }
 
 .chart-title {
@@ -819,7 +782,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	border: 0;
 	background: transparent;
 	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
-	font: 600 0.8125rem "Atkinson Hyperlegible", sans-serif;
+	font: 600 0.8125rem "Plus Jakarta Sans Variable", sans-serif;
 	padding: 0.3rem 0.7rem;
 	border-radius: 0.45rem;
 	cursor: pointer;
@@ -833,13 +796,13 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 .chart-seg-btn.is-active {
 	background: var(--color-global-bg);
 	color: var(--color-accent);
-	box-shadow: 0 1px 2px color-mix(in srgb, var(--color-global-text) 12%, transparent);
+	border: 1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
 .chart-toggle {
 	appearance: none;
 	cursor: pointer;
-	font: 600 0.8125rem "Atkinson Hyperlegible", sans-serif;
+	font: 600 0.8125rem "Plus Jakarta Sans Variable", sans-serif;
 	padding: 0.32rem 0.7rem;
 	border-radius: 0.5rem;
 	color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
@@ -873,7 +836,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 
 .chart-loading {
 	color: color-mix(in srgb, var(--color-global-text) 45%, transparent);
-	font: 0.875rem "Atkinson Hyperlegible Mono", monospace;
+	font: 0.875rem "Geist Mono Variable", monospace;
 }
 
 .chart-legend {
@@ -888,7 +851,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	align-items: center;
 	gap: 0.4rem;
 	cursor: pointer;
-	font: 500 0.8125rem "Atkinson Hyperlegible", sans-serif;
+	font: 500 0.8125rem "Plus Jakarta Sans Variable", sans-serif;
 	color: var(--color-global-text);
 	background: transparent;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
@@ -927,8 +890,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
 	border-radius: 0.75rem;
 	padding: 0.6rem 0.75rem;
-	box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.3);
-	font-family: "Atkinson Hyperlegible Mono", monospace;
+	font-family: "Geist Mono Variable", monospace;
 	min-width: 8rem;
 }
 
@@ -981,7 +943,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 
 .chart-card .recharts-label {
 	fill: color-mix(in srgb, var(--color-global-text) 70%, transparent);
-	font-family: "Atkinson Hyperlegible", sans-serif;
+	font-family: "Plus Jakarta Sans Variable", sans-serif;
 	font-size: 0.75rem;
 }
 
@@ -1028,7 +990,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 
 .dtable thead th {
 	font-weight: 600;
-	font-family: "Atkinson Hyperlegible Mono", monospace;
+	font-family: "Geist Mono Variable", monospace;
 	font-size: 0.72rem;
 	letter-spacing: 0.03em;
 	text-transform: uppercase;
@@ -1111,6 +1073,12 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	border-left: 3px solid var(--callout);
 	border-radius: 0.6rem;
 	background: color-mix(in srgb, var(--callout) 6%, transparent);
+	transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.info-callout:hover {
+	border-color: color-mix(in srgb, var(--callout) 45%, transparent);
+	background: color-mix(in srgb, var(--callout) 9%, transparent);
 }
 
 .info-callout--info {
@@ -1149,7 +1117,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 
 .info-callout-title {
 	margin: 0;
-	font: 600 0.95rem "Atkinson Hyperlegible", sans-serif;
+	font: 600 0.95rem "Plus Jakarta Sans Variable", sans-serif;
 	color: var(--callout);
 }
 
@@ -1161,4 +1129,695 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 
 .info-callout-body > :last-child {
 	margin-bottom: 0;
+}
+
+/* Astro island wrappers must never take layout space. Astro ships this rule with
+   its client runtime (late), so before it lands the wrappers render as inline boxes
+   and then collapse on hydration — reflowing anything around them (e.g. the footer).
+   Pinning it in head CSS makes island wrappers layout-neutral from the first paint. */
+astro-island,
+astro-slot,
+astro-static-slot {
+	display: contents;
+}
+
+/* ---------------------------------------------------------------------------
+   Footer logo (Spotify now-playing indicator) + source/commit widget.
+   These live here (head CSS) rather than in the island components' <style>
+   blocks so the footer is styled on first paint — island <style> ships with
+   the island's JS chunk in dev and applied ~0.8s late, reflowing the page.
+   --------------------------------------------------------------------------- */
+.footer-logo {
+	position: relative;
+	display: inline-flex;
+	justify-content: center;
+}
+
+.footer-logo__link {
+	display: block;
+	position: relative;
+	z-index: 1;
+}
+
+/* First-paint "fuzzy" reveal for the logo. The footer itself paints instantly
+   (static markup); only the logo image blurs/fades in once it decodes. Gated to
+   play just once per browser session by the island script, so navigating between
+   pages doesn't replay it. Default (no class) = fully visible, so the logo is
+   never hidden if the script doesn't run. Blur lives on the wrapper, not the
+   <img>, so it never clobbers the img's recolor/glow filter. */
+.footer-logo__link.is-entering {
+	opacity: 0;
+	filter: blur(7px);
+}
+
+.footer-logo__link.is-entered {
+	opacity: 1;
+	filter: blur(0);
+	transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.footer-logo__link.is-entering {
+		filter: none;
+	}
+	.footer-logo__link.is-entered {
+		transition: opacity 0.4s ease;
+	}
+}
+
+/* Logo follows the foreground: black on light, white on dark. */
+.footer-logo__img {
+	height: 2rem;
+	width: auto;
+	filter: brightness(0);
+	transition: filter 0.3s ease, transform 0.3s ease;
+}
+
+:root[data-theme="dark"] .footer-logo__img {
+	filter: brightness(0) invert(1);
+}
+
+/* Playing: a subtle, static blue glow (no pulsing) on top of the recolor. */
+.footer-logo[data-playing="true"] .footer-logo__img {
+	filter: brightness(0) drop-shadow(0 0 5px color-mix(in srgb, var(--color-accent) 55%, transparent));
+}
+
+:root[data-theme="dark"] .footer-logo[data-playing="true"] .footer-logo__img {
+	filter: brightness(0) invert(1)
+		drop-shadow(0 0 5px color-mix(in srgb, var(--color-accent) 55%, transparent));
+}
+
+.footer-logo[data-playing="true"] .footer-logo__link:hover .footer-logo__img {
+	transform: scale(1.05);
+}
+
+/* Faint row of blue music notes resting just above the logo (only while playing). */
+.footer-logo__notes {
+	position: absolute;
+	bottom: calc(100% - 0.1rem);
+	left: 50%;
+	transform: translateX(-50%);
+	display: none;
+	align-items: flex-end;
+	justify-content: space-between;
+	width: 2.9rem;
+	height: 0.9rem;
+	pointer-events: none;
+}
+
+.footer-logo[data-playing="true"] .footer-logo__notes {
+	display: flex;
+}
+
+.footer-logo__note {
+	font-size: 0.7rem;
+	line-height: 1;
+	color: color-mix(in srgb, var(--color-accent) 80%, transparent);
+	opacity: 0;
+	animation: footer-note-bob 3s ease-in-out infinite;
+}
+
+.footer-logo__note:nth-child(1) { animation-delay: 0s; }
+.footer-logo__note:nth-child(2) { animation-delay: 0.5s; font-size: 0.82rem; }
+.footer-logo__note:nth-child(3) { animation-delay: 1s; }
+
+@keyframes footer-note-bob {
+	0%, 100% { opacity: 0; transform: translateY(2px); }
+	40%, 60% { opacity: 0.65; transform: translateY(-2px); }
+}
+
+/* "Now playing" readout — tilted, card-less: just tilted art + text. */
+.footer-logo__np {
+	position: absolute;
+	bottom: calc(100% + 0.9rem);
+	left: 50%;
+	z-index: 60;
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	white-space: nowrap;
+	opacity: 0;
+	pointer-events: none;
+	transform: translateX(-50%) rotate(var(--tilt, -5deg)) translateY(6px);
+	transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.footer-logo[data-playing="true"]:hover .footer-logo__np {
+	opacity: 1;
+	transform: translateX(-50%) rotate(var(--tilt, -5deg)) translateY(0);
+}
+
+.footer-logo__np-art {
+	height: 2.6rem;
+	width: 2.6rem;
+	flex: none;
+	border-radius: 0.45rem;
+	object-fit: cover;
+}
+
+.footer-logo__np-text {
+	display: flex;
+	flex-direction: column;
+	text-align: left;
+}
+
+.footer-logo__np-track {
+	font-size: 0.82rem;
+	font-weight: 700;
+	color: var(--color-accent-2);
+}
+
+.footer-logo__np-artist {
+	font-size: 0.72rem;
+	color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.footer-logo__note { animation-duration: 5s; }
+	.footer-logo__np { transition: opacity 0.15s ease; }
+}
+
+/* ---------------------------------------------------------------------------
+   Hero social collage (home). In head CSS (not the component's scoped <style>)
+   so the icon buttons are sized on first paint — otherwise the buttons render
+   unsized until the component CSS loads, changing the hero height and (via the
+   vertically-centred layout) reflowing the whole page ~0.7s in.
+   --------------------------------------------------------------------------- */
+.hero-collage {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.3rem;
+	align-content: center;
+	justify-content: center;
+	max-width: 16rem;
+}
+
+/* Bare icons — no button surface. Just the logo, lightly muted, tilted for a
+   hand-placed feel; brightens to the accent on hover. */
+.hero-collage__item {
+	--tilt: 0deg;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
+	transform: rotate(var(--tilt));
+	transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+}
+
+.hero-collage__item:hover,
+.hero-collage__item:focus-visible {
+	transform: rotate(0deg) scale(1.18);
+	color: var(--color-accent);
+	outline: none;
+}
+
+.hero-collage__item.is-lg .hero-collage__icon {
+	width: 2.55rem;
+	height: 2.55rem;
+}
+
+.hero-collage__item.is-sm .hero-collage__icon {
+	width: 1.9rem;
+	height: 1.9rem;
+}
+
+.hero-collage__icon {
+	width: 2.2rem;
+	height: 2.2rem;
+	/* Gentle idle bob (on the inner icon so it never fights the item's tilt/scale).
+	   Negative, varied delays + durations keep the cluster from moving in lockstep. */
+	animation: hero-collage-bob 4.5s ease-in-out infinite;
+}
+
+@keyframes hero-collage-bob {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-3px);
+	}
+}
+
+.hero-collage__item:nth-child(1) .hero-collage__icon { animation-delay: -0.2s; animation-duration: 4.3s; }
+.hero-collage__item:nth-child(2) .hero-collage__icon { animation-delay: -1.6s; animation-duration: 5.1s; }
+.hero-collage__item:nth-child(3) .hero-collage__icon { animation-delay: -0.9s; animation-duration: 4.7s; }
+.hero-collage__item:nth-child(4) .hero-collage__icon { animation-delay: -2.3s; animation-duration: 5.4s; }
+.hero-collage__item:nth-child(5) .hero-collage__icon { animation-delay: -0.5s; animation-duration: 4.1s; }
+.hero-collage__item:nth-child(6) .hero-collage__icon { animation-delay: -1.9s; animation-duration: 5.2s; }
+.hero-collage__item:nth-child(7) .hero-collage__icon { animation-delay: -1.2s; animation-duration: 4.6s; }
+.hero-collage__item:nth-child(8) .hero-collage__icon { animation-delay: -2.7s; animation-duration: 5s; }
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-collage__item {
+		transition: color 0.2s ease;
+	}
+	.hero-collage__item:hover {
+		transform: rotate(var(--tilt)) scale(1.12);
+	}
+	.hero-collage__icon {
+		animation: none;
+	}
+}
+
+/* ---------------------------------------------------------------------------
+   Reusable "hero text" accents — name shimmer + coloured keywords. Defined
+   globally (not scoped) so both the home hero and the About page can use them.
+   On-theme: blue only (accent ↔ accent-2).
+   --------------------------------------------------------------------------- */
+.hero-name {
+	font-weight: 800;
+	background: linear-gradient(100deg, var(--color-accent-2), var(--color-accent), var(--color-accent-2));
+	background-size: 200% auto;
+	-webkit-background-clip: text;
+	background-clip: text;
+	color: transparent;
+	animation: hero-name-shimmer 7s linear infinite;
+}
+
+@keyframes hero-name-shimmer {
+	to {
+		background-position: 200% center;
+	}
+}
+
+.hero-kw {
+	display: inline-block;
+	color: var(--color-accent);
+	font-weight: 600;
+	transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-kw:hover {
+	transform: translateY(-2px) rotate(-2.5deg);
+}
+
+.hero-accent {
+	color: var(--color-accent-2);
+	font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Technology collage (About page). Same scattered, tilted icon language as the
+   home hero socials; hover reveals a tilted tooltip (like the home post cards).
+   --------------------------------------------------------------------------- */
+.tech-collage {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 1rem 1.15rem;
+	padding: 0.75rem 0;
+}
+
+.tech-collage__cell {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.tech-collage__item {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
+	transform: rotate(var(--tilt, 0deg));
+	transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+	cursor: pointer;
+}
+
+/* Blue when the tech has project posts; muted foreground otherwise. */
+.tech-collage__item.is-project {
+	color: var(--color-accent);
+}
+
+.tech-collage__cell:hover .tech-collage__item {
+	transform: rotate(0deg) scale(1.16);
+	color: var(--color-accent);
+}
+
+.tech-collage__cell:focus-within .tech-collage__item {
+	color: var(--color-accent);
+	outline: none;
+}
+
+.tech-collage__icon {
+	width: 2.1rem;
+	height: 2.1rem;
+}
+
+.tech-collage__item.is-lg .tech-collage__icon {
+	width: 2.65rem;
+	height: 2.65rem;
+}
+
+.tech-collage__item.is-md .tech-collage__icon {
+	width: 2.1rem;
+	height: 2.1rem;
+}
+
+.tech-collage__item.is-sm .tech-collage__icon {
+	width: 1.7rem;
+	height: 1.7rem;
+}
+
+/* Tilted hover tooltip — same flat, border-only card as the home post tips. */
+.tech-collage__tip {
+	position: absolute;
+	bottom: calc(100% + 0.55rem);
+	left: 50%;
+	z-index: 50;
+	width: 15rem;
+	max-width: min(15rem, calc(100vw - 2rem));
+	display: flex;
+	flex-direction: column;
+	gap: 0.12rem;
+	padding: 0.6rem 0.7rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+	border-radius: 0.6rem;
+	background: var(--color-global-bg);
+	text-align: left;
+	opacity: 0;
+	pointer-events: none;
+	transform: translateX(-50%) translateY(6px) rotate(var(--tip-tilt, -3deg)) scale(0.98);
+	transform-origin: bottom center;
+	transition: opacity 0.18s ease, transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tech-collage__cell:hover .tech-collage__tip,
+.tech-collage__cell:focus-within .tech-collage__tip {
+	opacity: 1;
+	transform: translateX(-50%) translateY(0) rotate(var(--tip-tilt, -3deg)) scale(1);
+}
+
+.tech-collage__tip-cat {
+	font-size: 0.62rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+}
+
+.tech-collage__tip-name {
+	font-size: 0.9rem;
+	font-weight: 700;
+	color: var(--color-accent-2);
+}
+
+.tech-collage__tip-desc {
+	font-size: 0.75rem;
+	line-height: 1.45;
+	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
+}
+
+.tech-collage__hint {
+	margin-top: 1.1rem;
+	text-align: center;
+	font-size: 0.72rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.45rem;
+	flex-wrap: wrap;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+}
+
+.tech-collage__kbd {
+	font-family: "Geist Mono Variable", monospace;
+	font-size: 0.68rem;
+	padding: 0.05rem 0.35rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 25%, transparent);
+	border-radius: 0.3rem;
+	color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
+}
+
+.tech-collage__hint-icon {
+	display: inline-block;
+	width: 0.95rem;
+	height: 0.95rem;
+	vertical-align: -0.15em;
+}
+
+.tech-collage__hint-sep {
+	opacity: 0.5;
+}
+
+.tech-collage__dot {
+	display: inline-block;
+	width: 0.55rem;
+	height: 0.55rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--color-global-text) 40%, transparent);
+	vertical-align: middle;
+}
+
+.tech-collage__dot.is-project {
+	background: var(--color-accent);
+}
+
+@media (hover: none) {
+	.tech-collage__tip {
+		display: none;
+	}
+}
+
+/* ---------------------------------------------------------------------------
+   Contact cards (About page). Legible, labelled, flat + themed.
+   --------------------------------------------------------------------------- */
+.contact-list {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 0.6rem;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+@media (min-width: 640px) {
+	.contact-list {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 1024px) {
+	.contact-list {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.contact-card {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	padding: 0.65rem 0.8rem;
+	border-radius: 0.7rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+	background: var(--color-global-bg);
+	text-decoration: none;
+	color: var(--color-global-text);
+	transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
+}
+
+.contact-card:hover,
+.contact-card:focus-visible {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+	outline: none;
+}
+
+.contact-card__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 2.1rem;
+	height: 2.1rem;
+	border-radius: 0.55rem;
+	color: var(--color-accent-2);
+	background: color-mix(in srgb, var(--color-global-text) 6%, transparent);
+	transition: color 0.18s ease, background 0.18s ease;
+}
+
+.contact-card:hover .contact-card__icon,
+.contact-card:focus-visible .contact-card__icon {
+	color: var(--color-accent);
+	background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+}
+
+.contact-card__icon svg {
+	width: 1.25rem;
+	height: 1.25rem;
+}
+
+.contact-card__text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	line-height: 1.2;
+}
+
+.contact-card__name {
+	font-size: 0.9rem;
+	font-weight: 600;
+}
+
+.contact-card__handle {
+	font-size: 0.78rem;
+	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------------------
+   Tag / Tech index cards. Flat + border-only + theme colours to match the home
+   page (no translucency, no shadow, no white-on-image overlays). Cover image is
+   faded out at the bottom — the same technique as the home post hover cards.
+   --------------------------------------------------------------------------- */
+.index-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 1rem;
+}
+
+@media (min-width: 640px) {
+	.index-grid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (min-width: 1024px) {
+	.index-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
+}
+
+.index-card {
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+	border-radius: 0.85rem;
+	background: var(--color-global-bg);
+	text-decoration: none;
+	transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.index-card:hover,
+.index-card:focus-visible {
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	outline: none;
+}
+
+/* Cover image, full at the top, fading to the card background toward the bottom. */
+.index-card__img {
+	width: 100%;
+	aspect-ratio: 16 / 6;
+	background-size: cover;
+	background-position: center;
+	-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+	mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
+}
+
+/* No cover: a slim accent rule instead of a big blurred gradient. */
+.index-card__img--none {
+	aspect-ratio: auto;
+	height: 0.3rem;
+	background: linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-accent) 65%, transparent),
+		transparent 75%
+	);
+	-webkit-mask-image: none;
+	mask-image: none;
+}
+
+.index-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.35rem;
+	padding: 0.7rem 0.95rem 0.95rem;
+	margin-top: -1.4rem; /* pull the text up into the faded part of the image */
+}
+
+.index-card__img--none + .index-card__body {
+	margin-top: 0;
+}
+
+.index-card__kicker {
+	font-size: 0.62rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.16em;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+}
+
+.index-card__title {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	margin: 0;
+	font-size: 1.25rem;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	color: var(--color-accent-2);
+}
+
+.index-card:hover .index-card__title,
+.index-card:focus-visible .index-card__title {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.index-card__title-icon {
+	width: 1.2rem;
+	height: 1.2rem;
+	flex: none;
+	color: var(--color-accent);
+}
+
+.index-card__count {
+	font-family: "Geist Mono Variable", monospace;
+	font-size: 0.74rem;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+}
+
+.index-card__posts {
+	margin: 0.35rem 0 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 0.3rem;
+}
+
+.index-card__post {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.82rem;
+	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.index-card__dot {
+	flex: none;
+	width: 0.4rem;
+	height: 0.4rem;
+	border-radius: 999px;
+	background: var(--color-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hero-name {
+		animation: none;
+	}
+	.tech-collage__item,
+	.tech-collage__tip {
+		transition: opacity 0.15s ease;
+	}
 }

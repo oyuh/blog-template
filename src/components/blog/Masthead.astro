@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "@/components/FormattedDate.astro";
-import { getTechIconName } from "@/utils/techIcons";
+import { getTechIconName, techSlug } from "@/utils/techIcons";
 import { Icon } from "astro-icon/components";
 
 interface Props {
@@ -15,131 +15,359 @@ const {
 } = Astro.props;
 
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
+	day: "numeric",
 	month: "long",
+	year: "numeric",
 };
 
 const technologies = (data.technologies ?? []).map((tech) => tech.trim()).filter(Boolean);
+const tags = data.tags ?? [];
+const VISIBLE = 5; // show this many before the "…" toggle
 ---
 
-{data.draft ? <span class="text-lg text-red-500 font-medium">(Draft)</span> : null}
-<h1 class="text-3xl sm:text-4xl font-bold text-accent-2 mb-4 leading-tight tracking-tight">
-	{data.title}
-</h1>
-{(data.tryLink || data.coverImage) && (
-	<div class:list={["mb-5 flex flex-wrap items-center gap-3", data.tryLink && data.coverImage ? "justify-between" : ""]}>
-		{data.tryLink && (
-			<a
-				href={data.tryLink}
-				target="_blank"
-				rel="noopener noreferrer"
-				class="group inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ring-1 ring-accent/40 bg-accent/10 hover:bg-accent/15 text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-global-bg"
-			>
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.75"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					class="h-4 w-4 opacity-80 group-hover:opacity-100"
-				>
-					<path d="M14 3h7v7"></path>
-					<path d="M10 14L21 3"></path>
-					<path d="M5 5v14h14"></path>
+<header class="post-header">
+	{data.draft && <span class="post-header__draft">Draft</span>}
+
+	<h1 class="post-header__title">{data.title}</h1>
+
+	{data.description && <p class="post-header__desc">{data.description}</p>}
+
+	<div class="post-header__meta">
+		<span class="post-header__meta-item">
+			<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+				<rect x="3" y="4.5" width="18" height="17" rx="2"></rect>
+				<path d="M3 9.5h18M8 2.5v4M16 2.5v4"></path>
+			</svg>
+			<FormattedDate date={data.publishDate} dateTimeOptions={dateTimeOptions} />
+		</span>
+
+		<span class="post-header__meta-dot" aria-hidden="true">•</span>
+
+		<span class="post-header__meta-item">
+			<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="9"></circle>
+				<path d="M12 7.5v5l3 2"></path>
+			</svg>
+			{readingTime}
+		</span>
+
+		{data.updatedDate && (
+			<span class="post-header__updated">
+				<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M21 12a9 9 0 1 1-2.64-6.36"></path>
+					<path d="M21 4v4h-4"></path>
 				</svg>
-				<span>Try it live</span>
-				<span class="sr-only">(opens in a new tab)</span>
-			</a>
-		)}
-		{data.coverImage && (
-			<button
-				type="button"
-				id="masthead-bg-toggle"
-				data-bg-toggle
-				aria-pressed="false"
-				title="Hide background"
-				class="bg-toggle group inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold ring-1 ring-white/15 bg-global-bg/40 text-global-text hover:bg-global-bg/60 hover:text-accent transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-2 focus-visible:ring-offset-global-bg"
-			>
-				<svg class="bg-toggle-eye-off h-4 w-4 opacity-80 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
-					<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
-					<path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
-					<line x1="2" x2="22" y1="2" y2="22"></line>
-				</svg>
-				<svg class="bg-toggle-eye h-4 w-4 opacity-80 group-hover:opacity-100" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-					<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
-					<circle cx="12" cy="12" r="3"></circle>
-				</svg>
-				<span class="bg-toggle-label">Hide background</span>
-			</button>
+				Updated <FormattedDate date={data.updatedDate} dateTimeOptions={dateTimeOptions} />
+			</span>
 		)}
 	</div>
-)}
-<div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-base">
-	<p class="font-semibold text-global-text">
-		<FormattedDate date={data.publishDate} dateTimeOptions={dateTimeOptions} /> /{" "}
-		{readingTime}
-	</p>
-	{
-		data.updatedDate && (
-			<span class="bg-quote/5 text-quote rounded-lg px-3 py-2 text-sm font-medium">
-				Updated:
-				<FormattedDate class="ms-1" date={data.updatedDate} dateTimeOptions={dateTimeOptions} />
-			</span>
-		)
-	}
-</div>
-{
-	!!data.tags?.length && (
-		<div class="mt-4">
-			<svg
-				aria-hidden="true"
-				class="inline-block h-6 w-6 mr-2"
-				fill="none"
-				focusable="false"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.5"
-				viewBox="0 0 24 24"
-				xmlns="http://www.w3.org/2000/svg"
-			>
-				<path d="M0 0h24v24H0z" fill="none" stroke="none" />
-				<path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z" />
-				<path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116" />
-				<path d="M6 9h-.01" />
+
+	{data.tryLink && (
+		<a
+			href={data.tryLink}
+			target="_blank"
+			rel="noopener noreferrer"
+			class="post-header__try"
+		>
+			<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+				<path d="M14 3h7v7"></path>
+				<path d="M10 14L21 3"></path>
+				<path d="M5 5v14h14"></path>
 			</svg>
-			{data.tags.map((tag, i) => (
-				<>
-					{/* prettier-ignore */}
-					<span class="contents text-base">
-						<a class="lawson-link inline-block before:content-['#'] font-medium" data-pagefind-filter={`tag:${tag}`} href={`/tags/${tag}/`}><span class="sr-only">View more posts with the tag&nbsp;</span>{tag}
-						</a>{i < data.tags.length - 1 && ", "}
-					</span>
-				</>
-			))}
+			<span>Try it live</span>
+			<span class="sr-only">(opens in a new tab)</span>
+		</a>
+	)}
+
+	{(tags.length > 0 || technologies.length > 0) && (
+		<div class="post-header__tax">
+			{tags.length > 0 && (
+				<div class="post-header__row" data-tax-row>
+					<svg aria-hidden="true" class="post-header__row-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5">
+						<path d="M0 0h24v24H0z" fill="none" stroke="none" />
+						<path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z" />
+						<path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116" />
+						<path d="M6 9h-.01" />
+					</svg>
+					<ul class="post-header__taxlist">
+						{tags.map((tag, i) => (
+							<li class:list={[i >= VISIBLE && "post-header__extra"]}>
+								<a class="post-header__taxlink" data-pagefind-filter={`tag:${tag}`} href={`/tags/${tag}/`}>
+									<span class="post-header__hash" aria-hidden="true">#</span>
+									<span class="sr-only">View more posts with the tag&nbsp;</span>{tag}
+								</a>
+							</li>
+						))}
+						{tags.length > VISIBLE && (
+							<li class="post-header__more-li">
+								<button type="button" class="post-header__more" data-more aria-label={`Show ${tags.length - VISIBLE} more tags`}>…</button>
+							</li>
+						)}
+					</ul>
+				</div>
+			)}
+
+			{technologies.length > 0 && (
+				<div class="post-header__row" data-tax-row>
+					<Icon aria-hidden="true" class="post-header__row-icon" name="mdi:tools" />
+					<ul class="post-header__taxlist">
+						{technologies.map((tech, i) => (
+							<li class:list={[i >= VISIBLE && "post-header__extra"]}>
+								<a class="post-header__taxlink" data-pagefind-filter={`tech:${tech}`} href={`/tech/${techSlug(tech)}/`}>
+									<Icon aria-hidden="true" class="post-header__tech-icon" name={getTechIconName(tech)} />
+									<span class="sr-only">View more posts using&nbsp;</span>{tech}
+								</a>
+							</li>
+						))}
+						{technologies.length > VISIBLE && (
+							<li class="post-header__more-li">
+								<button type="button" class="post-header__more" data-more aria-label={`Show ${technologies.length - VISIBLE} more technologies`}>…</button>
+							</li>
+						)}
+					</ul>
+				</div>
+			)}
 		</div>
-	)
-}
-{
-	technologies.length > 0 && (
-		<div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
-			<Icon aria-hidden="true" class="inline-block h-5 w-5 text-accent-2/80" name="mdi:tools" />
-			<div class="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
-				{technologies.map((tech, i) => {
-					const iconName = getTechIconName(tech);
-					return (
-						<span class="contents">
-							<span class="inline-flex items-center gap-1.5 font-medium text-global-text/80">
-								<Icon aria-hidden="true" class="h-4 w-4 text-accent-2/80" name={iconName} title={tech} />
-								<span>{tech}</span>
-							</span>
-							{i < technologies.length - 1 && <span class="text-global-text/40">,</span>}
-						</span>
-					);
-				})}
-			</div>
-		</div>
-	)
-}
+	)}
+</header>
+
+<style>
+	.post-header {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.post-header__draft {
+		align-self: flex-start;
+		margin-bottom: 0.5rem;
+		font-size: 0.72rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--color-red-500, oklch(62% 0.18 25));
+	}
+
+	.post-header__title {
+		margin: 0;
+		font-size: clamp(1.9rem, 4vw, 2.5rem);
+		font-weight: 800;
+		line-height: 1.12;
+		letter-spacing: -0.02em;
+		color: var(--color-accent-2);
+	}
+
+	/* Full-width subtitle (matches the title's measure, not a narrow column). */
+	.post-header__desc {
+		margin: 0.85rem 0 0;
+		width: 100%;
+		font-size: 1.075rem;
+		line-height: 1.6;
+		color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
+	}
+
+	.post-header__meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.4rem 0.7rem;
+		margin-top: 1.1rem;
+		font-size: 0.875rem;
+		color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+	}
+
+	.post-header__meta-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.post-header__meta-item svg {
+		width: 1rem;
+		height: 1rem;
+		color: var(--color-accent);
+	}
+
+	.post-header__meta-dot {
+		color: color-mix(in srgb, var(--color-global-text) 30%, transparent);
+	}
+
+	.post-header__updated {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.15rem 0.55rem;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 999px;
+		font-size: 0.78rem;
+	}
+
+	.post-header__updated svg {
+		width: 0.85rem;
+		height: 0.85rem;
+		color: var(--color-accent);
+	}
+
+	/* "Try it live" — flat, border-only, accent (matches the site). */
+	.post-header__try {
+		align-self: flex-start;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1.25rem;
+		padding: 0.5rem 0.9rem;
+		border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
+		border-radius: 0.6rem;
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-accent);
+		text-decoration: none;
+		transition: border-color 0.18s ease, background 0.18s ease;
+	}
+
+	.post-header__try:hover,
+	.post-header__try:focus-visible {
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		outline: none;
+	}
+
+	.post-header__try svg {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.post-header__tax {
+		display: flex;
+		flex-direction: column;
+		gap: 0.55rem;
+		margin-top: 1.5rem;
+	}
+
+	.post-header__row {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.6rem;
+	}
+
+	.post-header__row-icon {
+		flex: none;
+		width: 1.2rem;
+		height: 1.2rem;
+		margin-top: 0.15rem;
+		color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+	}
+
+	.post-header__taxlist {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.2rem 1rem;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	/* Plain text links — underline on hover (no pill). */
+	.post-header__taxlink {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		font-size: 0.92rem;
+		font-weight: 500;
+		color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
+		text-decoration: none;
+		text-underline-offset: 3px;
+		transition: color 0.15s ease;
+	}
+
+	.post-header__taxlink:hover,
+	.post-header__taxlink:focus-visible {
+		color: var(--color-accent);
+		text-decoration: underline;
+		outline: none;
+	}
+
+	.post-header__hash {
+		color: color-mix(in srgb, var(--color-accent) 75%, transparent);
+		font-weight: 700;
+	}
+
+	.post-header__taxlink:hover .post-header__hash {
+		color: var(--color-accent);
+	}
+
+	.post-header__tech-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	/* "…" toggle + the items it reveals. */
+	.post-header__extra {
+		display: none;
+	}
+
+	.post-header__row.is-expanded .post-header__extra {
+		display: inline-flex;
+	}
+
+	.post-header__row.is-expanded .post-header__more-li {
+		display: none;
+	}
+
+	.post-header__more {
+		border: 0;
+		background: transparent;
+		padding: 0 0.1rem;
+		cursor: pointer;
+		font-size: 1rem;
+		font-weight: 800;
+		line-height: 1;
+		letter-spacing: 0.04em;
+		color: var(--color-accent);
+		transition: color 0.15s ease;
+	}
+
+	.post-header__more:hover,
+	.post-header__more:focus-visible {
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		outline: none;
+	}
+</style>
+
+<script>
+	function setupPostHeaderTax() {
+		const header = document.querySelector<HTMLElement>(".post-header");
+		if (!header || header.dataset.taxBound === "true") return;
+		header.dataset.taxBound = "true";
+
+		const COLLAPSE_DELAY = 15000;
+		let collapseTimer: number | undefined;
+
+		const expand = (row: HTMLElement) => row.classList.add("is-expanded");
+		const collapseAll = () => {
+			for (const row of header.querySelectorAll<HTMLElement>(".post-header__row.is-expanded")) {
+				row.classList.remove("is-expanded");
+			}
+		};
+
+		for (const btn of header.querySelectorAll<HTMLButtonElement>("[data-more]")) {
+			btn.addEventListener("click", () => {
+				const row = btn.closest<HTMLElement>(".post-header__row");
+				if (row) expand(row);
+			});
+		}
+
+		// Once the cursor leaves the header, collapse back to 5 after 15s.
+		// Re-entering the header cancels the pending collapse.
+		header.addEventListener("mouseleave", () => {
+			window.clearTimeout(collapseTimer);
+			collapseTimer = window.setTimeout(collapseAll, COLLAPSE_DELAY);
+		});
+		header.addEventListener("mouseenter", () => window.clearTimeout(collapseTimer));
+	}
+
+	setupPostHeaderTax();
+	document.addEventListener("astro:page-load", setupPostHeaderTax);
+</script>

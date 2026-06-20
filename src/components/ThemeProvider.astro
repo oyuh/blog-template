@@ -7,7 +7,15 @@
 		return storedTheme || (lightModePref.matches ? "light" : "dark");
 	}
 
-	function setTheme(newTheme) {
+	function applyTheme(newTheme) {
+		const root = document.documentElement;
+		root.setAttribute("data-theme", newTheme);
+		if (typeof localStorage !== "undefined") {
+			localStorage.setItem("theme", newTheme);
+		}
+	}
+
+	function setTheme(newTheme, animate) {
 		if (newTheme !== "light" && newTheme !== "dark") {
 			return console.warn(
 				`Invalid theme value '${newTheme}' received. Expected 'light' or 'dark'.`,
@@ -21,10 +29,17 @@
 			return;
 		}
 
-		root.setAttribute("data-theme", newTheme);
+		const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-		if (typeof localStorage !== "undefined") {
-			localStorage.setItem("theme", newTheme);
+		// User-triggered switches wipe the new theme down from the top via the View
+		// Transitions API (scoped with `theme-vt`, see global.css). Initial/restore
+		// applications skip the animation.
+		if (animate && !prefersReduced && typeof document.startViewTransition === "function") {
+			root.classList.add("theme-vt");
+			const transition = document.startViewTransition(() => applyTheme(newTheme));
+			transition.finished.finally(() => root.classList.remove("theme-vt"));
+		} else {
+			applyTheme(newTheme);
 		}
 	}
 
@@ -36,9 +51,9 @@
 
 	// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
 	document.addEventListener("theme-change", (e) => {
-		setTheme(e.detail.theme);
+		setTheme(e.detail.theme, true);
 	});
 
 	// listen for prefers-color-scheme change.
-	lightModePref.addEventListener("change", (e) => setTheme(e.matches ? "light" : "dark"));
+	lightModePref.addEventListener("change", (e) => setTheme(e.matches ? "light" : "dark", true));
 </script>

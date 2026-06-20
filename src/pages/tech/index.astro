@@ -1,0 +1,80 @@
+---
+import { getAllPosts, getTechnologyUsage } from "@/data/post";
+import PageLayout from "@/layouts/Base.astro";
+import { getTechIconName, techSlug } from "@/utils/techIcons";
+import { Icon } from "astro-icon/components";
+
+const allPosts = await getAllPosts();
+const usage = getTechnologyUsage(allPosts);
+
+const techCards = Object.values(usage)
+	.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+	.map((u) => {
+		const coverSrc = u.projects.find((p) => p.coverImage?.src)?.coverImage?.src ?? null;
+		const featuredPosts = u.projects.slice(0, 3).map((p) => ({ id: p.id, title: p.title }));
+		return {
+			name: u.name,
+			slug: techSlug(u.name),
+			count: u.count,
+			icon: getTechIconName(u.name),
+			coverSrc,
+			featuredPosts,
+		};
+	});
+
+const meta = {
+	description: "Explore the technologies I build with and jump into the posts that use them.",
+	title: "All Tech",
+};
+
+export const prerender = true;
+---
+
+<PageLayout meta={meta} centerMain>
+	<div data-pagefind-ignore="all">
+		<div class="mb-10 space-y-3">
+			<h1 class="title text-3xl">Tech</h1>
+			<p class="max-w-2xl text-base text-global-text/80 dark:text-global-text/70">
+				The tools and frameworks I build with — each card jumps to the posts where I actually use it.
+			</p>
+		</div>
+		<div class="index-grid">
+			{
+				techCards.map(({ name, slug, count, icon, coverSrc, featuredPosts }) => (
+					<a
+						class="index-card"
+						data-astro-prefetch
+						href={`/tech/${slug}/`}
+						title={`View ${count} post${count === 1 ? "" : "s"} using ${name}`}
+					>
+						{coverSrc ? (
+							<div class="index-card__img" style={`background-image: url(${coverSrc});`} aria-hidden="true" />
+						) : (
+							<div class="index-card__img index-card__img--none" aria-hidden="true" />
+						)}
+						<div class="index-card__body">
+							<span class="index-card__kicker">Tech</span>
+							<h2 class="index-card__title">
+								<Icon aria-hidden="true" class="index-card__title-icon" focusable="false" name={icon} />
+								{name}
+							</h2>
+							<span class="index-card__count">
+								{count} post{count === 1 ? "" : "s"}
+							</span>
+							{featuredPosts.length > 0 && (
+								<ul class="index-card__posts">
+									{featuredPosts.map((post) => (
+										<li class="index-card__post">
+											<span class="index-card__dot" aria-hidden="true" />
+											<span class="truncate">{post.title}</span>
+										</li>
+									))}
+								</ul>
+							)}
+						</div>
+					</a>
+				))
+			}
+		</div>
+	</div>
+</PageLayout>

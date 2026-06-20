@@ -14,7 +14,7 @@ const { Content } = await render(note);
 
 <article
 	class:list={[
-		isPreview && "inline-grid rounded-md bg-[rgb(240,240,240)] px-4 py-3 dark:bg-[rgb(33,35,38)]",
+		isPreview && "inline-grid rounded-lg border border-global-text/15 bg-global-bg px-4 py-3",
 	]}
 	data-pagefind-body={isPreview ? false : true}
 >

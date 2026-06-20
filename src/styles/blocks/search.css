@@ -1,650 +1,129 @@
-@import "@pagefind/default-ui/css/ui.css";
+/* Inline header search (Pagefind JS API). Flat + border-only to match the site:
+   the header bar is the input; results + a toggleable Tags/Tech filter menu drop
+   into a panel directly beneath it. */
 
-:root {
-	--pagefind-ui-font: inherit;
-}
-
-/* Prevent the page behind the modal from scrolling */
-html[data-search-modal-open],
-body[data-search-modal-open] {
-	overflow: hidden;
-}
-
-#search dialog[aria-label="search"] {
-	overscroll-behavior: contain;
-	/* Let the internal scroll wrapper own vertical scrolling so the scrollbar
-	   sits next to the results (no padded gutter). Keep horizontal overflow
-	   hidden to prevent sideways scrolling. The tags panel is fixed-positioned. */
-	overflow-y: hidden !important;
-	overflow-x: hidden !important;
-}
-
-/* On larger screens, force viewport-fixed positioning so the dialog is never
-   clipped when the page is scrolled. Overrides the Tailwind sm:mt-16 margin
-   approach, which is scroll-position-dependent in some browsers. */
-@media (min-width: 640px) {
-	#search dialog[aria-label="search"][open] {
-		position: fixed !important;
-		top: 4rem !important;
-		margin-top: 0 !important;
-		margin-bottom: 0 !important;
-	}
-}
-
-/* Tags button: show selected-count and an active (accent/blue) background when tags are selected */
-#search [data-tags-button][data-has-selection="true"] {
-	background-color: oklch(from var(--color-accent) l c h / 0.12) !important;
-	border-color: color-mix(in srgb, var(--color-accent) 45%, transparent) !important;
-	color: var(--color-accent) !important;
-}
-
-#search [data-tags-button][data-has-selection="true"]:hover {
-	background-color: oklch(from var(--color-accent) l c h / 0.18) !important;
-}
-
-#lawson__search {
-	--pagefind-ui-primary: var(--color-accent);
-	--pagefind-ui-text: var(--color-global-text);
-	--pagefind-ui-background: var(--color-global-bg);
-	--pagefind-ui-border: color-mix(in srgb, var(--color-global-text) 18%, transparent);
-	--pagefind-ui-border-width: 1px;
-	--pagefind-ui-border-radius: 12px;
-	min-height: 0;
-	display: flex;
-	flex-direction: column;
-}
-
-/* Keep the modal header + tags panel fixed while results scroll */
-#lawson__search .pagefind-ui {
-	display: flex;
-	flex-direction: column;
-	min-height: 0;
-	flex: 1;
-}
-
-#lawson__search .pagefind-ui__results-area {
-	flex: 0 0 auto;
-	min-height: 0;
-	overflow: visible;
-	padding-right: 0 !important;
-	/* Prevent the results column from enforcing a minimum width that can cause
-	   horizontal overflow (cards appearing to run under the scrollbar). */
-	min-width: 0 !important;
-	width: 100%;
-}
-
-/* Enhanced search input styling */
-#lawson__search .pagefind-ui__form {
+.site-search {
 	position: relative;
-	--search-input-height: 3.25rem;
-	--search-overlay-control-size: 2.25rem;
-	margin-bottom: 1.5rem;
-}
-
-/* Hide the search icon inside the input */
-#lawson__search .pagefind-ui__search-input::before,
-#lawson__search .pagefind-ui__form::before,
-#lawson__search .pagefind-ui__form svg {
-	display: none !important;
-}
-
-/* Remove any icon background */
-#lawson__search .pagefind-ui__search-input {
-	background-image: none !important;
-}
-
-#lawson__search .pagefind-ui__search-input {
-	width: 100%;
-	min-height: var(--search-input-height);
-	padding: 1rem 8rem 1rem 1.25rem;
-	font-size: 1.0625rem;
-	line-height: 1.25;
-	font-family: inherit;
-	font-weight: 400;
-	background-color: color-mix(in srgb, var(--pagefind-ui-background) 78%, transparent);
-	border: 1px solid var(--pagefind-ui-border);
-	border-radius: 12px;
-	color: var(--pagefind-ui-text);
-	transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-	box-shadow: none;
-
-	&:focus {
-		outline: none;
-		border-color: var(--color-accent);
-		box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
-	}
-
-	&::placeholder {
-		color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
-		font-weight: 400;
-	}
-}
-
-#lawson__search .pagefind-ui__search-clear {
-	position: absolute;
-	right: 0.5rem;
-	top: calc((var(--search-input-height) - var(--search-overlay-control-size)) / 2);
-	transform: none;
-	width: var(--search-overlay-control-size);
-	height: var(--search-overlay-control-size);
-	padding: 0;
-	background-color: transparent;
-	border: none;
-	border-radius: 0.375rem;
-	cursor: pointer;
-	transition: all 0.2s ease-in-out;
-	overflow: hidden;
-	color: transparent;
-	text-indent: 200%;
-	white-space: nowrap;
-	z-index: 10;
-
-	&:hover {
-		background-color: oklch(from var(--color-accent) l c h / 0.1);
-	}
-
-	&:focus {
-		outline: none;
-		background-color: oklch(from var(--color-accent) l c h / 0.1);
-		box-shadow: 0 0 0 2px var(--color-accent);
-	}
-}
-
-#lawson__search .pagefind-ui__search-clear::before {
-	content: "";
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 18L18 6M6 6l12 12'%3E%3C/path%3E%3C/svg%3E")
-		center / 60% no-repeat;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='2' stroke='currentColor' %3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 18L18 6M6 6l12 12'%3E%3C/path%3E%3C/svg%3E")
-		center / 60% no-repeat;
-	background-color: var(--color-global-text);
-	display: block;
-	width: 100%;
-	height: 100%;
-	opacity: 0.6;
-	transition: opacity 0.2s ease-in-out;
-}
-
-#lawson__search .pagefind-ui__search-clear:hover::before {
-	opacity: 1;
-	background-color: var(--color-accent);
-}
-
-/* Enhanced results styling */
-#lawson__search .pagefind-ui__results-area {
-	margin-top: 0.75rem;
-}
-
-#lawson__search .pagefind-ui__results {
-	/* Avoid compounding spacing with results-area margin-top */
-	margin-top: 0;
-}
-
-/* If any result text is long/unbroken, force wrapping to prevent horizontal overflow */
-#lawson__search .pagefind-ui__result,
-#lawson__search .pagefind-ui__result * {
-	min-width: 0;
-	overflow-wrap: anywhere;
-	word-break: break-word;
-}
-
-#lawson__search .pagefind-ui__result {
-	border: 0;
-	margin-bottom: 0.75rem;
-	padding: 1rem;
-	background: color-mix(in srgb, var(--color-global-bg) 78%, transparent);
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
-	border-radius: 0.75rem;
-	transition: all 0.2s ease;
-	position: relative;
-	cursor: pointer;
-
-	&:last-child {
-		margin-bottom: 0;
-	}
-
-	&:hover {
-		background: color-mix(in srgb, var(--color-global-bg) 96%, transparent);
-		border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-		transform: none;
-		box-shadow: none;
-	}
-}
-
-#lawson__search .pagefind-ui__result-title {
-	margin-bottom: 0.5rem;
-}
-
-#lawson__search .pagefind-ui__result-link {
-	color: var(--color-accent-2);
-	text-decoration: underline;
-	font-weight: 600;
-	font-size: 1.125rem;
-	line-height: 1.4;
-	display: block;
-	position: relative;
-	transition: color 0.2s ease;
-	letter-spacing: -0.01em;
-	text-underline-offset: 0.14em;
-	text-decoration-thickness: 0.08em;
-	text-decoration-color: color-mix(in srgb, var(--color-accent-2) 28%, transparent);
-
-	&:hover {
-		color: var(--color-accent);
-		text-decoration-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
-	}
-
-	&:focus {
-		outline: 2px solid var(--color-accent);
-		outline-offset: 2px;
-		border-radius: 4px;
-	}
-}
-
-#lawson__search .pagefind-ui__result-excerpt {
-	color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
-	font-size: 0.9375rem;
-	line-height: 1.55;
-	margin-top: 0.5rem;
-	font-weight: 400;
-	text-wrap: pretty;
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 3;
-	overflow: hidden;
-}
-
-/* When a card is clickable, make hover/focus affordances more obvious */
-#lawson__search .pagefind-ui__result[data-clickable="true"]:hover {
-	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-}
-
-#lawson__search .pagefind-ui__result[data-clickable="true"]:hover .pagefind-ui__result-link {
-	text-decoration: underline;
-}
-
-/* Sub-results (Pagefind "nested" hits): keep them clearly secondary.
-   These often show up as things like "Posts with the tag …" and should read
-   as smaller items under the main page result. */
-#lawson__search .pagefind-ui__result-nested {
-	margin-top: 0.75rem;
-	padding: 0.75rem 0.875rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
-	border-radius: 0.75rem;
-	background: color-mix(in srgb, var(--color-global-text) 2.5%, transparent);
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-}
-
-/* Add a small label above the first nested item so it's clear these are in-page matches */
-#lawson__search .pagefind-ui__result-nested:first-of-type::before {
-	content: "Matches in this page";
-	display: block;
-	margin-bottom: 0.25rem;
-	font-size: 0.75rem;
-	font-weight: 600;
-	letter-spacing: -0.01em;
-	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
-}
-
-
-
-#lawson__search .pagefind-ui__result-nested + .pagefind-ui__result-nested {
-	margin-top: 0.5rem;
-}
-
-#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-link {
-	font-size: 0.875rem;
-	font-weight: 550;
-	line-height: 1.35;
-	letter-spacing: 0;
-	color: color-mix(in srgb, var(--color-global-text) 82%, transparent);
-	text-decoration: underline;
-	text-decoration-color: color-mix(in srgb, var(--color-global-text) 26%, transparent);
-	transition: color 0.2s ease, text-decoration-color 0.2s ease, background-color 0.2s ease;
-}
-
-#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-link:hover {
-	color: var(--color-accent);
-	text-decoration-color: color-mix(in srgb, var(--color-accent) 65%, transparent);
-}
-
-/* Pagefind adds a big "⤷" prefix by default. Tone it down to reduce visual noise. */
-#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-link::before {
-	content: "";
-	display: none;
-}
-
-#lawson__search .pagefind-ui__result-nested .pagefind-ui__result-excerpt {
-	margin-top: 0;
-	font-size: 0.8125rem;
-	line-height: 1.45;
-	color: color-mix(in srgb, var(--color-global-text) 68%, transparent);
-	-webkit-line-clamp: 2;
-}
-
-/* Make nested items feel like tappable rows */
-#lawson__search .pagefind-ui__result-nested[data-clickable="true"] {
-	cursor: pointer;
-	border-radius: 0.5rem;
-	padding: 0.5rem 0.5rem 0.5rem 0.875rem;
-}
-
-#lawson__search .pagefind-ui__result-nested[data-clickable="true"]:hover {
-	background-color: color-mix(in srgb, var(--color-global-bg) 88%, transparent);
-}
-
-#lawson__search .pagefind-ui__result-tags {
-	margin-top: 0.75rem;
-	display: flex;
-	gap: 0.5rem;
-	flex-wrap: wrap;
-}
-
-#lawson__search .pagefind-ui__result-tag {
-	background-color: transparent;
-	color: color-mix(in srgb, var(--color-global-text) 85%, transparent);
-	padding: 0.25rem 0.5rem;
-	border-radius: 0.375rem;
-	font-size: 0.75rem;
-	font-weight: 500;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 20%, transparent);
-}
-
-#lawson__search mark {
-	color: var(--color-accent);
-	background-color: color-mix(in srgb, var(--color-accent) 18%, transparent);
-	padding: 0.125rem 0.25rem;
-	border-radius: 4px;
-	font-weight: 600;
-	font-size: 1em;
-}
-
-/* Enhanced messages and loading states */
-/* The "X results" element is rendered by Pagefind in the results area.
-   We relocate it into the form so it sits on the search bar, then position it there. */
-#lawson__search .pagefind-ui__form .pagefind-ui__message {
-	position: absolute;
-	top: calc((var(--search-input-height) - var(--search-overlay-control-size)) / 2);
-	right: 3.25rem;
-	transform: none;
-	height: var(--search-overlay-control-size);
 	display: flex;
 	align-items: center;
-	justify-content: flex-end;
-	margin: 0;
-	padding: 0 0.5rem;
-	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
-	font-style: normal;
-	font-weight: 600;
-	letter-spacing: -0.01em;
-	line-height: 1;
-	font-size: 0.875rem;
-	pointer-events: none;
-	white-space: nowrap;
-	max-width: calc(100% - 4.25rem);
-	overflow: hidden;
-	text-overflow: ellipsis;
+	flex: 1 1 auto;
+	min-width: 0;
+	max-width: 22rem;
 }
 
-#lawson__search .pagefind-ui__loading {
-	text-align: center;
-	padding: 2rem 1rem;
-	color: var(--color-accent);
-
-	&::before {
-		content: "";
-		display: inline-block;
-		width: 1rem;
-		height: 1rem;
-		margin-right: 0.5rem;
-		border: 2px solid oklch(from var(--color-accent) l c h / 0.3);
-		border-top-color: var(--color-accent);
-		border-radius: 50%;
-		animation: spin 1s linear infinite;
-	}
+.site-search__bar {
+	display: flex;
+	align-items: center;
+	gap: 0.45rem;
+	width: 100%;
+	height: 2.25rem;
+	padding: 0 0.4rem 0 0.6rem;
+	border-radius: 0.6rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+	background: var(--color-global-bg);
+	transition: border-color 0.2s ease;
 }
 
-@keyframes spin {
-	to {
-		transform: rotate(360deg);
-	}
-}
-
-/* Button enhancements */
-#lawson__search .pagefind-ui__button {
-	background: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
-	color: var(--color-global-text);
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
-	padding: 0.75rem 1rem;
-	border-radius: 0.75rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: all 0.2s ease-in-out;
-
-	&:hover {
-		border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-		color: var(--color-accent);
-	}
-
-	&:focus {
-		outline: none;
-		box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
-	}
-}
-
-/* Responsive and accessibility improvements */
-@media (max-width: 640px) {
-	#lawson__search .pagefind-ui__result {
-		padding: 0.75rem;
-		margin-bottom: 0.75rem;
-	}
-
-	#lawson__search .pagefind-ui__search-input {
-		padding: 0.75rem 6.75rem 0.75rem 0.875rem;
-		font-size: 0.9375rem;
-	}
-
-	#lawson__search .pagefind-ui__form {
-		--search-input-height: 2.75rem;
-		--search-overlay-control-size: 1.75rem;
-	}
-
-	#lawson__search .pagefind-ui__search-clear {
-		right: 0.5rem;
-	}
-}
-
-/* Focus management improvements */
-#lawson__search .pagefind-ui__result:focus-within {
+.site-search__bar:focus-within {
 	border-color: var(--color-accent);
-	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.1);
 }
 
-/* Keep Pagefind's built-in filter UI out of the main results area.
-   The search modal relocates the filter panel into the right-side Tags panel. */
-#lawson__search .pagefind-ui__filter-panel {
-	display: none !important;
+/* Leading slot — holds the magnifying glass OR the live result count. */
+.site-search__lead {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	min-width: 1.15rem;
+	height: 1.15rem;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+	transition: color 0.2s ease;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel {
-	display: block !important;
-	margin: 0;
-	padding: 0;
+.site-search__bar:focus-within .site-search__lead {
+	color: var(--color-accent);
+}
+
+.site-search__icon {
+	width: 1.05rem;
+	height: 1.05rem;
+}
+
+.site-search__count {
+	font-family: "Geist Mono Variable", monospace;
+	font-size: 0.8rem;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--color-accent);
+}
+
+.site-search__input {
+	flex: 1;
+	min-width: 0;
 	border: 0;
 	background: transparent;
-}
-
-/* Remove Pagefind's filter group dropdown/header in the Tags sidebar (but keep tag text) */
-#search-tags-panel .pagefind-ui__filter-panel summary,
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-select,
-#search-tags-panel .pagefind-ui__filter-panel summary .pagefind-ui__filter-name {
-	display: none !important;
-}
-
-#search-tags-panel .pagefind-ui__filter-panel details {
-	border: 0;
-	padding: 0;
-	margin: 0;
-}
-
-#search-tags-panel .pagefind-ui__filter-panel details[open] {
-	padding-top: 0;
-}
-
-/* Detached tags panel: sits outside the modal to the right (does not change modal width) */
-#search-tags-panel {
-	position: fixed;
-	top: var(--search-tags-top, 6rem);
-	left: var(--search-tags-left, 0);
-	max-height: var(--search-tags-max-height, 50vh);
-	z-index: 60;
-}
-
-@media (max-width: 640px) {
-	#search-tags-panel {
-		position: static;
-		left: auto;
-		top: auto;
-		max-height: none;
-		margin-top: 1rem;
-	}
-}
-
-/* Make the tag list compact and easy to scan */
-#search-tags-panel .pagefind-ui__filter-panel label {
-	/* Fallback: older Pagefind versions may use a label wrapper */
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.5rem;
-	padding: 0.375rem 0.5rem;
-	border-radius: 0.5rem;
-	cursor: pointer;
-	user-select: none;
-	border: 1px solid transparent;
-	color: color-mix(in srgb, var(--color-global-text) 90%, transparent);
-}
-
-/* Primary selector for Pagefind's filter row */
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 0.5rem;
-	padding: 0.375rem 0.5rem;
-	border-radius: 0.5rem;
-	cursor: pointer;
-	user-select: none;
-	border: 1px solid transparent;
-	color: color-mix(in srgb, var(--color-global-text) 90%, transparent);
-}
-
-/* Pagefind draws its own checkmark via .pagefind-ui__filter-value::before.
-   We render the checkmark on the checkbox itself, so disable theirs to avoid the doubled icon. */
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value::before {
-	content: none !important;
-	display: none !important;
-}
-
-/* Remove Pagefind's default checkbox decoration (prevents double-check icons) */
-#search-tags-panel .pagefind-ui__filter-panel label::before,
-#search-tags-panel .pagefind-ui__filter-panel label::after,
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]::after {
-	content: none !important;
-	display: none !important;
-}
-
-#search-tags-panel .pagefind-ui__filter-panel label:hover {
-	background-color: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
-}
-
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value:hover {
-	background-color: color-mix(in srgb, var(--color-global-bg) 80%, transparent);
-}
-
-#search-tags-panel .pagefind-ui__filter-panel label:has(input[type="checkbox"]:checked) {
-	background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
-	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-}
-
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value.pagefind-ui__filter-value--checked {
-	background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
-	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-}
-
-#search-tags-panel .pagefind-ui__filter-panel label:has(input[type="checkbox"]:focus-visible) {
+	color: var(--color-global-text);
+	font: inherit;
+	font-size: 0.9rem;
 	outline: none;
-	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
 }
 
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-value:has(.pagefind-ui__filter-checkbox:focus-visible) {
-	outline: none;
-	box-shadow: 0 0 0 3px oklch(from var(--color-accent) l c h / 0.16);
+.site-search__input::placeholder {
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"],
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox {
-	appearance: none;
+.site-search__input::-webkit-search-cancel-button {
 	-webkit-appearance: none;
-	width: 1rem;
-	height: 1rem;
-	border-radius: 0.25rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 25%, transparent);
-	background-color: transparent;
-	background-image: none !important;
-	flex: 0 0 auto;
-	display: inline-grid;
-	place-content: center;
+	appearance: none;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]::before,
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox::before {
-	content: "";
-	width: 0.625rem;
-	height: 0.625rem;
-	transform: scale(0);
-	transition: transform 120ms ease-in-out;
-	background-color: var(--color-global-bg);
-	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E") center / contain no-repeat;
-	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke-width='3' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M4.5 12.75l6 6 9-13.5'/%3E%3C/svg%3E") center / contain no-repeat;
+.site-search__clear {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.4rem;
+	height: 1.4rem;
+	flex: none;
+	border: 0;
+	border-radius: 0.35rem;
+	background: transparent;
+	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	cursor: pointer;
+	transition: color 0.15s ease, background 0.15s ease;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked,
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox:checked {
-	background-color: var(--color-accent);
-	border-color: var(--color-accent);
+.site-search__clear svg {
+	width: 0.85rem;
+	height: 0.85rem;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel input[type="checkbox"]:checked::before,
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-checkbox:checked::before {
-	transform: scale(1);
+.site-search__clear:hover,
+.site-search__clear:focus-visible {
+	color: var(--color-accent);
+	outline: none;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-label {
-	flex: 1;
-	min-width: 0;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+/* Results panel — flat, border-only, drops below the bar. */
+.site-search__panel {
+	position: absolute;
+	top: calc(100% + 0.5rem);
+	left: 0;
+	z-index: 70;
+	width: min(34rem, calc(100vw - 2rem));
+	max-height: min(74vh, 34rem);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 0.5rem;
+	border-radius: 0.85rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	background: var(--color-global-bg);
+	animation: search-pop 0.16s ease;
 }
 
-#search-tags-panel .pagefind-ui__filter-panel .pagefind-ui__filter-count {
-	opacity: 0.7;
-	font-size: 0.75rem;
-}
-
-/* Search placeholder styling */
-.search-placeholder {
-	display: block;
-	margin-top: 1.5rem;
-	animation: fadeIn 0.3s ease-in-out;
-}
-
-@keyframes fadeIn {
+@keyframes search-pop {
 	from {
 		opacity: 0;
-		transform: translateY(-8px);
+		transform: translateY(-6px);
 	}
 	to {
 		opacity: 1;
@@ -652,6 +131,226 @@ body[data-search-modal-open] {
 	}
 }
 
-.placeholder-content {
-	max-width: 100%;
+/* Filter toolbar */
+.site-search__toolbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem;
+	padding: 0.15rem 0.25rem 0.4rem;
+}
+
+.site-search__filter-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.55rem;
+	border-radius: 0.5rem;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+	background: transparent;
+	color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
+	font-size: 0.8rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.site-search__filter-toggle svg {
+	width: 0.9rem;
+	height: 0.9rem;
+}
+
+.site-search__filter-toggle:hover,
+.site-search__filter-toggle.is-active {
+	color: var(--color-accent);
+	border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+}
+
+.site-search__filter-badge {
+	font-family: "Geist Mono Variable", monospace;
+	font-size: 0.7rem;
+	font-weight: 700;
+	min-width: 1.05rem;
+	height: 1.05rem;
+	padding: 0 0.25rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	background: var(--color-accent);
+	color: var(--color-global-bg);
+}
+
+.site-search__filter-clear {
+	border: 0;
+	background: transparent;
+	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	font-size: 0.78rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: color 0.15s ease;
+}
+
+.site-search__filter-clear:hover {
+	color: var(--color-accent);
+}
+
+/* Filter menu */
+.site-search__filters {
+	padding: 0.25rem 0.25rem 0.5rem;
+	margin-bottom: 0.35rem;
+	border-bottom: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
+	animation: search-pop 0.16s ease;
+}
+
+.site-search__filter-group + .site-search__filter-group {
+	margin-top: 0.6rem;
+}
+
+.site-search__filter-title {
+	margin: 0 0 0.4rem;
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+}
+
+.site-search__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+}
+
+.site-search__chips-empty {
+	font-size: 0.8rem;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+}
+
+.site-search__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3rem;
+	padding: 0.2rem 0.55rem;
+	border-radius: 999px;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	background: transparent;
+	color: color-mix(in srgb, var(--color-global-text) 82%, transparent);
+	font-size: 0.78rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.site-search__chip:hover {
+	border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+	color: var(--color-accent);
+}
+
+.site-search__chip.is-active {
+	background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+	color: var(--color-accent);
+}
+
+.site-search__chip-count {
+	font-family: "Geist Mono Variable", monospace;
+	font-size: 0.68rem;
+	opacity: 0.7;
+}
+
+/* Results */
+.site-search__message {
+	padding: 0.85rem 0.75rem;
+	font-size: 0.875rem;
+	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+}
+
+.site-search__result {
+	padding: 0.7rem 0.75rem;
+	border-radius: 0.6rem;
+	border: 1px solid transparent;
+	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.site-search__result + .site-search__result {
+	margin-top: 0.35rem;
+}
+
+.site-search__result:hover {
+	border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+	background: color-mix(in srgb, var(--color-global-text) 4%, transparent);
+}
+
+.site-search__result-link {
+	display: block;
+	font-size: 1rem;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	color: var(--color-accent-2);
+	text-decoration: none;
+}
+
+.site-search__result-link:hover,
+.site-search__result-link:focus-visible {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.site-search__result-excerpt {
+	margin-top: 0.25rem;
+	font-size: 0.85rem;
+	line-height: 1.5;
+	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	overflow-wrap: anywhere;
+}
+
+.site-search__sub {
+	display: block;
+	margin-top: 0.4rem;
+	padding: 0.35rem 0.5rem;
+	border-radius: 0.45rem;
+	text-decoration: none;
+	border: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
+	transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.site-search__sub:hover {
+	border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+	background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+}
+
+.site-search__sub-title {
+	display: block;
+	font-size: 0.8rem;
+	font-weight: 550;
+	color: color-mix(in srgb, var(--color-global-text) 85%, transparent);
+}
+
+.site-search__sub-excerpt {
+	display: block;
+	font-size: 0.75rem;
+	line-height: 1.4;
+	color: color-mix(in srgb, var(--color-global-text) 62%, transparent);
+	overflow-wrap: anywhere;
+}
+
+/* Pagefind highlight marks inside excerpts. */
+.site-search__panel mark {
+	color: var(--color-accent);
+	background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+	border-radius: 3px;
+	padding: 0 0.15em;
+	font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.site-search__panel,
+	.site-search__filters {
+		animation: none;
+	}
 }

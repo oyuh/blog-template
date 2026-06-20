@@ -1,0 +1,56 @@
+---
+// A casual "collage" of social/link buttons for the hero. GitHub, LinkedIn,
+// Discord and the About link are the large ones; the rest are smaller. Order and
+// tilt are randomised on the client each load (see the script) for a hand-placed feel.
+import { Icon } from "astro-icon/components";
+
+type Social = {
+	name: string;
+	label: string;
+	href: string;
+	size: "lg" | "sm";
+	internal?: boolean;
+};
+
+const socials: Social[] = [
+	{ name: "mdi:github", label: "GitHub (@oyuh)", href: "https://github.com/oyuh/", size: "lg" },
+	{ name: "mdi:linkedin", label: "LinkedIn", href: "https://www.linkedin.com/in/lawson-hart/", size: "lg" },
+	{ name: "mdi:discord", label: "Discord", href: "https://discordapp.com/users/527167786200465418", size: "lg" },
+	{ name: "mdi:account-circle", label: "About me", href: "/about/", size: "lg", internal: true },
+	{ name: "mdi:twitter", label: "Twitter/X", href: "https://x.com/sumboutlaw/", size: "sm" },
+	{ name: "mdi:instagram", label: "Instagram", href: "https://www.instagram.com/lawsonwtf/", size: "sm" },
+	{ name: "mdi:email", label: "Email", href: "mailto:me@lawsonhart.me", size: "sm" },
+	{ name: "mdi:coffee", label: "Buy Me A Coffee", href: "https://www.buymeacoffee.com/lawsonhart", size: "sm" },
+];
+
+// Shuffle order + assign a tilt at render time so the collage is scattered the
+// instant it paints (no deferred-script "pop"). Wider range (±4–10°) than the cards.
+const collageTilt = () => {
+	const sign = Math.random() < 0.5 ? -1 : 1;
+	return Math.round(sign * (4 + Math.random() * 6) * 100) / 100;
+};
+const arranged = [...socials]
+	.sort(() => Math.random() - 0.5)
+	.map((s) => ({ ...s, tilt: collageTilt() }));
+---
+
+<div class="hero-collage" aria-label="Links">
+	{
+		arranged.map((s) => (
+			<a
+				class:list={["hero-collage__item", `is-${s.size}`]}
+				style={`--tilt:${s.tilt}deg`}
+				href={s.href}
+				aria-label={s.label}
+				title={s.label}
+				{...(s.internal ? {} : { target: "_blank", rel: "noreferrer" })}
+			>
+				<Icon name={s.name} class="hero-collage__icon" aria-hidden="true" />
+			</a>
+		))
+	}
+</div>
+
+{/* Styles for .hero-collage* live in src/styles/global.css (head CSS) so the icon
+    buttons are sized on first paint and never reflow the hero when their CSS loads. */}
+

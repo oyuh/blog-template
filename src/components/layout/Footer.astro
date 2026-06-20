@@ -1,142 +1,64 @@
 ---
-import SiteSettings from "@/components/SiteSettings.astro";
+import SpotifyLogoIsland from "@/components/SpotifyLogoIsland.astro";
 import { menuLinks, siteConfig } from "@/site.config";
-
-type AstroComponent = (props: Record<string, unknown>) => unknown;
-// SOFT IMPORT (template-safe): GitHub footer widget exists on my private site,
-// but can be removed from the public template repo without breaking builds.
-const gitHubInfoModules = import.meta.glob("../GitHubInfo.astro", { eager: true });
-const GitHubInfo = (gitHubInfoModules["../GitHubInfo.astro"] as unknown as { default?: AstroComponent })?.default;
 
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-auto w-full pt-6 pb-3 sm:pt-16 sm:pb-6">
-	<div class="text-zinc-500 dark:text-zinc-400 space-y-4 text-sm">
-		<div class="sm:hidden flex flex-col items-center gap-2 text-center">
-			<img src="/logo.svg" alt="Lawson Hart Logo" class="h-8 w-auto" />
-			<span class="text-sm font-medium leading-relaxed">&copy; {siteConfig.author} {year}</span>
-			<button
-				type="button"
-				data-site-settings-open
-				class="footer-settings-cog mt-1 inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 transition-colors duration-200 hover:text-accent hover:bg-accent/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-				aria-label="Open site settings"
-			>
-				<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-					<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-				</svg>
-				Settings
-			</button>
-		</div>
-		<!-- Main content: Nav links separated by logo -->
-		<div class="hidden sm:flex items-center justify-center flex-wrap gap-y-4">
-			<!-- Combined top row for better centering -->
-			<div class="w-full flex items-center justify-center gap-6">
-				<!-- Left side: Copyright & Policies -->
-				<div class="flex items-center gap-2 sm:gap-3">
-					<span>&copy; {siteConfig.author} {year}</span>
-					<span class="text-zinc-300 dark:text-zinc-600">•</span>
-					<a class="hover:text-accent transition-colors duration-200" href="/policy/">
-						Policies
-					</a>
-				</div>
-
-			<!-- Center: Logo with decorative elements -->
-			<div class="flex items-center justify-center relative">
-
-				<!-- Subtle gradient background -->
-				<div class="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-200/5 dark:via-zinc-700/5 to-transparent rounded-lg"></div>
-
-				<a href="/" class="block shrink-0 group relative z-10" style="transform: translateY(8.25%);">
-					<img
-						src="/logo.svg"
-						alt="Lawson Hart Logo"
-						class="h-8 w-auto transition-all duration-300 grayscale group-hover:grayscale-0 group-hover:drop-shadow-[0_0_8px_rgba(87,130,255,0.35)] group-hover:scale-110"
-					/>
-				</a>
-			</div>
-				<!-- Right side: Navigation Links -->
-				<div class="flex items-center gap-2 sm:gap-3">
-					{
-						menuLinks.map((link, index) => (
-							<>
-								<a class="hover:text-accent transition-colors duration-200" href={link.path}>
-									{link.title}
-								</a>
-								{index < menuLinks.length - 1 && (
-									<span class="text-zinc-300 dark:text-zinc-600">•</span>
-								)}
-							</>
-						))
-					}
-					<span class="text-zinc-300 dark:text-zinc-600">•</span>
-					<button
-						type="button"
-						data-site-settings-open
-						class="footer-settings-cog inline-flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 transition-colors duration-200 hover:text-accent hover:bg-accent/5 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-						aria-label="Open site settings"
-						title="Site settings"
-					>
-						<svg class="h-[1.05rem] w-[1.05rem]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-							<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-							<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-						</svg>
-					</button>
-				</div>
+<footer class="mt-auto w-full pt-8 pb-6 sm:pt-14 sm:pb-8">
+	<div class="text-global-text/60 text-sm">
+		<!-- Mobile: stacked + centered -->
+		<div class="sm:hidden flex flex-col items-center gap-2.5 text-center">
+			<SpotifyLogoIsland />
+			<span class="text-xs font-medium">&copy; {siteConfig.author} {year}</span>
+			<div class="flex items-center gap-3 text-xs">
+				<a class="footer-link" href="/policy/">Policies</a>
+				{menuLinks.map((link) => (
+					<a class="footer-link" href={link.path}>{link.title}</a>
+				))}
 			</div>
 		</div>
 
-		<!-- Bottom: GitHub info -->
-		<div class="hidden sm:flex w-full items-center justify-center pt-2 text-center">
-			{GitHubInfo && <GitHubInfo />}
+		<!-- Desktop: single centered row, logo in the middle -->
+		<div class="hidden sm:flex w-full items-center justify-center gap-6">
+			<div class="flex items-center gap-3">
+				<span>&copy; {siteConfig.author} {year}</span>
+				<span class="footer-dot">•</span>
+				<a class="footer-link" href="/policy/">Policies</a>
+			</div>
+
+			<div class="flex items-center justify-center">
+				<SpotifyLogoIsland />
+			</div>
+
+			<div class="flex items-center gap-3">
+				{
+					menuLinks.map((link, index) => (
+						<>
+							<a class="footer-link" href={link.path}>{link.title}</a>
+							{index < menuLinks.length - 1 && <span class="footer-dot">•</span>}
+						</>
+					))
+				}
+			</div>
 		</div>
 	</div>
-
-	<!-- Personal site settings modal (triggered by the cog buttons above) -->
-	<SiteSettings />
 </footer>
 
 <style>
-	@keyframes flash {
-		0%, 50% {
-			opacity: 0.3;
-		}
-		25% {
-			opacity: 1;
-		}
-		75%, 100% {
-			opacity: 0.3;
-		}
+	/* Hover = underline, not a colour change. */
+	.footer-link {
+		color: inherit;
+		text-decoration: none;
+		text-underline-offset: 3px;
 	}
 
-	.animate-flash {
-		animation: flash 4.8s ease-in-out infinite;
+	.footer-link:hover,
+	.footer-link:focus-visible {
+		text-decoration: underline;
 	}
 
-	@keyframes footerFloat {
-		0%, 100% {
-			transform: translateY(0);
-		}
-		50% {
-			transform: translateY(-6%);
-		}
-	}
-
-	@keyframes footerGlowPulse {
-		0%, 100% {
-			box-shadow: 0 18px 36px -24px rgba(56, 119, 237, 0.35);
-		}
-		50% {
-			box-shadow: 0 20px 44px -24px rgba(56, 119, 237, 0.55);
-		}
-	}
-
-	.footer-logo-float {
-		animation: footerFloat 6s ease-in-out infinite;
-	}
-
-	.footer-logo-glow {
-		animation: footerGlowPulse 5.5s ease-in-out infinite;
+	.footer-dot {
+		color: color-mix(in srgb, var(--color-global-text) 30%, transparent);
 	}
 </style>

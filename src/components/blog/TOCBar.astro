@@ -5,215 +5,74 @@ import TOCHeading from "./TOCHeading.astro";
 
 interface Props {
   headings: MarkdownHeading[];
-  hasCoverImage?: boolean;
 }
 
-const { headings, hasCoverImage = false } = Astro.props;
+const { headings } = Astro.props;
 const toc = generateToc(headings);
 ---
 
 {toc.length > 0 && (
   <aside
-    class="hidden lg:block lg:order-2 lg:self-start"
-    id="toc-aside"
-    data-collapsed="false"
+    class="hidden lg:flex lg:flex-col lg:gap-8 lg:order-2 lg:self-start"
+    id="post-aside"
   >
-    <!-- Expanded: full table of contents + comments card -->
-    <div id="toc-panel" class="flex flex-col gap-3">
-      <div class="relative rounded-xl bg-global-bg/60 ring-1 ring-white/10 shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-shadow duration-300 ease-out hover:shadow-[0_8px_20px_-12px_rgba(0,0,0,0.4)] hover:ring-white/15" id="toc-container">
-        <div class="flex items-center justify-between gap-2 px-4 py-3 border-b border-white/10" id="toc-header">
-          <div class="text-sm font-semibold text-accent-2 tracking-wide">On this page</div>
-          <div class="flex items-center gap-1">
-            {hasCoverImage && (
-              <button
-                type="button"
-                id="toc-bg-toggle"
-                data-bg-toggle
-                aria-pressed="false"
-                aria-label="Hide background"
-                title="Hide background"
-                class="bg-toggle hidden group h-8 w-8 items-center justify-center rounded-lg text-global-text hover:text-accent hover:bg-accent/5 transition-colors duration-200"
-              >
-                <svg class="bg-toggle-eye-off h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/>
-                  <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/>
-                  <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/>
-                  <line x1="2" x2="22" y1="2" y2="22"/>
-                </svg>
-                <svg class="bg-toggle-eye h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            )}
-            <button
-              type="button"
-              id="toc-toggle"
-              class="group inline-flex h-8 w-8 items-center justify-center rounded-lg text-global-text hover:text-accent hover:bg-accent/5 transition-colors duration-200"
-              aria-expanded="true"
-              aria-controls="toc-panel"
-              title="Collapse"
-            >
-              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M13 5l7 7-7 7M5 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div id="toc-content" class="overflow-auto py-3">
-          <nav class="px-2">
-            <ol class="space-y-1" id="toc-list">
-              {toc.map((heading) => <TOCHeading heading={heading} />)}
-            </ol>
-          </nav>
-        </div>
-
-        <!-- Drag-to-resize handle (wide / floating mode only) -->
-        <div
-          id="toc-resize"
-          class="absolute bottom-0 end-0 hidden h-5 w-5 cursor-nwse-resize items-end justify-end p-1 text-global-text/35 hover:text-accent/70"
-          title="Drag to resize"
-          aria-hidden="true"
+    <!-- Table of contents: flat, separated by a line on its left, hideable. -->
+    <nav id="toc-dock" class="toc-dock" data-collapsed="false" aria-label="Table of contents">
+      <div class="toc-dock__head">
+        <span class="toc-dock__title">On this page</span>
+        <button
+          type="button"
+          id="toc-toggle"
+          class="toc-dock__toggle"
+          aria-expanded="true"
+          aria-controls="toc-nav"
+          title="Hide"
         >
-          <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-            <path d="M21 15L15 21M21 8L8 21"/>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 9l6 6 6-6" />
           </svg>
-        </div>
+        </button>
       </div>
+      <div id="toc-nav" class="toc-dock__nav">
+        <ol id="toc-list">
+          {toc.map((heading) => <TOCHeading heading={heading} />)}
+        </ol>
+      </div>
+    </nav>
 
+    <!-- Comments dock: flat, hidden by default. Lives under the TOC, and floats
+         into the left gutter on very wide screens (see media query below). -->
+    <div id="comments-dock" class="comments-dock">
       <slot />
-    </div>
-
-    <!-- Collapsed: two thin square buttons -->
-    <div id="toc-collapsed" class="flex-col gap-2 items-end">
-      <button
-        type="button"
-        id="toc-expand-btn"
-        class="group inline-flex h-11 w-11 items-center justify-center rounded-xl bg-global-bg/60 ring-1 ring-white/10 text-global-text shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-colors duration-200 hover:bg-accent/5 hover:text-accent"
-        aria-label="Show table of contents"
-        title="On this page"
-      >
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M8 6h12M8 12h12M8 18h12"/>
-          <path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>
-        </svg>
-      </button>
-      <button
-        type="button"
-        id="toc-comments-btn"
-        class="group relative inline-flex h-11 w-11 items-center justify-center rounded-xl bg-global-bg/60 ring-1 ring-white/10 text-global-text shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-colors duration-200 hover:bg-accent/5 hover:text-accent"
-        aria-label="Open comments"
-        title="Comments"
-      >
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M7 8h10M7 12h6m-6 8l-4 2V6a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H7z"/>
-        </svg>
-        <span
-          id="toc-comments-badge"
-          class="absolute -top-1.5 -end-1.5 hidden min-w-[1.15rem] h-[1.15rem] items-center justify-center rounded-full bg-accent px-1 text-[0.65rem] font-semibold leading-none text-global-bg ring-2 ring-global-bg"
-        >0</span>
-      </button>
     </div>
   </aside>
 )}
 
 <script>
-  const aside = document.getElementById('toc-aside') as HTMLElement | null;
+  // ---- Hide / show the table of contents (persisted per page) ----
+  const dock = document.getElementById('toc-dock') as HTMLElement | null;
   const toggleBtn = document.getElementById('toc-toggle') as HTMLButtonElement | null;
-  const expandBtn = document.getElementById('toc-expand-btn') as HTMLButtonElement | null;
-  const commentsBtn = document.getElementById('toc-comments-btn') as HTMLButtonElement | null;
-  const badge = document.getElementById('toc-comments-badge') as HTMLSpanElement | null;
   const list = document.getElementById('toc-list') as HTMLOListElement | null;
 
-  // ---- Collapse / expand (whole panel ↔ two compact buttons) ----
   const collapseKey = `toc-collapsed:${location.pathname}`;
 
   const setCollapsed = (collapsed: boolean) => {
-    if (!aside) return;
-    aside.dataset.collapsed = String(collapsed);
+    if (!dock) return;
+    dock.dataset.collapsed = String(collapsed);
     toggleBtn?.setAttribute('aria-expanded', String(!collapsed));
+    toggleBtn?.setAttribute('title', collapsed ? 'Show' : 'Hide');
     try { localStorage.setItem(collapseKey, String(collapsed)); } catch {}
   };
+
+  toggleBtn?.addEventListener('click', () => {
+    setCollapsed(dock?.dataset.collapsed !== 'true');
+  });
 
   const initCollapsed = () => {
     try {
       if (localStorage.getItem(collapseKey) === 'true') setCollapsed(true);
     } catch {}
   };
-
-  toggleBtn?.addEventListener('click', () => setCollapsed(true));
-  expandBtn?.addEventListener('click', () => setCollapsed(false));
-  commentsBtn?.addEventListener('click', () => {
-    window.dispatchEvent(new CustomEvent('comments:open'));
-  });
-
-  // ---- Comments count badge (driven by the Comments island) ----
-  const updateBadge = (count: number) => {
-    if (!badge) return;
-    if (count > 0) {
-      badge.textContent = count > 9 ? '9+' : String(count);
-      badge.classList.remove('hidden');
-      badge.classList.add('flex');
-    } else {
-      badge.classList.add('hidden');
-      badge.classList.remove('flex');
-    }
-  };
-  window.addEventListener('comments:count', (e) => {
-    const detail = (e as CustomEvent).detail as { count?: number } | undefined;
-    if (detail && typeof detail.count === 'number') updateBadge(detail.count);
-  });
-
-  // ---- Drag-to-resize (floating mode) ----
-  const sizeKey = 'toc-size:v1';
-  const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-  const resizeHandle = document.getElementById('toc-resize') as HTMLDivElement | null;
-  const content = document.getElementById('toc-content') as HTMLDivElement | null;
-  let curW: number | null = null;
-  let curH: number | null = null;
-
-  const applySize = (w: number | null, h: number | null) => {
-    if (!aside) return;
-    if (w != null) { aside.style.setProperty('--toc-w', `${w}px`); curW = w; }
-    if (h != null) { aside.style.setProperty('--toc-list-h', `${h}px`); curH = h; }
-  };
-
-  const loadSize = () => {
-    try {
-      const raw = localStorage.getItem(sizeKey);
-      if (!raw) return;
-      const s = JSON.parse(raw) as { w?: number; h?: number };
-      applySize(typeof s.w === 'number' ? s.w : null, typeof s.h === 'number' ? s.h : null);
-    } catch {}
-  };
-
-  let resizing: { x: number; y: number; w: number; h: number } | null = null;
-  resizeHandle?.addEventListener('pointerdown', (e) => {
-    if (!aside || !content) return;
-    e.preventDefault();
-    resizing = {
-      x: e.clientX,
-      y: e.clientY,
-      w: aside.getBoundingClientRect().width,
-      h: content.getBoundingClientRect().height,
-    };
-    resizeHandle.setPointerCapture(e.pointerId);
-  });
-  window.addEventListener('pointermove', (e) => {
-    if (!resizing) return;
-    const minW = 13 * remPx;
-    const maxW = Math.max(minW, window.innerWidth * 0.5 - 34.5 * remPx);
-    const minH = 120;
-    const maxH = window.innerHeight * 0.78;
-    const w = Math.min(maxW, Math.max(minW, resizing.w + (e.clientX - resizing.x)));
-    const h = Math.min(maxH, Math.max(minH, resizing.h + (e.clientY - resizing.y)));
-    applySize(w, h);
-  });
-  window.addEventListener('pointerup', () => {
-    if (!resizing) return;
-    resizing = null;
-    try { localStorage.setItem(sizeKey, JSON.stringify({ w: curW, h: curH })); } catch {}
-  });
 
   // ---- Scrollspy highlighting ----
   // Scope to the article prose so hidden, position:fixed headings from the
@@ -316,7 +175,6 @@ const toc = generateToc(headings);
 
   const init = () => {
     initCollapsed();
-    loadSize();
     headingEls.forEach((h) => io.observe(h));
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll, { passive: true });
@@ -345,59 +203,139 @@ const toc = generateToc(headings);
 </script>
 
 <style is:global>
-  /* Collapse state: swap the full panel for the two compact buttons. */
-  #toc-collapsed { display: none; }
-  #toc-aside[data-collapsed="true"] #toc-panel { display: none; }
-  #toc-aside[data-collapsed="true"] #toc-collapsed { display: flex; }
+  /*
+   * Flat table of contents — separated from the article by a line on its left,
+   * no card / shadow / blur. Hideable via the header chevron.
+   */
+  .toc-dock {
+    border-left: 2px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+    padding-left: 1rem;
+  }
 
-  /* Quick fade as each face becomes visible (expand/collapse + first paint). */
-  #toc-aside[data-collapsed="false"] #toc-panel,
-  #toc-aside[data-collapsed="true"] #toc-collapsed {
+  .toc-dock__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .toc-dock__title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+  }
+
+  .toc-dock__toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 0.375rem;
+    color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+    cursor: pointer;
+    transition: color 0.18s ease;
+  }
+
+  .toc-dock__toggle svg {
+    height: 0.95rem;
+    width: 0.95rem;
+    transition: transform 0.2s ease;
+  }
+
+  @media (hover: hover) {
+    .toc-dock__toggle:hover {
+      color: var(--color-accent);
+    }
+  }
+
+  /* Chevron points up while expanded (click = hide), down while collapsed (click = show). */
+  #toc-dock:not([data-collapsed="true"]) .toc-dock__toggle svg {
+    transform: rotate(180deg);
+  }
+
+  #toc-dock[data-collapsed="true"] .toc-dock__nav {
+    display: none;
+  }
+
+  .toc-dock__nav {
+    max-height: 60vh;
+    overflow: auto;
     animation: toc-fade-in 0.2s ease-out;
   }
-  /* Shrink the whole sidebar to a thin strip when collapsed. */
-  #toc-aside[data-collapsed="true"] {
-    width: auto;
-    max-width: none;
-    flex: none;
+
+  .toc-dock__nav ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
-  /* The scrollable list height is user-resizable (falls back to 55vh). */
-  #toc-content {
-    max-height: var(--toc-list-h, 55vh);
+  #toc-list > li + li {
+    margin-top: 0.1rem;
   }
 
   /*
-   * Desktop sidebar (lg → 1700px): pinned, fixed-width column beside the
-   * article. `flex: 0 0` keeps it from shrinking (it used to collapse to
-   * ~160px, wrapping headings onto 3–4 lines).
+   * Comments dock — flat, separated by a line on its left. Hidden behind a
+   * toggle by default (the React island renders its own collapsible header).
+   * When the island has no content (comments disabled / not signed-in render),
+   * collapse the dock so we never show an empty bordered box.
+   */
+  .comments-dock {
+    border-left: 2px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+    padding-left: 1rem;
+  }
+
+  #comments-dock:not(:has(.comments-dock__inner)) {
+    display: none;
+  }
+
+  /*
+   * Desktop sidebar (lg → 1700px): pinned column to the right of the article.
+   * TOC sits on top, comments dock under it.
    */
   @media (min-width: 1024px) {
-    #toc-aside {
+    #post-aside {
       position: sticky;
       top: var(--header-clearance, 72px);
       flex: 0 0 20rem;
       width: 20rem;
       max-width: 20rem;
       align-self: flex-start;
+      max-height: calc(100vh - var(--header-clearance, 72px) - 1.5rem);
     }
   }
 
   /*
-   * Wide screens (≥ 1700px): float the sidebar into the right gutter so the
-   * article gets the full body width. Width is user-resizable, defaulting to
-   * 16.5rem and capped by the available gutter.
+   * Wide screens (≥ 1700px): the article keeps the centred body width, the TOC
+   * floats into the right gutter, and the comments dock floats into the LEFT
+   * gutter (its separating line flips to the right so it faces the article).
    */
   @media (min-width: 1700px) {
-    #toc-aside {
+    #post-aside {
       position: fixed;
       top: var(--header-clearance, 72px);
       left: calc(50% + 32rem + 1.5rem);
       flex: none;
-      width: clamp(13rem, var(--toc-w, 16.5rem), calc(50vw - 34.5rem));
+      width: clamp(13rem, 16.5rem, calc(50vw - 34.5rem));
       max-width: none;
+      max-height: none;
     }
 
-    #toc-resize { display: flex; }
+    #comments-dock {
+      position: fixed;
+      top: var(--header-clearance, 72px);
+      left: auto;
+      right: calc(50% + 32rem + 1.5rem);
+      width: clamp(13rem, 16.5rem, calc(50vw - 34.5rem));
+      max-height: calc(100vh - var(--header-clearance, 72px) - 1.5rem);
+      overflow: auto;
+      border-left: 0;
+      border-right: 2px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
+      padding-left: 0;
+      padding-right: 1rem;
+    }
   }
 </style>

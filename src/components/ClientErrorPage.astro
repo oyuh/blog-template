@@ -17,7 +17,7 @@ function toCanonicalRoute(pathname: string): string {
 ---
 
 <section class="mx-auto w-full max-w-3xl py-10 sm:py-14" data-attempted-path={attemptedCanonicalPath}>
-	<div class="rounded-xl border border-accent/20 bg-global-bg p-6 shadow-sm sm:p-8">
+	<div class="rounded-xl border border-accent/20 bg-global-bg p-6 sm:p-8">
 		<p class="text-xs font-semibold uppercase tracking-wide text-accent">Client Error · {statusCode}</p>
 		<h1 class="title mt-2 mb-4">This page could not be loaded.</h1>
 		<p class="mb-3 text-base text-global-text/90">
@@ -33,14 +33,14 @@ function toCanonicalRoute(pathname: string): string {
 
 		<div class="flex flex-wrap gap-3">
 			<button
-				class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+				class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
 				id="go-back-button"
 				type="button"
 			>
 				Go Back
 			</button>
 			<a
-				class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
+				class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
 				href="/"
 			>
 				Go Home
@@ -158,7 +158,7 @@ function toCanonicalRoute(pathname: string): string {
 			const link = document.createElement("a");
 			link.href = suggestion.route;
 			link.className =
-				"inline-flex min-w-[16rem] rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors";
+				"inline-flex min-w-[16rem] rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5";
 
 			const topRow = document.createElement("span");
 			topRow.className = "flex w-full items-center justify-between gap-3";

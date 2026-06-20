@@ -1,6 +1,5 @@
 ---
 import BaseHead from "@/components/BaseHead.astro";
-// import CookieConsent from "@/components/CookieConsent.astro"; // DISABLED: Cookie consent temporarily disabled
 import SkipLink from "@/components/SkipLink.astro";
 import ThemeProviderOptional from "@/components/ThemeProviderOptional.astro";
 import Footer from "@/components/layout/Footer.astro";
@@ -8,22 +7,18 @@ import Header from "@/components/layout/Header.astro";
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
 import Analytics from "@vercel/analytics/astro";
-import "aos/dist/aos.css";
-
-// SOFT IMPORT (template-safe): holiday overlay exists on my private site,
-// but the public template repo may omit it entirely.
-const holidayOverlayIslandModules = import.meta.glob("../components/HolidayOverlayIsland.astro", { eager: true });
-type AstroComponent = (props: Record<string, unknown>) => unknown;
-const HolidayOverlayIsland = (holidayOverlayIslandModules["../components/HolidayOverlayIsland.astro"] as unknown as { default?: AstroComponent })?.default;
+// Self-hosted fonts (default weight 400 for the sans).
+import "@fontsource-variable/plus-jakarta-sans/index.css";
+import "@fontsource-variable/geist-mono/index.css";
 
 interface Props {
 	meta: SiteMeta;
-	disableHolidayOverlay?: boolean;
+	centerMain?: boolean;
 }
 
 const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
-	disableHolidayOverlay = false,
+	centerMain = false,
 } = Astro.props;
 
 const enableVercelAnalytics =
@@ -44,14 +39,9 @@ const enableVercelAnalytics =
 					try {
 						var raw = localStorage.getItem("site-settings:v1");
 						var s = raw ? JSON.parse(raw) : {};
-						var holiday = s.holiday || "disabled"; // default: holidays paused
 						var root = document.documentElement;
-						root.classList.toggle("settings-holiday-removed", holiday === "removed");
 						root.classList.toggle("settings-spotify-disabled", s.spotify === "disabled");
 						root.classList.toggle("settings-comments-disabled", s.comments === "disabled");
-						// Pause the holiday overlay before its islands initialize. Only force
-						// the pause; while "enabled" we leave the flag for the sparkle button.
-						if (holiday !== "enabled") localStorage.setItem("holidays-user-disabled", "true");
 					} catch (e) {}
 				}
 				applySiteSettings();
@@ -79,61 +69,113 @@ const enableVercelAnalytics =
 	>
 		<ThemeProviderOptional />
 		<SkipLink />
-        <!-- <CookieConsent/> DISABLED: Cookie consent temporarily disabled -->
-		{HolidayOverlayIsland && <HolidayOverlayIsland disabled={disableHolidayOverlay} />}
+		{/* Subtle blue glow rising from the bottom of the viewport, sitting behind
+		    all content so the footer reads against it without competing with the page. */}
+		<div aria-hidden="true" class="page-bottom-glow"></div>
 		<Header />
-    {/* {showBanner && (
-			<Banner
-				client:load
-				id="working-on-games"
-				message={message}
-				type="info"
-				closable={true}
-				link="https://github.com/oyuh/games"
-			/>
-    )} */}
-		<main id="main" style="padding-top: calc(var(--header-clearance, 72px) * 0.5);">
+		<main id="main" class:list={[{ "main-centered": centerMain }]}>
 			<slot />
 		</main>
 		<Footer />
 
-		<script>
-			const loadAOS = (() => {
-				let loader: Promise<any> | undefined;
-				return () => {
-					if (!loader) {
-						loader = import('aos').then((mod: any) => mod.default ?? mod);
-					}
-					return loader;
-				};
-			})();
-
-			const initializeAOS = async () => {
-				const AOS = await loadAOS();
-				if (!AOS) {
-					return;
-				}
-				AOS.init({
-					offset: 120,
-					duration: 700,
-					easing: 'ease-out-cubic',
-					once: true,
-					mirror: false,
-				});
-			};
-
-			if (document.readyState === 'loading') {
-				document.addEventListener('DOMContentLoaded', () => void initializeAOS(), { once: true });
-			} else {
-				void initializeAOS();
+		<style>
+			/* Opt-in (home): centre the main content between header and footer. */
+			#main.main-centered {
+				flex: 1 1 auto;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
 			}
 
-			document.addEventListener('astro:page-load', async () => {
-				const AOS = await loadAOS();
-				if (AOS?.refreshHard) {
-					AOS.refreshHard();
+			/* A very subtle, grainy blue wave that wells up from the bottom-centre of the
+			   viewport. Fixed + z-index:-1 + pointer-events-none so it only tints the page.
+			   Hidden by default — only revealed when the cursor is near the bottom of the
+			   viewport, or the page is actually scrolled to its end (see script below). */
+			.page-bottom-glow {
+				position: fixed;
+				inset-inline: 0;
+				bottom: 0;
+				height: 30vh;
+				z-index: -1;
+				pointer-events: none;
+				opacity: 0;
+				transition: opacity 0.5s ease;
+				background: radial-gradient(
+					150% 95% at 50% 120%,
+					color-mix(in srgb, var(--color-accent) 16%, transparent) 0%,
+					color-mix(in srgb, var(--color-accent) 5%, transparent) 38%,
+					transparent 70%
+				);
+			}
+
+			/* Grain, confined to the wave so it reads as texture, not static. */
+			.page-bottom-glow::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+				background-size: 180px 180px;
+				mix-blend-mode: overlay;
+				opacity: 0.12;
+				-webkit-mask-image: radial-gradient(150% 95% at 50% 120%, #000 0%, transparent 68%);
+				mask-image: radial-gradient(150% 95% at 50% 120%, #000 0%, transparent 68%);
+			}
+
+			body.glow-near .page-bottom-glow {
+				opacity: 0.32;
+			}
+
+			:root[data-theme="dark"] .page-bottom-glow {
+				background: radial-gradient(
+					150% 95% at 50% 120%,
+					color-mix(in srgb, var(--color-accent) 22%, transparent) 0%,
+					color-mix(in srgb, var(--color-accent) 8%, transparent) 40%,
+					transparent 72%
+				);
+			}
+
+			:root[data-theme="dark"] body.glow-near .page-bottom-glow {
+				opacity: 0.42;
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				.page-bottom-glow {
+					transition: none;
 				}
-			});
+			}
+		</style>
+
+		<script>
+			// Reveal the bottom glow only when the cursor nears the bottom of the
+			// viewport, or the page is genuinely scrolled to its end. On short pages
+			// (nothing to scroll) the footer being visible isn't enough — the cursor
+			// has to come down to it.
+			(() => {
+				const NEAR = 170; // px from the viewport bottom
+				let cursorNear = false;
+
+				const isScrolledToBottom = () => {
+					const doc = document.documentElement;
+					const scrollable = doc.scrollHeight > window.innerHeight + 4;
+					return scrollable && window.innerHeight + window.scrollY >= doc.scrollHeight - 8;
+				};
+
+				const apply = () => {
+					document.body.classList.toggle("glow-near", cursorNear || isScrolledToBottom());
+				};
+
+				window.addEventListener(
+					"pointermove",
+					(e) => {
+						cursorNear = e.clientY >= window.innerHeight - NEAR;
+						apply();
+					},
+					{ passive: true },
+				);
+				window.addEventListener("scroll", apply, { passive: true });
+				window.addEventListener("resize", apply, { passive: true });
+				apply();
+			})();
 		</script>
 	</body>
 </html>

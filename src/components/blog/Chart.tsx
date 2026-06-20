@@ -178,7 +178,7 @@ export default function Chart({
 	};
 
 	const axisProps = {
-		tick: { fontSize: 11, fontFamily: '"Atkinson Hyperlegible Mono", monospace' },
+		tick: { fontSize: 11, fontFamily: '"Geist Mono Variable", monospace' },
 		tickLine: false,
 		axisLine: { strokeWidth: 1 },
 	} as const;

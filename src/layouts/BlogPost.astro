@@ -38,39 +38,18 @@ const CommentsIsland =
 		ogImage: socialImage,
 		title,
 	}}
-	disableHolidayOverlay
 >
 	<!-- Scroll Progress Bar -->
 	<ScrollProgressBar client:idle />
 
-	<!-- Cover image hero background (full viewport width, behind header) -->
-	{post.data.coverImage && (
-		<div
-			id="blog-cover"
-			class="fixed inset-x-0 top-0 z-0 overflow-hidden"
-			style={{ height: "60vh" }}
-		>
-			<img
-				src={post.data.coverImage.src.src}
-				alt=""
-				class="w-full h-full object-cover blur-lg scale-105 opacity-40"
-				loading="eager"
-			/>
-			<!-- Very light gradient overlay to maximize image visibility -->
-			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-global-bg/10"></div>
-			<div class="absolute inset-0 bg-gradient-to-b from-transparent via-global-bg/5 to-global-bg/40"></div>
-			<div class="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-global-bg to-transparent"></div>
-		</div>
-	)}
-
-	<article class="relative z-10 grow break-words" data-pagefind-body data-blog-post="true">
+	<article class="relative z-10 grow break-words pt-6 sm:pt-10" data-pagefind-body data-blog-post="true">
 		<div id="blog-hero" class="mb-12"><Masthead content={post} readingTime={readingTime} /></div>
 		<div class="flex flex-col gap-10 lg:flex-row lg:items-start">
-			<EnhancedProse class="blog-prose prose prose-base min-w-0 lg:flex-1 max-w-none prose-headings:font-semibold prose-headings:text-accent-2 prose-headings:relative prose-headings:scroll-mt-24 sm:prose-th:before:content-none">
+			<EnhancedProse class="blog-prose prose prose-base min-w-0 lg:flex-1 max-w-none prose-headings:relative prose-headings:scroll-mt-24 sm:prose-th:before:content-none">
 				<slot />
 			</EnhancedProse>
 			{!!headings.length && (
-				<TOCBar headings={headings} hasCoverImage={!!post.data.coverImage}>
+				<TOCBar headings={headings}>
 					{CommentsIsland && (
 						<div data-pagefind-ignore>
 							<CommentsIsland siteKey={siteKey} resourceType="post" resourceId={post.id} variant="sidebar" />
@@ -92,8 +71,7 @@ const CommentsIsland =
 	{!!headings.length && <TOCMobile headings={headings} />}
 
 	<button
-		class="fixed end-6 bottom-6 z-40 flex h-12 w-12 items-center justify-center rounded-xl bg-global-bg/55 ring-1 ring-white/5 text-global-text shadow-[0_6px_16px_-10px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all duration-300 opacity-0 translate-y-16 cursor-pointer hover:text-accent hover:bg-global-bg/70 hover:scale-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-global-bg active:scale-95 data-[show=true]:translate-y-0 data-[show=true]:opacity-100"
-		style="-webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);"
+		class="fixed end-6 bottom-6 z-40 flex h-12 w-12 items-center justify-center rounded-xl border border-global-text/15 bg-global-bg text-global-text transition-all duration-300 opacity-0 translate-y-16 cursor-pointer hover:text-accent hover:border-accent/40 hover:scale-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-global-bg active:scale-95 data-[show=true]:translate-y-0 data-[show=true]:opacity-100"
 		data-show="false"
 		id="to-top-btn"
 		aria-label="Back to top"
@@ -117,29 +95,107 @@ const CommentsIsland =
 </BaseLayout>
 
 <style is:global>
-	/* Cover image: quick fade out when hidden via the toggle button.
-	   `.bg-anim` is added after first paint so a persisted-hidden state
-	   doesn't animate on load. */
-	#blog-cover.bg-anim {
-		transition: opacity 0.25s ease;
+	/* ---- Reading rhythm + heading hierarchy -------------------------------
+	   Body sits slightly below pure foreground; headings are bolder + accent-2
+	   (near-white/near-black) so sections never blend into the prose. Sizes,
+	   weights and top-margins step down per level to read as a clear outline. */
+	.blog-prose {
+		--tw-prose-body: color-mix(in srgb, var(--color-global-text) 86%, transparent);
+		font-size: 1.02rem;
+		line-height: 1.78;
 	}
 
-	#blog-cover[data-hidden='true'] {
-		opacity: 0;
-		pointer-events: none;
+	.blog-prose :is(h1, h2, h3, h4, h5, h6) {
+		scroll-margin-top: 6rem;
+		letter-spacing: -0.015em;
+		text-wrap: balance;
 	}
 
-	/* Hide-background toggle: swap eye / eye-off based on pressed state. */
-	.bg-toggle .bg-toggle-eye {
-		display: none;
+	.blog-prose h1 {
+		margin: 2.5rem 0 1rem;
+		font-size: 2.1rem;
+		font-weight: 800;
+		line-height: 1.15;
+		color: var(--color-accent-2);
 	}
 
-	.bg-toggle[aria-pressed='true'] .bg-toggle-eye-off {
-		display: none;
+	.blog-prose h2 {
+		margin: 2.75rem 0 1rem;
+		padding-bottom: 0.4rem;
+		font-size: 1.55rem;
+		font-weight: 750;
+		line-height: 1.25;
+		color: var(--color-accent-2);
+		border-bottom: 1px solid color-mix(in srgb, var(--color-global-text) 12%, transparent);
 	}
 
-	.bg-toggle[aria-pressed='true'] .bg-toggle-eye {
-		display: inline;
+	.blog-prose h3 {
+		margin: 2rem 0 0.7rem;
+		font-size: 1.26rem;
+		font-weight: 700;
+		line-height: 1.3;
+		color: var(--color-accent-2);
+	}
+
+	/* h4–h6 switch to the blue accent so deeper levels read as a different tier. */
+	.blog-prose h4 {
+		margin: 1.6rem 0 0.55rem;
+		font-size: 1.06rem;
+		font-weight: 700;
+		color: var(--color-accent);
+	}
+
+	.blog-prose h5 {
+		margin: 1.45rem 0 0.5rem;
+		font-size: 0.95rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--color-accent);
+	}
+
+	.blog-prose h6 {
+		margin: 1.3rem 0 0.5rem;
+		font-size: 0.85rem;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
+		color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+	}
+
+	.blog-prose > :first-child {
+		margin-top: 0;
+	}
+
+	.blog-prose strong {
+		font-weight: 700;
+		color: var(--color-global-text);
+	}
+
+	.blog-prose hr {
+		margin: 2.75rem 0;
+		border-color: color-mix(in srgb, var(--color-global-text) 14%, transparent);
+	}
+
+	/* Body links: accent with a soft underline that firms up on hover. */
+	.blog-prose a:not(.not-prose):not(.github-link):not(.link-preview-link) {
+		color: var(--color-accent);
+		text-decoration: underline;
+		text-decoration-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+		text-underline-offset: 3px;
+		transition: color 0.15s ease, text-decoration-color 0.15s ease;
+	}
+
+	.blog-prose a:not(.not-prose):not(.github-link):not(.link-preview-link):hover {
+		color: var(--color-accent-2);
+		text-decoration-color: var(--color-accent);
+	}
+
+	/* Headings are click-to-copy — nudge their colour to accent on hover. */
+	@media (hover: hover) {
+		.blog-prose :is(h1, h2, h3)[role="button"]:hover {
+			color: var(--color-accent);
+		}
 	}
 
 	/* Blog post prose: keep interactions subtle + theme-first */
@@ -420,60 +476,4 @@ const CommentsIsland =
 	}
 </script>
 
-<script>
-	// Hide / show the cover background image. The control lives in the masthead
-	// (across from "Try it live") and hands off to a compact icon next to the
-	// TOC collapse button once you scroll past it.
-	const cover = document.getElementById("blog-cover");
-	if (cover) {
-		const toggles = Array.from(
-			document.querySelectorAll<HTMLButtonElement>("[data-bg-toggle]"),
-		);
-		const mastheadBtn = document.getElementById("masthead-bg-toggle");
-		const tocBtn = document.getElementById("toc-bg-toggle");
-		const key = `blog-bg-hidden:${location.pathname}`;
-
-		let hidden = false;
-		try {
-			hidden = localStorage.getItem(key) === "true";
-		} catch {}
-
-		const apply = (next: boolean) => {
-			hidden = next;
-			cover.dataset.hidden = String(next);
-			const label = next ? "Show background" : "Hide background";
-			toggles.forEach((btn) => {
-				btn.setAttribute("aria-pressed", String(next));
-				btn.setAttribute("title", label);
-				if (btn.id === "toc-bg-toggle") btn.setAttribute("aria-label", label);
-				const text = btn.querySelector(".bg-toggle-label");
-				if (text) text.textContent = label;
-			});
-			try {
-				localStorage.setItem(key, String(next));
-			} catch {}
-		};
-
-		apply(hidden);
-		// Enable the fade only after the first paint so a remembered state
-		// doesn't visibly animate on load.
-		requestAnimationFrame(() => cover.classList.add("bg-anim"));
-
-		toggles.forEach((btn) => btn.addEventListener("click", () => apply(!hidden)));
-
-		// Reveal the compact sidebar toggle once the masthead one scrolls away.
-		if (mastheadBtn && tocBtn) {
-			const showToc = (show: boolean) => {
-				tocBtn.classList.toggle("hidden", !show);
-				tocBtn.classList.toggle("inline-flex", show);
-			};
-			const io = new IntersectionObserver(
-				(entries) => {
-					for (const entry of entries) showToc(!entry.isIntersecting);
-				},
-				{ rootMargin: "-80px 0px 0px 0px" },
-			);
-			io.observe(mastheadBtn);
-		}
-	}
-</script>
+<!-- Cover-image background + its show/hide toggle were removed — posts no longer render a hero background. -->

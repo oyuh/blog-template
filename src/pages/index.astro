@@ -1,99 +1,63 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import SocialList from "@/components/SocialList.astro";
-import SplashText from "@/components/SplashText.astro";
+import HeroSocials from "@/components/HeroSocials.astro";
 import PostPreview from "@/components/blog/PostPreview.astro";
 import { getAllPosts } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 import { collectionDateSort } from "@/utils/date";
 
 // Posts
-const MAX_POSTS = 10;
+const MAX_POSTS = 5;
 const allPosts = await getAllPosts();
+const publicPostCount = allPosts.filter((p) => !p.data.draft).length;
 const allPostsByDate = allPosts
 	.sort(collectionDateSort)
 	.slice(0, MAX_POSTS) as CollectionEntry<"post">[];
 ---
 
-<PageLayout meta={{ title: "Home" }}>
-    <section class="relative index-content">
-        <div class="relative z-10 py-6">
-            <div class="mb-6">
-                <h1 data-hero-howdy class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
-                    Howdy!
-                    <span class="inline-block origin-bottom-right animate-wave">👋</span>
-                </h1>
-            </div>
+<PageLayout meta={{ title: "Home" }} centerMain>
+	<section class="hero">
+		<div class="hero__text">
+			<h1 id="hero-howdy" class="text-3xl md:text-4xl font-bold text-accent-2 leading-tight">
+				Howdy!
+				<span class="inline-block origin-bottom-right animate-wave">👋</span>
+			</h1>
+			<p class="text-lg text-global-text/85 leading-relaxed">
+				I'm <span class="hero-name">Lawson</span> a <span class="font-semibold text-accent-2">full-stack developer &amp; software (prompt) engineer</span>.
+			</p>
+        <p class="mt-3 text-base text-global-text/70 leading-relaxed max-w-prose">
+          I make things for all kinds of spaces and corners around the internet. I build
+          things to make using a computer <span class="hero-accent">less dehumanzing</span>. I focus on <span class="hero-kw">streaming tools</span> and <span class="hero-kw">content based productivity apps</span>. You can find more
+          info about what I do using the collage of buttons.
+        </p>
+		</div>
+		<div class="hero__art">
+			<HeroSocials />
+		</div>
+	</section>
 
-            <div class="max-w-full mb-6">
-                <div class="mb-6">
-                    <p data-hero-role class="hero-role text-xl text-global-text leading-relaxed mb-2">
-                        I'm a <span class="font-semibold text-accent-2">computer science based full-stack developer / software engineer</span>.
-                    </p>
-
-                    <p class="splash-line">
-                        <span aria-hidden="true" class="splash-marker">//</span>
-                        <SplashText class="splash-text" />
-                    </p>
-
-                    <p class="text-base text-global-text/80 flex items-center gap-2 mt-4">
-                        <svg class="w-4 h-4 text-accent" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                        </svg>
-                        Located in the Dallas–Fort Worth Metroplex
-                    </p>
-                </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-3 mb-6">
-                <a
-                    href="/about"
-                    class="cta-button group relative inline-flex items-center justify-center gap-2 font-medium px-6 py-3 rounded-lg
-                           transition-all duration-300 ease-out
-                           bg-accent text-white border-2 border-accent
-                           hover:bg-accent/90 hover:border-accent hover:-translate-y-0.5 hover:shadow-lg
-                           active:translate-y-0 active:shadow-md
-                           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
-                >
-                    <span>Learn More About Me</span>
-                    <svg class="w-4 h-4 transition-all duration-300 group-hover:translate-x-1 animate-bounce-x" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                </a>
-            </div>
-
-            <!-- Social links with enhanced styling -->
-            <div class="border-t border-zinc-400 pt-4">
-                <p class="text-sm font-medium text-global-text/70 mb-3">Connect with me:</p>
-                <SocialList />
-            </div>
-        </div>
-    </section>
-
-    <div class="my-16 relative">
-    </div>
-
-	<section class="index-content">
-		<div class="flex items-center justify-between mb-8">
-            <h2 class="text-2xl md:text-3xl font-bold text-accent-2">
-                <a href="/posts/" class="hover:text-accent transition-colors duration-300">
-                    Posts & Projects
-                </a>
-            </h2>
-            <a
-                href="/posts/"
-                class="text-sm font-medium text-accent hover:text-accent/80 transition-colors duration-300 flex items-center gap-1"
-            >
-                View All
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-            </a>
-        </div>
-		<ul class="space-y-4" role="list">
+	<section class="mt-12 sm:mt-14">
+		<div class="flex items-center justify-between mb-4">
+			<h2 class="text-xl md:text-2xl font-bold text-accent-2 flex items-baseline gap-2">
+				<a href="/posts/" class="underline-hover">
+					Posts &amp; Projects
+				</a>
+				<span class="post-count">{publicPostCount}</span>
+			</h2>
+			<a
+				href="/posts/"
+				class="underline-hover text-sm font-medium text-accent inline-flex items-center gap-1"
+			>
+				View All
+				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+				</svg>
+			</a>
+		</div>
+		<ul class="post-list" role="list">
 			{
 				allPostsByDate.map((p) => (
-					<li class="w-full">
+					<li>
 						<PostPreview post={p} as="h3" />
 					</li>
 				))
@@ -103,145 +67,105 @@ const allPostsByDate = allPosts
 </PageLayout>
 
 <style>
-    .bg-grid-pattern {
-        background-image: radial-gradient(circle, rgba(87, 130, 255, 0.1) 1px, transparent 1px);
-        background-size: 20px 20px;
-    }
+	/* Waving hand animation (kept — small, purposeful) */
+	@keyframes wave {
+		0%, 100% { transform: rotate(-10deg); }
+		50% { transform: rotate(10deg); }
+	}
 
-    /* The role line is the headline statement: JS sizes it to fill the body
-       width on one line, and scales "Howdy!" up from there. Until JS runs (and
-       on narrow screens) it stays at its Tailwind size and wraps normally. */
-    .hero-role.hero-fit {
-        white-space: nowrap;
-    }
+	.animate-wave {
+		animation: wave 1.5s ease-in-out infinite;
+		transform-origin: 70% 70%;
+	}
 
-    /* Rotating "ironic" tagline, framed as a self-deprecating code comment.
-       Kept at a modest fixed size on its own line. */
-    .splash-line {
-        display: flex;
-        align-items: flex-start;
-        gap: 0.5rem;
-        margin-bottom: 0.25rem;
-        min-height: 3.25rem;
-        font-size: 1.125rem;
-        line-height: 1.6;
-        font-style: italic;
-        color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
-    }
+	/* Hero text accents (.hero-name / .hero-kw / .hero-accent) live in global.css
+	   so the About page can reuse them too. */
 
-    .splash-marker {
-        flex-shrink: 0;
-        font-family: "Atkinson Hyperlegible Mono", monospace;
-        font-style: normal;
-        font-weight: 600;
-        color: var(--color-accent);
-        opacity: 0.85;
-        user-select: none;
-    }
+	/* Hero: text on the left, social collage on the right. */
+	.hero {
+		display: flex;
+		flex-direction: column;
+		gap: 1.75rem;
+	}
 
-    .splash-text {
-        font-weight: 500;
-    }
+	.hero__art {
+		display: flex;
+		justify-content: center;
+	}
 
-    @media (max-width: 640px) {
-        .splash-line {
-            min-height: 4.5rem;
-        }
-    }
+	@media (min-width: 768px) {
+		.hero {
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			gap: 2.5rem;
+		}
+		.hero__text {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		.hero__art {
+			flex: 0 0 auto;
+			justify-content: flex-end;
+		}
+	}
 
-    /* CTA Button - Arrow bounce animation */
-    @keyframes bounce-x {
-        0%, 100% {
-            transform: translateX(0);
-        }
-        50% {
-            transform: translateX(4px);
-        }
-    }
+	/* "Howdy! 👋" has done its job after a moment — fade + collapse it away. */
+	#hero-howdy {
+		margin-bottom: 0.75rem;
+		overflow: hidden;
+		max-height: 4rem;
+		transition: opacity 0.5s ease, max-height 0.6s ease, margin 0.5s ease, transform 0.5s ease;
+	}
 
-    .animate-bounce-x {
-        animation: bounce-x 2s ease-in-out infinite;
-    }
+	#hero-howdy.is-gone {
+		opacity: 0;
+		max-height: 0;
+		margin: 0;
+		transform: translateY(-8px);
+	}
 
-    .cta-button:hover .animate-bounce-x {
-        animation: none;
-    }
+	/* Tight, flat list — rows handle their own separators. */
+	.post-list {
+		display: flex;
+		flex-direction: column;
+	}
 
-    /* Waving hand animation */
-    @keyframes wave {
-        0%, 100% {
-            transform: rotate(-10deg);
-        }
-        50% {
-            transform: rotate(10deg);
-        }
-    }
+	/* Count of public posts beside the section heading. */
+	.post-count {
+		font-family: "Geist Mono Variable", monospace;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--color-accent);
+	}
 
-    .animate-wave {
-        animation: wave 1.5s ease-in-out infinite;
-        transform-origin: 70% 70%;
-    }
-
-    /* Loading Animation Styles */
-    .index-content {
-        opacity: 0;
-        animation: fizzleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-    }
-
-    /* Stagger the second section slightly */
-    section.index-content:nth-of-type(2) {
-        animation-delay: 0.45s;
-    }
-
-    @keyframes fizzleIn {
-        0% {
-            opacity: 0;
-            transform: translateY(30px) scale(0.96);
-            filter: blur(6px) brightness(1.2);
-        }
-        50% {
-            filter: blur(2px) brightness(1.1);
-        }
-        100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-            filter: blur(0) brightness(1);
-        }
-    }
-
-    /* Disable animations if user has seen the page this session */
-    body.no-intro-animation .index-content {
-        animation: none;
-        opacity: 1;
-        transform: none;
-        filter: none;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-        .index-content {
-            animation: none !important;
-            opacity: 1;
-            transform: none;
-            filter: none;
-        }
-    }
+	@media (prefers-reduced-motion: reduce) {
+		.animate-wave {
+			animation: none !important;
+		}
+		#hero-howdy {
+			transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease;
+		}
+	}
 </style>
 
 <script>
-    // Check if user has already seen the intro animation this session
-    const hasSeenIntro = sessionStorage.getItem('hasSeenIndexIntro');
+	// The greeting is only useful for the first moment — retire it after a few seconds.
+	function scheduleHowdyExit() {
+		const el = document.getElementById("hero-howdy");
+		if (!el || el.dataset.exitScheduled === "true") return;
+		el.dataset.exitScheduled = "true";
+		const hero = el.closest<HTMLElement>(".hero");
+		window.setTimeout(() => {
+			// Lock the whole hero's height first so that when the greeting collapses,
+			// the (shorter) text column re-centres alongside the social icons instead of
+			// the bio riding up to the top while the icons stay centred — they stay
+			// vertically aligned, and the rest of the page doesn't reflow.
+			if (hero) hero.style.minHeight = `${hero.offsetHeight}px`;
+			el.classList.add("is-gone");
+		}, 4000);
+	}
 
-    if (hasSeenIntro) {
-        document.body.classList.add('no-intro-animation');
-    } else {
-        // Mark as seen for this session
-        sessionStorage.setItem('hasSeenIndexIntro', 'true');
-    }
-
-    // Mark body as index page for header animation timing
-    document.body.classList.add('index-page');
-</script>
-
-<script>
-    import "@/scripts/heroFit";
+	scheduleHowdyExit();
+	document.addEventListener("astro:page-load", scheduleHowdyExit);
 </script>

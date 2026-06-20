@@ -3,20 +3,16 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import ResumeDownload from "@/components/ResumeDownload.tsx";
 import SocialList from "@/components/SocialList.astro";
-import TechList from "@/components/TechList.tsx";
+import TechList from "@/components/TechList.astro";
 import { getAllPosts, getTechnologyUsage } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
-import { Icon } from "astro-icon/components";
 
 const meta = {
   title: "About",
   description: "A little bit about me!",
 };
 
-const templateRepoUrl = import.meta.env.PUBLIC_TEMPLATE_REPO_URL;
-
 const defaultResumePdfUrl = "/Lawson_Hart_Resume.pdf";
-
 const resumePdfFsPath = resolve(process.cwd(), "public", defaultResumePdfUrl.replace(/^\//, ""));
 const resumePdfExists = existsSync(resumePdfFsPath);
 
@@ -24,74 +20,61 @@ const allPosts = await getAllPosts();
 const technologyUsage = getTechnologyUsage(allPosts);
 
 export const prerender = true;
-
 ---
-<PageLayout meta={meta}>
+<PageLayout meta={meta} centerMain>
   <article data-pagefind-body>
     <section class="relative">
       <div class="relative z-10 py-6">
         <div class="mb-6">
           <h1 class="text-3xl md:text-4xl font-bold text-accent-2 mb-3 leading-tight">
-            About Me <span class="inline-block"></span>
+            About Me
           </h1>
         </div>
 
         <div class="max-w-full space-y-4 mb-6">
           <p class="text-lg text-global-text leading-relaxed">
-            Hey, I'm <span class="font-semibold text-accent-2">Lawson Hart</span> a
-            <span class="font-semibold text-accent-2">computer science student</span> at the
-            <span class="font-semibold text-accent-2">University of Texas at Dallas</span>, aka The MIT of the South.
-            Dallas born and raised, never really left the <span class="font-semibold text-accent-2">DFW</span> bubble.
+            Hey, I'm <span class="hero-name">Lawson Hart</span> a
+            <span class="hero-accent">computer science student</span> at the
+            <span class="hero-accent">University of Texas at Dallas</span>, aka The MIT of the South.
+            Dallas born and raised, never really left the <span class="hero-kw">DFW</span> bubble.
           </p>
-          <!-- <p class="text-base text-global-text/90 leading-relaxed">
-            I'm kinda obsessed with building things that actually <span class="font-medium text-accent-2">solve problems</span> I come across in my internet nook.
-            I think it's pretty fun taking a messy idea and turning it into something clean, functional, and genuinely useful.
-          </p> -->
-          <p class="text-base text-global-text/90 leading-relaxed">I'm on the computer science track with a focus on software engineering/cyber security. I take everything I find annoying or that I think I can do better
-            on the internet and give it a go. Most of my projects focus on a playform with oAuth and storing some information as I learn new technologies and frameworks.
 
+          <p class="text-base text-global-text/90 leading-relaxed">
+            I'm on the computer science track with a focus on
+            <span class="hero-kw">software engineering</span>/<span class="hero-kw">cyber security</span>. I take everything I find annoying or that I think I can do better
+            on the internet and give it a go. Most of my projects focus on a playform with <span class="hero-accent">oAuth</span> and storing some information as I learn new technologies and frameworks.
           </p>
 
           <p class="text-base text-global-text/80 leading-relaxed">
-            Growing up as the family's unofficial <span class="font-medium text-accent-2">tech support</span> was basically my first job
-            That curiosity naturally evolved into a love for <span class="font-medium text-accent-2">full-stack development</span>
-            and building <span class="font-medium text-accent-2">web applications</span>.
+            Growing up as the family's unofficial <span class="hero-kw">tech support</span> was basically my first job
+            That curiosity naturally evolved into a love for <span class="hero-accent">full-stack development</span>
+            and building <span class="hero-accent">web applications</span>.
             I'm a
-            <span class="font-medium text-accent-2">full‑stack developer</span> with a strong interest in
-            <span class="font-medium text-accent-2">web based applications</span>. When I’m not studying, I’m working with
+            <span class="hero-kw">full‑stack developer</span> with a strong interest in
+            <span class="hero-accent">web based applications</span>. When I’m not studying, I’m working with
             personal projects or just generally procrastinating.
           </p>
 
           <div class="mt-4">
-          {resumePdfExists ? (
-            <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
-          ) : (
-            <p class="text-sm text-global-text/70">Resume PDF is not available.</p>
-          )}
-        </div>
+            {resumePdfExists ? (
+              <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
+            ) : (
+              <p class="text-sm text-global-text/70">Resume PDF is not available.</p>
+            )}
+          </div>
         </div>
 
-        <div class="border-t border-zinc-400 pt-6"></div>
+        <div class="border-t border-global-text/15 pt-6"></div>
       </div>
     </section>
 
     <section class="relative">
       <div class="py-4">
-        <div class="mb-4">
-          <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Technologies & Tools</h2>
-        </div>
-
-        <p class="max-w-full text-base text-global-text/85 leading-relaxed mb-4">
-          Here's a "tech list", this isn't just like a list of things "I know" but rather something with more detail. Click on any technology to learn more about how I use it!
-        </p>
-
-        <div class="space-y-8">
-          <TechList client:load techUsage={technologyUsage} />
-        </div>
+        <TechList techUsage={technologyUsage} />
       </div>
     </section>
 
-    <div class="border-t border-zinc-400 my-8"></div>
+    <div class="border-t border-global-text/15 my-8"></div>
 
     <section class="relative">
       <div class="py-4">
@@ -99,75 +82,16 @@ export const prerender = true;
           <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Contact Me</h2>
         </div>
 
-        <div class="space-y-4">
-          <p class="text-base text-global-text/85">
-            The quickest ways to get in touch are
-            <a class="lawson-link" href="mailto:me@lawsonhart.me" target="_blank">email</a>
-            or a
-            <a class="lawson-link" href="https://discordapp.com/users/527167786200465418" target="_blank" rel="noreferrer">Discord DM</a>.
-          </p>
-
-          <div class="flex flex-wrap gap-2">
-            <a
-              href="mailto:me@lawsonhart.me"
-              target="_blank"
-              class="inline-flex items-center gap-2 rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-            >
-              <Icon aria-hidden="true" class="h-5 w-5" focusable="false" name="mdi:email" />
-              <span>Email me</span>
-            </a>
-            <a
-              href="https://discordapp.com/users/527167786200465418"
-              target="_blank"
-              rel="noreferrer"
-              class="inline-flex items-center gap-2 rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-            >
-              <Icon aria-hidden="true" class="h-5 w-5" focusable="false" name="mdi:discord" />
-              <span>DM on Discord</span>
-            </a>
-          </div>
-
-          <div class="pt-2">
-            <SocialList />
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="border-t border-zinc-400 my-8"></div>
-
-    <section class="relative">
-      <div class="py-4">
-        <div class="mb-3">
-          <h2 class="text-2xl md:text-3xl font-bold text-accent-2 leading-tight">Site Information/Credits</h2>
-        </div>
-
-        <div class="space-y-4">
+        <div class="space-y-5">
           <p class="text-base text-global-text/85 leading-relaxed">
-            This site is built with <a class="lawson-link" href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a>
-            and is based on the <a class="lawson-link" href="https://github.com/chrismwilliams/astro-theme-cactus" target="_blank" rel="noopener noreferrer">Astro Cactus</a>
-            theme. I kept the core structure, but redesigned and extended the components and styling.
+            The quickest ways to reach me are
+            <a class="lawson-link" href="mailto:me@lawsonhart.me">email</a>
+            or a
+            <a class="lawson-link" href="https://discordapp.com/users/527167786200465418" target="_blank" rel="noreferrer">Discord DM</a>
+            — but I'm scattered across a few corners of the internet:
           </p>
 
-          <div class="flex flex-wrap gap-2">
-            {templateRepoUrl ? (
-              <a
-                href={templateRepoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-              >
-                Blog template
-              </a>
-            ) : null}
-
-            <a
-              href="/info-stats"
-              class="inline-flex items-center rounded-md border border-[var(--c-border)] bg-[var(--c-bg-dim)] px-3 py-2 text-sm font-medium hover:border-accent transition-colors"
-            >
-              Info &amp; stats
-            </a>
-          </div>
+          <SocialList />
         </div>
       </div>
     </section>

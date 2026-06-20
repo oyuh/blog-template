@@ -81,17 +81,19 @@ const {
 		color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
 	}
 
+	/* Hover: underline only — no background pill (flat redesign). */
 	@media (hover: hover) {
 		a[data-toc-link]:hover {
-			color: var(--color-accent);
-			background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+			text-decoration: underline;
+			text-decoration-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+			text-underline-offset: 3px;
 		}
 	}
 
+	/* Current section: blue text only — no background highlight. */
 	a[data-toc-link][data-active="true"] {
 		color: var(--color-accent);
-		background-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
-		font-weight: 600;
+		font-weight: 700;
 	}
 
 	/*

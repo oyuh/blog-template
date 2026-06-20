@@ -1,26 +1,19 @@
 // Personal site settings: let visitors tailor how the site feels.
 //
-// Three opt-in/out preferences are persisted to localStorage and applied both
+// Two opt-in/out preferences are persisted to localStorage and applied both
 // before paint (a tiny inline script in Base.astro mirrors `applySettingsToDocument`)
 // and at runtime (the settings modal + the React islands subscribe via `SETTINGS_EVENT`).
 //
-//  - holiday:  "enabled" | "disabled" | "removed"
-//      enabled  → holiday overlays + the header sparkle button behave normally
-//      disabled → overlays paused (mirrors the existing `holidays-user-disabled`
-//                 flag); the header button stays visible so it can be re-enabled
-//      removed  → the header button is stripped entirely and overlays never run
 //  - spotify:  "enabled" | "disabled"
-//      disabled → the header status is removed AND the SpotifyStatus island never
-//                 subscribes, so no requests hit the streaming API
+//      disabled → the footer logo drops its now-playing effects AND the SpotifyLogo
+//                 island never subscribes, so no requests hit the streaming API
 //  - comments: "enabled" | "disabled"
 //      disabled → the comments UI (sidebar pop-out, mobile overlay, TOC buttons) is
 //                 removed AND the Comments island never mounts, so no requests fire
 
-export type HolidaySetting = "enabled" | "disabled" | "removed";
 export type ToggleSetting = "enabled" | "disabled";
 
 export interface SiteSettings {
-	holiday: HolidaySetting;
 	spotify: ToggleSetting;
 	comments: ToggleSetting;
 }
@@ -31,23 +24,12 @@ export const SETTINGS_STORAGE_KEY = "site-settings:v1";
 export const SETTINGS_SAVED_KEY = "site-settings:savedAt";
 export const SETTINGS_EVENT = "site-settings:change";
 
-// Reused so the holiday toggle/overlay keep working with our preference.
-const HOLIDAY_DISABLED_KEY = "holidays-user-disabled";
-
 export const SITE_SETTINGS_DEFAULTS: SiteSettings = {
-	holiday: "disabled",
 	spotify: "enabled",
 	comments: "enabled",
 };
 
-const HOLIDAY_VALUES: HolidaySetting[] = ["enabled", "disabled", "removed"];
 const TOGGLE_VALUES: ToggleSetting[] = ["enabled", "disabled"];
-
-function coerceHoliday(value: unknown): HolidaySetting {
-	return HOLIDAY_VALUES.includes(value as HolidaySetting)
-		? (value as HolidaySetting)
-		: SITE_SETTINGS_DEFAULTS.holiday;
-}
 
 function coerceToggle(value: unknown, fallback: ToggleSetting): ToggleSetting {
 	return TOGGLE_VALUES.includes(value as ToggleSetting) ? (value as ToggleSetting) : fallback;
@@ -61,7 +43,6 @@ export function readSiteSettings(): SiteSettings {
 		if (!raw) return { ...SITE_SETTINGS_DEFAULTS };
 		const parsed = JSON.parse(raw) as Partial<Record<SiteSettingKey, unknown>>;
 		return {
-			holiday: coerceHoliday(parsed.holiday),
 			spotify: coerceToggle(parsed.spotify, SITE_SETTINGS_DEFAULTS.spotify),
 			comments: coerceToggle(parsed.comments, SITE_SETTINGS_DEFAULTS.comments),
 		};
@@ -83,25 +64,12 @@ function writeSiteSettings(settings: SiteSettings): void {
  * Reflect the settings onto `<html>` via classes so plain CSS can hide the
  * relevant header / TOC affordances. Kept in sync with the inline script in
  * Base.astro — update both if the class names change.
- *
- * Also ensures a non-enabled holiday preference pauses the holiday overlay. We
- * only force the pause flag (never un-force it here) so that, while holidays are
- * "enabled", the header sparkle button can still pause/resume on its own.
  */
 export function applySettingsToDocument(settings: SiteSettings): void {
 	if (typeof document === "undefined") return;
 	const root = document.documentElement;
-	root.classList.toggle("settings-holiday-removed", settings.holiday === "removed");
 	root.classList.toggle("settings-spotify-disabled", settings.spotify === "disabled");
 	root.classList.toggle("settings-comments-disabled", settings.comments === "disabled");
-
-	if (settings.holiday !== "enabled") {
-		try {
-			window.localStorage.setItem(HOLIDAY_DISABLED_KEY, "true");
-		} catch {
-			// ignore
-		}
-	}
 }
 
 /** Read the timestamp (ms) of the last settings change, or null if never saved. */
@@ -116,26 +84,6 @@ export function readSettingsSavedAt(): number | null {
 	}
 }
 
-/**
- * Push the holiday preference into the existing holiday overlay system. The
- * overlay/toggle listen for `holiday-toggle` and persist `holidays-user-disabled`
- * themselves, but we set it eagerly so a page refresh restores the right state.
- */
-function syncHolidaySideEffects(value: HolidaySetting): void {
-	if (typeof document === "undefined") return;
-	const userDisabled = value !== "enabled";
-	try {
-		window.localStorage.setItem(HOLIDAY_DISABLED_KEY, String(userDisabled));
-	} catch {
-		// ignore
-	}
-	document.dispatchEvent(
-		new CustomEvent("holiday-toggle", {
-			detail: userDisabled ? { userDisabled: true } : { userDisabled: false, auto: true },
-		}),
-	);
-}
-
 /** Update a single setting, persist it, apply DOM effects, and notify listeners. */
 export function setSiteSetting<K extends SiteSettingKey>(key: K, value: SiteSettings[K]): SiteSettings {
 	const next = { ...readSiteSettings(), [key]: value } as SiteSettings;
@@ -148,10 +96,6 @@ export function setSiteSetting<K extends SiteSettingKey>(key: K, value: SiteSett
 		} catch {
 			// ignore
 		}
-	}
-
-	if (key === "holiday") {
-		syncHolidaySideEffects(value as HolidaySetting);
 	}
 
 	if (typeof window !== "undefined") {
