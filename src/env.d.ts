@@ -36,6 +36,8 @@ interface ImportMetaEnv {
 	readonly GITHUB_TOKEN?: string;
 	readonly GITHUB_OWNER?: string;
 	readonly GITHUB_REPO?: string;
+	// Secret for the music-thing worker, read server-side only by /api/now-playing.
+	readonly MUSIC_THING_SECRET?: string;
 	readonly UMAMI_API_KEY?: string;
 	readonly UMAMI_HOST?: string;
 	readonly UMAMI_WEBSITE_ID?: string;

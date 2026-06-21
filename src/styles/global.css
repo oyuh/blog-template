@@ -1197,14 +1197,28 @@ astro-static-slot {
 	filter: brightness(0) invert(1);
 }
 
-/* Playing: a subtle, static blue glow (no pulsing) on top of the recolor. */
+/* Playing: a subtle, static glow (no pulsing) on top of the recolor. Tinted with
+   the album's dominant colour when available (--np-dominant), else the site accent.
+   --np-glow is the glow colour: the raw dominant on light backgrounds; on dark, it's
+   nudged toward white so even very dark dominants stay visible (hue preserved). */
+.footer-logo[data-playing="true"] {
+	--np-glow: var(--np-dominant, var(--color-accent));
+}
+
+:root[data-theme="dark"] .footer-logo[data-playing="true"] {
+	--np-glow: color-mix(in srgb, var(--np-dominant, var(--color-accent)) 70%, white);
+}
+
 .footer-logo[data-playing="true"] .footer-logo__img {
-	filter: brightness(0) drop-shadow(0 0 5px color-mix(in srgb, var(--color-accent) 55%, transparent));
+	filter: brightness(0)
+		drop-shadow(0 0 5px color-mix(in srgb, var(--np-glow) 60%, transparent))
+		drop-shadow(0 0 11px color-mix(in srgb, var(--np-glow) 38%, transparent));
 }
 
 :root[data-theme="dark"] .footer-logo[data-playing="true"] .footer-logo__img {
 	filter: brightness(0) invert(1)
-		drop-shadow(0 0 5px color-mix(in srgb, var(--color-accent) 55%, transparent));
+		drop-shadow(0 0 5px color-mix(in srgb, var(--np-glow) 60%, transparent))
+		drop-shadow(0 0 11px color-mix(in srgb, var(--np-glow) 38%, transparent));
 }
 
 .footer-logo[data-playing="true"] .footer-logo__link:hover .footer-logo__img {
@@ -1229,6 +1243,8 @@ astro-static-slot {
 	display: flex;
 }
 
+/* Each note picks up one of the album's accent colours (--np-accent-1..3),
+   falling back to the site accent when no palette is available. */
 .footer-logo__note {
 	font-size: 0.7rem;
 	line-height: 1;
@@ -1237,9 +1253,19 @@ astro-static-slot {
 	animation: footer-note-bob 3s ease-in-out infinite;
 }
 
-.footer-logo__note:nth-child(1) { animation-delay: 0s; }
-.footer-logo__note:nth-child(2) { animation-delay: 0.5s; font-size: 0.82rem; }
-.footer-logo__note:nth-child(3) { animation-delay: 1s; }
+.footer-logo__note:nth-child(1) {
+	animation-delay: 0s;
+	color: color-mix(in srgb, var(--np-accent-1, var(--color-accent)) 85%, transparent);
+}
+.footer-logo__note:nth-child(2) {
+	animation-delay: 0.5s;
+	font-size: 0.82rem;
+	color: color-mix(in srgb, var(--np-accent-2, var(--color-accent)) 85%, transparent);
+}
+.footer-logo__note:nth-child(3) {
+	animation-delay: 1s;
+	color: color-mix(in srgb, var(--np-accent-3, var(--color-accent)) 85%, transparent);
+}
 
 @keyframes footer-note-bob {
 	0%, 100% { opacity: 0; transform: translateY(2px); }
@@ -1278,7 +1304,9 @@ astro-static-slot {
 .footer-logo__np-text {
 	display: flex;
 	flex-direction: column;
+	gap: 0.1rem;
 	text-align: left;
+	min-width: 7rem;
 }
 
 .footer-logo__np-track {
@@ -1287,9 +1315,48 @@ astro-static-slot {
 	color: var(--color-accent-2);
 }
 
+/* Artist name tinted with the album's text colour (--np-text) when available. */
 .footer-logo__np-artist {
 	font-size: 0.72rem;
-	color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
+	color: var(--np-text, color-mix(in srgb, var(--color-global-text) 70%, transparent));
+}
+
+/* Compact "elapsed — bar — total" progress row. */
+.footer-logo__np-progress {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	margin-top: 0.15rem;
+}
+
+.footer-logo__np-time {
+	font-size: 0.62rem;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 0.02em;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+}
+
+.footer-logo__np-bar {
+	position: relative;
+	flex: 1;
+	height: 0.2rem;
+	min-width: 2.5rem;
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	overflow: hidden;
+}
+
+.footer-logo__np-bar-fill {
+	position: absolute;
+	inset: 0 auto 0 0;
+	width: 0%;
+	border-radius: inherit;
+	background: color-mix(in srgb, var(--np-accent-1, var(--color-accent)) 90%, transparent);
+	transition: width 0.9s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.footer-logo__np-bar-fill { transition: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
