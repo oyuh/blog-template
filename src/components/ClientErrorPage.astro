@@ -17,44 +17,42 @@ function toCanonicalRoute(pathname: string): string {
 ---
 
 <section class="mx-auto w-full max-w-3xl py-10 sm:py-14" data-attempted-path={attemptedCanonicalPath}>
-	<div class="rounded-xl border border-accent/20 bg-global-bg p-6 sm:p-8">
-		<p class="text-xs font-semibold uppercase tracking-wide text-accent">Client Error · {statusCode}</p>
-		<h1 class="title mt-2 mb-4">This page could not be loaded.</h1>
-		<p class="mb-3 text-base text-global-text/90">
-			The requested URL
-			<code class="mx-1 rounded-md border border-accent/20 bg-global-bg px-1.5 py-0.5 text-sm">
-				{attemptedCanonicalPath}
-			</code>
-			is unavailable.
-		</p>
-		<p class="mb-6 text-sm text-global-text/75">
-			Client errors are in the 4xx range and usually happen because a link changed, the path was typed incorrectly, or access is restricted.
-		</p>
+	<p class="text-xs font-semibold uppercase tracking-wide text-accent">Client Error · {statusCode}</p>
+	<h1 class="title mt-2 mb-4">This page could not be loaded.</h1>
+	<p class="mb-3 text-base text-global-text/90">
+		The requested URL
+		<code class="mx-1 rounded-md border border-accent/20 bg-global-bg px-1.5 py-0.5 text-sm">
+			{attemptedCanonicalPath}
+		</code>
+		is unavailable.
+	</p>
+	<p class="mb-6 text-sm text-global-text/75">
+		Client errors are in the 4xx range and usually happen because a link changed, the path was typed incorrectly, or access is restricted.
+	</p>
 
-		<div class="flex flex-wrap gap-3">
-			<button
-				class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
-				id="go-back-button"
-				type="button"
-			>
-				Go Back
-			</button>
-			<a
-				class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
-				href="/"
-			>
-				Go Home
-			</a>
-		</div>
+	<div class="flex flex-wrap gap-3">
+		<button
+			class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
+			id="go-back-button"
+			type="button"
+		>
+			Go Back
+		</button>
+		<a
+			class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
+			href="/"
+		>
+			Go Home
+		</a>
+	</div>
 
-		<div class="mt-7 hidden border-t border-accent/15 pt-5" data-suggestion-root>
-			<div class="mb-3 flex items-center justify-between gap-3">
-				<p class="text-sm font-medium text-global-text">Did you mean:</p>
-				<span class="hidden text-xs text-global-text/60" data-suggestion-tier></span>
-			</div>
-			<p class="hidden text-xs text-global-text/70" data-suggestion-loading>Checking close matches…</p>
-			<div class="flex flex-wrap gap-3" data-suggestion-list></div>
+	<div class="mt-7 hidden border-t border-accent/15 pt-5" data-suggestion-root>
+		<div class="mb-3 flex items-center justify-between gap-3">
+			<p class="text-sm font-medium text-global-text">Did you mean:</p>
+			<span class="hidden text-xs text-global-text/60" data-suggestion-tier></span>
 		</div>
+		<p class="hidden text-xs text-global-text/70" data-suggestion-loading>Checking close matches…</p>
+		<div class="flex flex-wrap gap-3" data-suggestion-list></div>
 	</div>
 </section>
 

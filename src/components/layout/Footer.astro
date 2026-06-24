@@ -21,7 +21,7 @@ const year = new Date().getFullYear();
 
 		<!-- Desktop: single centered row, logo in the middle -->
 		<div class="hidden sm:flex w-full items-center justify-center gap-6">
-			<div class="flex items-center gap-3">
+			<div class="flex flex-1 items-center justify-end gap-3" data-footer-left>
 				<span>&copy; {siteConfig.author} {year}</span>
 				<span class="footer-dot">•</span>
 				<a class="footer-link" href="/policy/">Policies</a>
@@ -31,7 +31,7 @@ const year = new Date().getFullYear();
 				<SpotifyLogoIsland />
 			</div>
 
-			<div class="flex items-center gap-3">
+			<div class="flex flex-1 items-center justify-start gap-3" data-footer-right>
 				{
 					menuLinks.map((link, index) => (
 						<>
@@ -62,3 +62,76 @@ const year = new Date().getFullYear();
 		color: color-mix(in srgb, var(--color-global-text) 30%, transparent);
 	}
 </style>
+
+<script>
+	// Keep the footer balanced: (1) equalise the rendered width of the two text
+	// groups by nudging letter-spacing on the narrower one, and (2) anchor the
+	// bottom glow to the logo's *actual* centre rather than the viewport/spacing
+	// centre, so the glow sits directly under the logo.
+	(() => {
+		// Width of the actual text run inside a group (the children hug the logo via
+		// justify-*; the flex container itself is wider, so measure the content).
+		const contentWidth = (group: HTMLElement) => {
+			let min = Number.POSITIVE_INFINITY;
+			let max = Number.NEGATIVE_INFINITY;
+			for (const kid of group.children) {
+				const r = kid.getBoundingClientRect();
+				if (r.width === 0 && r.height === 0) continue;
+				min = Math.min(min, r.left);
+				max = Math.max(max, r.right);
+			}
+			return max > min ? max - min : 0;
+		};
+
+		const balance = () => {
+			const left = document.querySelector<HTMLElement>("[data-footer-left]");
+			const right = document.querySelector<HTMLElement>("[data-footer-right]");
+			if (!left || !right) return;
+			left.style.letterSpacing = "";
+			right.style.letterSpacing = "";
+			// On mobile the desktop row is display:none (zero width) — nothing to do.
+			if (left.getBoundingClientRect().width === 0) return;
+			// Two passes converge the two text widths to within a sub-pixel by adding
+			// letter-spacing to the narrower side until it matches the wider one.
+			for (let pass = 0; pass < 2; pass++) {
+				const diff = contentWidth(right) - contentWidth(left);
+				if (Math.abs(diff) < 0.5) break;
+				const narrower = diff > 0 ? left : right;
+				const glyphs = (narrower.textContent ?? "").replace(/\s/g, "").length;
+				if (glyphs < 2) break;
+				const current = Number.parseFloat(narrower.style.letterSpacing) || 0;
+				narrower.style.letterSpacing = `${current + Math.abs(diff) / glyphs}px`;
+			}
+		};
+
+		const alignGlow = () => {
+			const glow = document.querySelector<HTMLElement>(".page-bottom-glow");
+			if (!glow) return;
+			let logo: HTMLElement | null = null;
+			for (const el of document.querySelectorAll<HTMLElement>("[data-spotify-logo]")) {
+				if (el.getClientRects().length) {
+					logo = el;
+					break;
+				}
+			}
+			// No visible logo (e.g. Spotify disabled): fall back to the CSS 50% centre.
+			if (!logo) {
+				glow.style.removeProperty("left");
+				return;
+			}
+			const r = logo.getBoundingClientRect();
+			glow.style.left = `${r.left + r.width / 2}px`;
+		};
+
+		const update = () => {
+			balance();
+			alignGlow();
+		};
+
+		update();
+		window.addEventListener("resize", update, { passive: true });
+		document.addEventListener("astro:page-load", update);
+		// Web-font swap changes text widths — rebalance once fonts settle.
+		if (document.fonts?.ready) document.fonts.ready.then(update);
+	})();
+</script>

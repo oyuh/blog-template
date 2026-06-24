@@ -93,49 +93,60 @@ const enableVercelAnalytics =
 			   viewport, or the page is actually scrolled to its end (see script below). */
 			.page-bottom-glow {
 				position: fixed;
-				inset-inline: 0;
+				left: 50%;
+				transform: translateX(-50%);
+				width: min(820px, 95vw);
 				bottom: 0;
-				height: 30vh;
+				height: 26vh;
 				z-index: -1;
 				pointer-events: none;
 				opacity: 0;
-				transition: opacity 0.5s ease;
+				transition: opacity 0.6s ease;
+				/* Origin sits just below the box so the colour wells up from the
+				   bottom. The horizontal radius (56%) is small enough that the fade
+				   reaches full transparency *inside* the box width, so the left/right
+				   edges are never clipped mid-colour — no harsh sides. */
 				background: radial-gradient(
-					150% 95% at 50% 120%,
-					color-mix(in srgb, var(--color-accent) 16%, transparent) 0%,
-					color-mix(in srgb, var(--color-accent) 5%, transparent) 38%,
-					transparent 70%
+					56% 115% at 50% 134%,
+					color-mix(in srgb, var(--color-accent) 28%, transparent) 0%,
+					color-mix(in srgb, var(--color-accent) 18%, transparent) 26%,
+					color-mix(in srgb, var(--color-accent) 9%, transparent) 50%,
+					color-mix(in srgb, var(--color-accent) 3%, transparent) 68%,
+					transparent 84%
 				);
 			}
 
-			/* Grain, confined to the wave so it reads as texture, not static. */
+			/* Grain, confined to the wave so it reads as texture, not static. The mask
+			   feathers out on the same curve as the glow so its edges are never harsh. */
 			.page-bottom-glow::after {
 				content: "";
 				position: absolute;
 				inset: 0;
 				background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-				background-size: 180px 180px;
+				background-size: 110px 110px;
 				mix-blend-mode: overlay;
-				opacity: 0.12;
-				-webkit-mask-image: radial-gradient(150% 95% at 50% 120%, #000 0%, transparent 68%);
-				mask-image: radial-gradient(150% 95% at 50% 120%, #000 0%, transparent 68%);
+				opacity: 0.45;
+				-webkit-mask-image: radial-gradient(56% 115% at 50% 134%, #000 0%, rgba(0,0,0,0.5) 45%, transparent 80%);
+				mask-image: radial-gradient(56% 115% at 50% 134%, #000 0%, rgba(0,0,0,0.5) 45%, transparent 80%);
 			}
 
 			body.glow-near .page-bottom-glow {
-				opacity: 0.32;
+				opacity: 0.45;
 			}
 
 			:root[data-theme="dark"] .page-bottom-glow {
 				background: radial-gradient(
-					150% 95% at 50% 120%,
-					color-mix(in srgb, var(--color-accent) 22%, transparent) 0%,
-					color-mix(in srgb, var(--color-accent) 8%, transparent) 40%,
-					transparent 72%
+					56% 115% at 50% 134%,
+					color-mix(in srgb, var(--color-accent) 38%, transparent) 0%,
+					color-mix(in srgb, var(--color-accent) 24%, transparent) 26%,
+					color-mix(in srgb, var(--color-accent) 12%, transparent) 50%,
+					color-mix(in srgb, var(--color-accent) 4%, transparent) 68%,
+					transparent 84%
 				);
 			}
 
 			:root[data-theme="dark"] body.glow-near .page-bottom-glow {
-				opacity: 0.42;
+				opacity: 0.58;
 			}
 
 			@media (prefers-reduced-motion: reduce) {
@@ -175,6 +186,49 @@ const enableVercelAnalytics =
 				window.addEventListener("scroll", apply, { passive: true });
 				window.addEventListener("resize", apply, { passive: true });
 				apply();
+			})();
+		</script>
+
+		<script>
+			// Split highlighted hero words into per-letter spans so each letter can
+			// hop in sequence on hover (a staggered wave). Each word is wrapped in a
+			// nowrap span so the inline-block letters can't break mid-word at a line
+			// end; only the spaces between words remain breakable.
+			(() => {
+				const splitLetters = (el: HTMLElement) => {
+					if (el.dataset.lettersSplit === "true") return;
+					const text = el.textContent ?? "";
+					el.textContent = "";
+					let i = 0;
+					// Split on whitespace runs but keep them as separators.
+					for (const token of text.split(/(\s+)/)) {
+						if (token === "") continue;
+						if (/^\s+$/.test(token)) {
+							el.appendChild(document.createTextNode(token));
+							continue;
+						}
+						const word = document.createElement("span");
+						word.className = "hw";
+						for (const ch of token) {
+							const span = document.createElement("span");
+							span.className = "ltr";
+							span.style.setProperty("--i", String(i++));
+							span.textContent = ch;
+							word.appendChild(span);
+						}
+						el.appendChild(word);
+					}
+					el.dataset.lettersSplit = "true";
+				};
+
+				const run = () => {
+					document
+						.querySelectorAll<HTMLElement>(".hero-kw, .hero-accent")
+						.forEach(splitLetters);
+				};
+
+				run();
+				document.addEventListener("astro:page-load", run);
 			})();
 		</script>
 	</body>
