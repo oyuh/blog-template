@@ -2,7 +2,7 @@
 //
 // Two opt-in/out preferences are persisted to localStorage and applied both
 // before paint (a tiny inline script in Base.astro mirrors `applySettingsToDocument`)
-// and at runtime (the settings modal + the React islands subscribe via `SETTINGS_EVENT`).
+// and at runtime (the settings modal + the comments island subscribe via `SETTINGS_EVENT`).
 //
 //  - spotify:  "enabled" | "disabled"
 //      disabled → the footer logo drops its now-playing effects AND the SpotifyLogo

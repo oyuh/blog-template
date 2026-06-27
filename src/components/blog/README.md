@@ -11,7 +11,7 @@ Displays a GitHub repository with live stats fetched from the GitHub API.
 **Usage:**
 
 ```mdx
-import GitHubRepoCard from '@/components/blog/GitHubRepoCard.tsx';
+import GitHubRepoCard from '@/components/blog/GitHubRepoCard.astro';
 
 <GitHubRepoCard repo="owner/repository" />
 
@@ -39,7 +39,7 @@ Shows a preview card for any URL, with metadata fetched on hover or always visib
 **Usage:**
 
 ```mdx
-import LinkPreview from '@/components/blog/LinkPreview.tsx';
+import LinkPreview from '@/components/blog/LinkPreview.astro';
 
 <!-- Hover preview (tooltip) -->
 <LinkPreview url="https://example.com">Link Text</LinkPreview>
@@ -68,7 +68,7 @@ Create interactive charts and graphs using HTML5 Canvas.
 **Usage:**
 
 ```mdx
-import Chart from '@/components/blog/Chart.tsx';
+import Chart from '@/components/blog/Chart.vue';
 
 <Chart
   data={[
@@ -115,7 +115,7 @@ Display highlighted information with styled cards.
 **Usage:**
 
 ```mdx
-import InfoCard from '@/components/blog/InfoCard.tsx';
+import InfoCard from '@/components/blog/InfoCard.astro';
 
 <InfoCard title="Important Note" type="info">
 This is important information to highlight.
@@ -190,8 +190,8 @@ See the following example posts in `/src/content/post/testing/`:
 title: "My Post"
 ---
 
-import GitHubRepoCard from '@/components/blog/GitHubRepoCard.tsx';
-import Chart from '@/components/blog/Chart.tsx';
+import GitHubRepoCard from '@/components/blog/GitHubRepoCard.astro';
+import Chart from '@/components/blog/Chart.vue';
 
 Your content here...
 

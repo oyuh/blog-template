@@ -366,6 +366,10 @@ const toc = generateToc(headings);
     -webkit-user-select: none;
     /* Ensure button stays above other content */
     isolation: isolate;
+    /* Containing block for the ::before touch halo below, so it hugs this
+       button instead of stretching across the whole actions bar (which would
+       sit on top of the comments button and steal its taps). */
+    position: relative;
   }
 
   /* Add pseudo-element for larger touch target */

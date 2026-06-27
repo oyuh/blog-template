@@ -6,14 +6,14 @@ tags: ["demo", "components", "interactive"]
 draft: true
 ---
 
-import LinkPreview from '@/components/blog/LinkPreview.tsx';
-import Chart from '@/components/blog/Chart.tsx';
-import DataTable from '@/components/blog/DataTable.tsx';
-import InfoCard from '@/components/blog/InfoCard.tsx';
+import LinkPreview from '@/components/blog/LinkPreview.astro';
+import Chart from '@/components/blog/Chart.vue';
+import DataTable from '@/components/blog/DataTable.vue';
+import InfoCard from '@/components/blog/InfoCard.astro';
 import GitHubRepoCardOptional from '@/components/blog/GitHubRepoCardOptional.astro';
 
 This post demonstrates the interactive components available for blog posts. The charts and
-tables are powered by [Recharts](https://recharts.org), themed to match the site, and stretch
+tables are powered by [Chart.js](https://www.chartjs.org), themed to match the site, and stretch
 to the full width of the article.
 
 ## GitHub Repository Cards
@@ -32,11 +32,11 @@ Here is the template-safe card wrapper in action:
 
 Regular links show previews on hover — just wrap them in the `LinkPreview` component:
 
-<LinkPreview url="https://astro.build" client:load>Check out Astro</LinkPreview>
+<LinkPreview url="https://astro.build">Check out Astro</LinkPreview>
 
 Or show a full card preview:
 
-<LinkPreview url="https://tailwindcss.com" showPreview client:load />
+<LinkPreview url="https://tailwindcss.com" showPreview />
 
 ## Charts
 
@@ -167,23 +167,23 @@ standalone `DataTable` anywhere — click a header to sort:
 
 Highlight important information with callouts that match the site's admonition style:
 
-<InfoCard title="Important Note" type="info" client:load>
+<InfoCard title="Important Note" type="info">
 This is an informational card that stands out from regular content.
 </InfoCard>
 
-<InfoCard title="Success!" type="success" client:load>
+<InfoCard title="Success!" type="success">
 Your operation completed successfully.
 </InfoCard>
 
-<InfoCard title="Warning" type="warning" client:load>
+<InfoCard title="Warning" type="warning">
 Please be careful when proceeding with this action.
 </InfoCard>
 
-<InfoCard title="Error" type="error" client:load>
+<InfoCard title="Error" type="error">
 Something went wrong. Please try again.
 </InfoCard>
 
-<InfoCard title="Custom Icon" type="info" icon="🚀" client:load>
+<InfoCard title="Custom Icon" type="info" icon="🚀">
 Pass an `icon` prop to override the default glyph.
 </InfoCard>
 
@@ -243,6 +243,6 @@ toggle, and `allowedTypes={['line','bar']}` limits the type switcher.
 ### Link preview
 
 ```tsx
-<LinkPreview url="https://example.com" client:load>Link Text</LinkPreview>
-<LinkPreview url="https://example.com" showPreview client:load />
+<LinkPreview url="https://example.com">Link Text</LinkPreview>
+<LinkPreview url="https://example.com" showPreview />
 ```

@@ -3,9 +3,9 @@ import fs from "node:fs";
 import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
 import mdx from "@astrojs/mdx";
 import node from "@astrojs/node";
-import react from "@astrojs/react";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
+import vue from "@astrojs/vue";
 import tailwind from "@tailwindcss/vite";
 import type { AstroUserConfig } from "astro";
 import { defineConfig } from "astro/config";
@@ -98,7 +98,15 @@ export default defineConfig({
 			},
 		}),
 		sitemap(),
-		mdx(),
+		// `@astrojs/mdx` reads its plugins from these integration options (it does
+		// NOT read `markdown.processor`), so the `.mdx` pipeline gets directives,
+		// GFM, etc. here. The core `.md` pipeline is fed by `markdown.processor` below.
+		mdx({
+			remarkPlugins: remarkPlugins as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["remarkPlugins"]>,
+			rehypePlugins: rehypePlugins as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["rehypePlugins"]>,
+			remarkRehype: remarkRehypeOptions,
+			gfm: true,
+		}),
 		robotsTxt({
 			policy: [
 				{
@@ -145,15 +153,13 @@ export default defineConfig({
 				insertThemeColorMeta: true,
 			},
 		}),
-		react(),
+		vue(),
 	],
 	markdown: {
-		// Top-level keys feed `@astrojs/mdx` (it doesn't read `processor`); `gfm`
-		// stays on for GFM tables. `processor` feeds the core `.md` pipeline.
-		remarkPlugins,
-		rehypePlugins,
-		remarkRehype: remarkRehypeOptions,
-		gfm: true,
+		// Only `processor` here — the deprecated top-level `remarkPlugins`/
+		// `rehypePlugins`/`remarkRehype`/`gfm` keys are gone (Astro warns on them).
+		// This `processor` feeds the core `.md` pipeline; `.mdx` gets the same
+		// plugins via the `mdx({...})` integration options above.
 		processor: unified({
 			remarkPlugins,
 			rehypePlugins,
@@ -165,9 +171,6 @@ export default defineConfig({
 	prefetch: true,
 	vite: {
 		resolve: {
-			// Prevent "Invalid hook call" by forcing Vite to always use a single
-			// React instance for both the renderer and all components.
-			dedupe: ["react", "react-dom"],
 			// bun can use symlinks; preserving them can lead to duplicated module instances.
 			preserveSymlinks: false,
 		},

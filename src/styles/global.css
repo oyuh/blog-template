@@ -927,32 +927,6 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	font-variant-numeric: tabular-nums;
 }
 
-/* Recharts surface theming (colours resolve from CSS vars) */
-.chart-card .recharts-cartesian-grid line {
-	stroke: color-mix(in srgb, var(--color-global-text) 10%, transparent);
-}
-
-.chart-card .recharts-cartesian-axis-line,
-.chart-card .recharts-cartesian-axis-tick-line {
-	stroke: color-mix(in srgb, var(--color-global-text) 16%, transparent);
-}
-
-.chart-card .recharts-cartesian-axis-tick-value {
-	fill: color-mix(in srgb, var(--color-global-text) 55%, transparent);
-}
-
-.chart-card .recharts-label {
-	fill: color-mix(in srgb, var(--color-global-text) 70%, transparent);
-	font-family: "Plus Jakarta Sans Variable", sans-serif;
-	font-size: 0.75rem;
-}
-
-.chart-card .chart-cursor,
-.chart-card .recharts-tooltip-cursor {
-	fill: color-mix(in srgb, var(--color-accent) 8%, transparent);
-	stroke: color-mix(in srgb, var(--color-accent) 32%, transparent);
-}
-
 /* DataTable */
 .dtable-wrap {
 	margin: 1.75rem 0;

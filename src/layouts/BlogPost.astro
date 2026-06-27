@@ -2,7 +2,7 @@
 import { type CollectionEntry, render } from "astro:content";
 import EnhancedProse from "@/components/blog/EnhancedProse.astro";
 import Masthead from "@/components/blog/Masthead.astro";
-import ScrollProgressBar from "@/components/blog/ScrollProgressBar";
+import ScrollProgressBar from "@/components/blog/ScrollProgressBar.astro";
 import TOCBar from "@/components/blog/TOCBar.astro";
 import TOCMobile from "@/components/blog/TOCMobile.astro";
 import { siteConfig } from "@/site.config";
@@ -40,7 +40,7 @@ const CommentsIsland =
 	}}
 >
 	<!-- Scroll Progress Bar -->
-	<ScrollProgressBar client:idle />
+	<ScrollProgressBar />
 
 	<article class="relative z-10 grow break-words pt-6 sm:pt-10" data-pagefind-body data-blog-post="true">
 		<div id="blog-hero" class="mb-12"><Masthead content={post} readingTime={readingTime} /></div>

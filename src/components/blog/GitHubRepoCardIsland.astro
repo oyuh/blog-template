@@ -2,7 +2,7 @@
 // Wrapper island for the GitHub repo card.
 // This exists so pages/MDX can reference a stable component, while the template repo
 // can optionally delete the underlying GitHub integration without breaking builds.
-import GitHubRepoCard from "./GitHubRepoCard";
+import GitHubRepoCard from "./GitHubRepoCard.astro";
 
 type Props = {
 	repo: string;
@@ -12,4 +12,4 @@ type Props = {
 const { repo, compact } = Astro.props;
 ---
 
-<GitHubRepoCard client:idle repo={repo} compact={compact ?? false} />
+<GitHubRepoCard repo={repo} compact={compact ?? false} />

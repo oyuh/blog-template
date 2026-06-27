@@ -1,6 +1,17 @@
 // Shared data model + helpers for the blog Chart and DataTable components.
 // Keeping these in one place means a chart and its "view as table" stay in sync.
 
+export interface DataColumn {
+	key: string;
+	label: string;
+	align?: "left" | "right" | "center";
+	/** Treat values as numbers for sorting + default right-alignment. */
+	numeric?: boolean;
+	format?: (value: string | number) => string;
+}
+
+export type DataRow = Record<string, string | number>;
+
 export interface ChartPoint {
 	x: string | number;
 	y: number;
@@ -60,7 +71,7 @@ export function normalizeSeries({ series, data, title, color }: NormalizeArgs): 
 export type CategoryRow = { x: string } & Record<string, string | number>;
 
 /**
- * Merge every series onto a shared, ordered category axis so Recharts (which
+ * Merge every series onto a shared, ordered category axis so the chart (which
  * wants one row per x with a key per series) can render them together.
  * Categories appear in first-seen order across all series.
  */

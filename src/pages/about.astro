@@ -1,7 +1,7 @@
 ---
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import ResumeDownload from "@/components/ResumeDownload.tsx";
+import ResumeDownload from "@/components/ResumeDownload.astro";
 import SocialList from "@/components/SocialList.astro";
 import TechList from "@/components/TechList.astro";
 import { getAllPosts, getTechnologyUsage } from "@/data/post";
@@ -57,7 +57,7 @@ export const prerender = true;
 
           <div class="mt-4">
             {resumePdfExists ? (
-              <ResumeDownload client:load pdfUrl={defaultResumePdfUrl} />
+              <ResumeDownload pdfUrl={defaultResumePdfUrl} />
             ) : (
               <p class="text-sm text-global-text/70">Resume PDF is not available.</p>
             )}

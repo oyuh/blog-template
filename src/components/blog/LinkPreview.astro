@@ -1,0 +1,175 @@
+---
+interface Props {
+	url: string;
+	/** If false (default), the preview card only appears on hover. */
+	showPreview?: boolean;
+}
+
+const { url, showPreview = false } = Astro.props;
+
+let displayUrl = url;
+try {
+	displayUrl = new URL(url).hostname.replace("www.", "");
+} catch {
+	/* leave displayUrl as the raw url if it can't be parsed */
+}
+---
+
+{
+	showPreview ? (
+		<a
+			class="link-preview-card not-prose"
+			href={url}
+			target="_blank"
+			rel="noopener noreferrer"
+			data-link-preview
+			data-url={url}
+			data-display-url={displayUrl}
+			data-mode="card"
+		>
+			<div class="link-preview-skeleton" data-link-preview-slot>
+				<div class="link-preview-skeleton-line" style="width: 60%" />
+				<div class="link-preview-skeleton-line" style="width: 90%" />
+			</div>
+		</a>
+	) : (
+		<span
+			class="link-preview-wrapper"
+			data-link-preview
+			data-url={url}
+			data-display-url={displayUrl}
+			data-mode="hover"
+		>
+			<a
+				class="link-preview-link"
+				href={url}
+				target="_blank"
+				rel="noopener noreferrer"
+				data-link-preview-link
+			>
+				<slot>{url}</slot>
+			</a>
+		</span>
+	)
+}
+
+<script>
+	interface LinkMetadata {
+		title: string;
+		description?: string;
+		image?: string;
+		url: string;
+		siteName?: string;
+		favicon?: string;
+	}
+
+	async function fetchMetadata(url: string): Promise<LinkMetadata> {
+		try {
+			const response = await fetch(`/api/link-preview?url=${encodeURIComponent(url)}`);
+			if (response.ok) return await response.json();
+		} catch (err) {
+			console.error("Failed to fetch link preview:", err);
+		}
+		let hostname = url;
+		try {
+			hostname = new URL(url).hostname;
+		} catch {
+			/* keep raw url */
+		}
+		return { title: hostname, description: url, url };
+	}
+
+	function buildMeta(meta: LinkMetadata, size: "card" | "tip", displayUrl: string): HTMLElement {
+		const wrap = document.createElement("div");
+		wrap.className = `link-preview-meta link-preview-meta--${size}`;
+
+		if (meta.image) {
+			const img = document.createElement("img");
+			img.className = "link-preview-img";
+			img.src = meta.image;
+			img.alt = meta.title ?? "";
+			wrap.appendChild(img);
+		}
+
+		const body = document.createElement("div");
+		body.className = "link-preview-body";
+
+		const source = document.createElement("div");
+		source.className = "link-preview-source";
+		if (meta.favicon) {
+			const fav = document.createElement("img");
+			fav.className = "link-preview-favicon";
+			fav.src = meta.favicon;
+			fav.alt = "";
+			source.appendChild(fav);
+		}
+		const siteSpan = document.createElement("span");
+		siteSpan.textContent = meta.siteName || displayUrl;
+		source.appendChild(siteSpan);
+		body.appendChild(source);
+
+		const name = document.createElement("div");
+		name.className = "link-preview-name";
+		name.textContent = meta.title ?? "";
+		body.appendChild(name);
+
+		if (meta.description) {
+			const desc = document.createElement("p");
+			desc.className = "link-preview-desc";
+			desc.textContent = meta.description;
+			body.appendChild(desc);
+		}
+
+		wrap.appendChild(body);
+		return wrap;
+	}
+
+	for (const el of document.querySelectorAll<HTMLElement>("[data-link-preview]")) {
+		const url = el.dataset.url;
+		const displayUrl = el.dataset.displayUrl ?? url ?? "";
+		if (!url) continue;
+		let metadata: LinkMetadata | null = null;
+
+		if (el.dataset.mode === "card") {
+			const slot = el.querySelector<HTMLElement>("[data-link-preview-slot]");
+			fetchMetadata(url).then((meta) => {
+				metadata = meta;
+				if (slot) slot.replaceWith(buildMeta(meta, "card", displayUrl));
+			});
+			continue;
+		}
+
+		// Hover mode
+		const link = el.querySelector<HTMLAnchorElement>("[data-link-preview-link]");
+		if (!link) continue;
+		let enterTimeout: ReturnType<typeof setTimeout> | null = null;
+		let tooltip: HTMLElement | null = null;
+
+		const showTooltip = () => {
+			if (!metadata || tooltip) return;
+			tooltip = document.createElement("span");
+			tooltip.className = "link-preview-tooltip not-prose";
+			tooltip.appendChild(buildMeta(metadata, "tip", displayUrl));
+			el.appendChild(tooltip);
+		};
+
+		const hideTooltip = () => {
+			if (tooltip) {
+				tooltip.remove();
+				tooltip = null;
+			}
+		};
+
+		link.addEventListener("mouseenter", () => {
+			enterTimeout = setTimeout(async () => {
+				if (!metadata) metadata = await fetchMetadata(url);
+				showTooltip();
+			}, 300);
+		});
+
+		link.addEventListener("mouseleave", () => {
+			if (enterTimeout) clearTimeout(enterTimeout);
+			setTimeout(hideTooltip, 100);
+		});
+	}
+</script>

@@ -157,28 +157,33 @@ const enableVercelAnalytics =
 		</style>
 
 		<script>
-			// Reveal the bottom glow only when the cursor nears the bottom of the
-			// viewport, or the page is genuinely scrolled to its end. On short pages
-			// (nothing to scroll) the footer being visible isn't enough — the cursor
-			// has to come down to it.
+			// Reveal the bottom glow only when the cursor is near the *footer itself*.
+			// Tracking the footer element (rather than the viewport bottom) means the
+			// glow can't appear mid-page just because the cursor sits low on screen —
+			// the footer has to actually be in view (i.e. you're near the page end) and
+			// the cursor has to come down to it.
 			(() => {
-				const NEAR = 170; // px from the viewport bottom
-				let cursorNear = false;
+				const NEAR = 170; // px above the footer the cursor must reach
+				let cursorY = -1;
 
-				const isScrolledToBottom = () => {
-					const doc = document.documentElement;
-					const scrollable = doc.scrollHeight > window.innerHeight + 4;
-					return scrollable && window.innerHeight + window.scrollY >= doc.scrollHeight - 8;
+				const shouldGlow = () => {
+					const footer = document.querySelector("footer");
+					if (!footer || cursorY < 0) return false;
+					const r = footer.getBoundingClientRect();
+					// Footer must be on screen (you're at/near the bottom of the page)…
+					if (r.top >= window.innerHeight) return false;
+					// …and the cursor must be near (or over) the footer.
+					return cursorY >= r.top - NEAR;
 				};
 
 				const apply = () => {
-					document.body.classList.toggle("glow-near", cursorNear || isScrolledToBottom());
+					document.body.classList.toggle("glow-near", shouldGlow());
 				};
 
 				window.addEventListener(
 					"pointermove",
 					(e) => {
-						cursorNear = e.clientY >= window.innerHeight - NEAR;
+						cursorY = e.clientY;
 						apply();
 					},
 					{ passive: true },

@@ -1,0 +1,297 @@
+---
+interface Props {
+	repo: string; // Format: "owner/repo"
+	compact?: boolean;
+}
+
+const { repo, compact = false } = Astro.props;
+---
+
+<div class="gh-card-root" data-ghcard-root data-repo={repo} data-compact={compact ? "true" : "false"}>
+	{
+		compact ? (
+			<>
+				<div class="gh-card-compact-skeleton" data-ghcard-skeleton />
+				<a
+					class="gh-card-compact not-prose"
+					data-ghcard-link
+					hidden
+					target="_blank"
+					rel="noopener noreferrer"
+				>
+					<img class="gh-card-compact-avatar" data-ghcard-avatar alt="" />
+					<span class="gh-card-compact-name" data-ghcard-name />
+					<span class="gh-card-compact-stars">
+						⭐ <span data-ghcard-stars />
+					</span>
+				</a>
+			</>
+		) : (
+			<>
+				<div class="gh-card-skeleton" data-ghcard-skeleton>
+					<div class="sk-avatar" />
+					<div class="sk-lines">
+						<div class="sk-line" style="width: 40%" />
+						<div class="sk-line" style="width: 80%" />
+					</div>
+				</div>
+				<a class="gh-card not-prose" data-ghcard-link hidden target="_blank" rel="noopener noreferrer">
+					<div class="gh-card-head">
+						<img class="gh-card-avatar" data-ghcard-avatar alt="" />
+						<div class="gh-card-info">
+							<h3 class="gh-card-name" data-ghcard-name />
+							<p class="gh-card-desc" data-ghcard-desc hidden />
+						</div>
+					</div>
+					<div class="gh-card-meta">
+						<span class="gh-card-lang" data-ghcard-lang-wrap hidden>
+							<span class="gh-card-lang-dot" />
+							<span data-ghcard-lang />
+						</span>
+						<span>⭐ <span data-ghcard-stars /></span>
+						<span>🍴 <span data-ghcard-forks /></span>
+					</div>
+				</a>
+			</>
+		)
+	}
+	<div class="gh-card-error" data-ghcard-error hidden>
+		<p>Failed to load: <span data-ghcard-error-repo>{repo}</span></p>
+	</div>
+</div>
+
+<style>
+	.gh-card {
+		display: block;
+		padding: 1.25rem;
+		margin: 1rem 0;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 6px;
+		text-decoration: none;
+		color: inherit;
+		transition: all 0.15s ease;
+		background: transparent;
+	}
+	.gh-card:hover {
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+	}
+	.gh-card-head {
+		display: flex;
+		gap: 0.875rem;
+		align-items: flex-start;
+		margin-bottom: 0.875rem;
+	}
+	.gh-card-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 4px;
+		flex-shrink: 0;
+		margin: 0;
+	}
+	.gh-card-info {
+		flex: 1;
+		min-width: 0;
+	}
+	.gh-card-name {
+		font-weight: 600;
+		font-size: 1rem;
+		color: var(--color-accent-2);
+		margin: 0 0 0.25rem;
+		font-family: "Geist Mono Variable", monospace;
+	}
+	.gh-card-desc {
+		margin: 0;
+		opacity: 0.75;
+		font-size: 0.875rem;
+		line-height: 1.5;
+		color: var(--color-global-text);
+	}
+	.gh-card-meta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 1rem;
+		font-size: 0.8125rem;
+		opacity: 0.6;
+		align-items: center;
+		padding-top: 0.5rem;
+		border-top: 1px solid color-mix(in srgb, var(--color-global-text) 8%, transparent);
+		font-family: "Geist Mono Variable", monospace;
+	}
+	.gh-card-lang {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+	.gh-card-lang-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--color-accent);
+		display: inline-block;
+	}
+
+	.gh-card-compact {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.75rem;
+		margin: 0.25rem;
+		text-decoration: none;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 4px;
+		transition: all 0.15s ease;
+	}
+	.gh-card-compact:hover {
+		border-color: var(--color-accent);
+	}
+	.gh-card-compact-avatar {
+		width: 20px;
+		height: 20px;
+		border-radius: 3px;
+		margin: 0;
+	}
+	.gh-card-compact-name {
+		font-weight: 500;
+		font-size: 0.875rem;
+		color: var(--color-accent-2);
+		font-family: "Geist Mono Variable", monospace;
+	}
+	.gh-card-compact-stars {
+		font-size: 0.75rem;
+		opacity: 0.6;
+	}
+
+	.gh-card-error {
+		padding: 1rem;
+		margin: 1rem 0;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 6px;
+		background: transparent;
+	}
+	.gh-card-error p {
+		margin: 0;
+		color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+		font-family: "Geist Mono Variable", monospace;
+		font-size: 0.875rem;
+	}
+
+	/* Loading skeletons (pulse) */
+	.gh-card-skeleton {
+		display: flex;
+		gap: 0.875rem;
+		align-items: flex-start;
+		padding: 1.25rem;
+		margin: 1rem 0;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 6px;
+	}
+	.gh-card-skeleton .sk-avatar {
+		width: 32px;
+		height: 32px;
+		border-radius: 4px;
+		flex-shrink: 0;
+	}
+	.gh-card-skeleton .sk-lines {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+	.gh-card-skeleton .sk-line {
+		height: 0.75rem;
+		border-radius: 4px;
+	}
+	.gh-card-compact-skeleton {
+		display: inline-block;
+		width: 9rem;
+		height: 2rem;
+		margin: 0.25rem;
+		border-radius: 4px;
+		vertical-align: middle;
+	}
+	.gh-card-skeleton .sk-avatar,
+	.gh-card-skeleton .sk-line,
+	.gh-card-compact-skeleton {
+		background: color-mix(in srgb, var(--color-global-text) 12%, transparent);
+		animation: gh-card-pulse 1.2s ease-in-out infinite;
+	}
+	@keyframes gh-card-pulse {
+		0%,
+		100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.4;
+		}
+	}
+</style>
+
+<script>
+	interface GitHubRepoData {
+		full_name: string;
+		description: string;
+		html_url: string;
+		stargazers_count: number;
+		forks_count: number;
+		language: string;
+		owner: { login: string; avatar_url: string };
+	}
+
+	for (const root of document.querySelectorAll<HTMLElement>("[data-ghcard-root]")) {
+		const repo = root.dataset.repo;
+		if (!repo) continue;
+
+		const skeleton = root.querySelector<HTMLElement>("[data-ghcard-skeleton]");
+		const link = root.querySelector<HTMLAnchorElement>("[data-ghcard-link]");
+		const errorEl = root.querySelector<HTMLElement>("[data-ghcard-error]");
+
+		const showError = () => {
+			skeleton?.setAttribute("hidden", "");
+			link?.setAttribute("hidden", "");
+			errorEl?.removeAttribute("hidden");
+		};
+
+		fetch(`https://api.github.com/repos/${repo}`)
+			.then((res) => {
+				if (!res.ok) throw new Error("Repository not found");
+				return res.json() as Promise<GitHubRepoData>;
+			})
+			.then((data) => {
+				if (!link) return;
+				link.href = data.html_url;
+
+				const avatar = root.querySelector<HTMLImageElement>("[data-ghcard-avatar]");
+				if (avatar) {
+					avatar.src = data.owner.avatar_url;
+					avatar.alt = data.owner.login;
+				}
+
+				const name = root.querySelector<HTMLElement>("[data-ghcard-name]");
+				if (name) name.textContent = data.full_name;
+
+				const desc = root.querySelector<HTMLElement>("[data-ghcard-desc]");
+				if (desc && data.description) {
+					desc.textContent = data.description;
+					desc.removeAttribute("hidden");
+				}
+
+				const langWrap = root.querySelector<HTMLElement>("[data-ghcard-lang-wrap]");
+				const lang = root.querySelector<HTMLElement>("[data-ghcard-lang]");
+				if (langWrap && lang && data.language) {
+					lang.textContent = data.language;
+					langWrap.removeAttribute("hidden");
+				}
+
+				const stars = root.querySelector<HTMLElement>("[data-ghcard-stars]");
+				if (stars) stars.textContent = data.stargazers_count.toLocaleString();
+
+				const forks = root.querySelector<HTMLElement>("[data-ghcard-forks]");
+				if (forks) forks.textContent = data.forks_count.toLocaleString();
+
+				skeleton?.setAttribute("hidden", "");
+				link.removeAttribute("hidden");
+			})
+			.catch(showError);
+	}
+</script>

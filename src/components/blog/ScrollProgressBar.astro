@@ -1,0 +1,64 @@
+---
+// Vertical scroll-progress indicator pinned to the right edge of the viewport.
+// Interactivity lives in the hoisted <script> below — no client framework needed.
+---
+
+<div
+	class="fixed right-0 top-0 z-50 w-1 h-full bg-accent pointer-events-none origin-top"
+	aria-hidden="true"
+	style="transform: scaleY(0); will-change: transform;"
+	data-scroll-progress
+>
+</div>
+
+<script>
+	const bar = document.querySelector<HTMLDivElement>("[data-scroll-progress]");
+	if (bar) {
+		let currentProgress = 0;
+		let targetProgress = 0;
+		let isAnimating = false;
+
+		const lerp = (start: number, end: number, factor: number) => start + (end - start) * factor;
+
+		const animate = () => {
+			currentProgress = lerp(currentProgress, targetProgress, 0.25);
+
+			// Stop animating when close enough to target (within 0.1%)
+			if (Math.abs(currentProgress - targetProgress) < 0.1) {
+				currentProgress = targetProgress;
+				bar.style.transform = `scaleY(${currentProgress / 100})`;
+				isAnimating = false;
+				return;
+			}
+
+			bar.style.transform = `scaleY(${currentProgress / 100})`;
+			requestAnimationFrame(animate);
+		};
+
+		const startAnimating = () => {
+			if (!isAnimating) {
+				isAnimating = true;
+				requestAnimationFrame(animate);
+			}
+		};
+
+		const updateTarget = () => {
+			const windowHeight = window.innerHeight;
+			const documentHeight = document.documentElement.scrollHeight;
+			const scrollTop = window.scrollY;
+
+			const scrollableHeight = documentHeight - windowHeight;
+			const progress = scrollableHeight > 0 ? (scrollTop / scrollableHeight) * 100 : 0;
+			targetProgress = Math.min(100, Math.max(0, progress));
+			startAnimating();
+		};
+
+		// Initial calculation — snap to position without animating in.
+		updateTarget();
+		currentProgress = targetProgress;
+		bar.style.transform = `scaleY(${currentProgress / 100})`;
+
+		window.addEventListener("scroll", updateTarget, { passive: true });
+		window.addEventListener("resize", updateTarget, { passive: true });
+	}
+</script>
