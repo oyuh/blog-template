@@ -1005,14 +1005,14 @@ provide(commentsCtxKey, ctx);
 	>
 		<button
 			type="button"
-			class="flex w-full items-center justify-between gap-2 text-left"
+			class="group flex w-full items-center justify-between gap-2 text-left"
 			:aria-expanded="dockOpen"
 			aria-controls="comments-dock-body"
 			:title="dockOpen ? 'Hide comments' : 'Show comments'"
 			@click="dockOpen = !dockOpen"
 		>
 			<span class="flex items-baseline gap-2">
-				<span class="text-xs font-bold uppercase tracking-[0.08em] text-global-text/55">Comments</span>
+				<span class="text-xs font-bold uppercase tracking-[0.08em] text-global-text/55 group-hover:underline">Comments</span>
 				<span v-if="!loading" class="text-xs font-semibold tabular-nums text-global-text/45">{{ count }}</span>
 			</span>
 			<Icon

@@ -18,21 +18,21 @@ const toc = generateToc(headings);
   >
     <!-- Table of contents: flat, separated by a line on its left, hideable. -->
     <nav id="toc-dock" class="toc-dock" data-collapsed="false" aria-label="Table of contents">
-      <div class="toc-dock__head">
-        <span class="toc-dock__title">On this page</span>
-        <button
-          type="button"
-          id="toc-toggle"
-          class="toc-dock__toggle"
-          aria-expanded="true"
-          aria-controls="toc-nav"
-          title="Hide"
-        >
+      <button
+        type="button"
+        id="toc-toggle"
+        class="toc-dock__head"
+        aria-expanded="true"
+        aria-controls="toc-nav"
+        title="Hide"
+      >
+        <span class="toc-dock__title">Content</span>
+        <span class="toc-dock__toggle" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M6 9l6 6 6-6" />
           </svg>
-        </button>
-      </div>
+        </span>
+      </button>
       <div id="toc-nav" class="toc-dock__nav">
         <ol id="toc-list">
           {toc.map((heading) => <TOCHeading heading={heading} />)}
@@ -218,6 +218,13 @@ const toc = generateToc(headings);
     justify-content: space-between;
     gap: 0.5rem;
     margin-bottom: 0.6rem;
+    width: 100%;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
   }
 
   .toc-dock__title {
@@ -247,8 +254,11 @@ const toc = generateToc(headings);
   }
 
   @media (hover: hover) {
-    .toc-dock__toggle:hover {
+    .toc-dock__head:hover .toc-dock__toggle {
       color: var(--color-accent);
+    }
+    .toc-dock__head:hover .toc-dock__title {
+      text-decoration: underline;
     }
   }
 
