@@ -224,6 +224,12 @@ samp {
 	html {
 		color-scheme: light dark;
 		accent-color: var(--color-accent);
+		/* Background lives on the ROOT (not just <body>) so the cross-document
+		   view-transition snapshot of `root` is opaque — otherwise the browser's
+		   default white canvas flashes through the cross-fade on every navigation
+		   (very visible in dark mode). <body> is intentionally left transparent so
+		   the fixed `.page-bottom-glow` (z-index:-1) still shows through it. */
+		background-color: var(--color-global-bg);
 
 		&[data-theme="light"] {
 			color-scheme: light;
