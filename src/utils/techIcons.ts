@@ -11,6 +11,11 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	hono: "simple-icons:hono",
 	vite: "simple-icons:vite",
 	astro: "simple-icons:astro",
+	// SvelteKit has no dedicated simple-icon, so it shares the Svelte flame.
+	svelte: "simple-icons:svelte",
+	"svelte 5": "simple-icons:svelte",
+	sveltekit: "simple-icons:svelte",
+	"svelte kit": "simple-icons:svelte",
 	mdx: "simple-icons:mdx",
 	pagefind: "mdi:code-tags",
 	"tailwind css": "simple-icons:tailwindcss",
@@ -49,6 +54,7 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	"node.js": "simple-icons:nodedotjs",
 	nodejs: "simple-icons:nodedotjs",
 	node: "simple-icons:nodedotjs",
+	bun: "simple-icons:bun",
 	electron: "simple-icons:electron",
 	"electron.js": "simple-icons:electron",
 	electronjs: "simple-icons:electron",
@@ -56,6 +62,7 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	// Infra
 	vercel: "simple-icons:vercel",
 	cloudflare: "simple-icons:cloudflare",
+	railway: "simple-icons:railway",
 	docker: "simple-icons:docker",
 	github: "simple-icons:github",
 	azure: "simple-icons:microsoftazure",

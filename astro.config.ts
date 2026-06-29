@@ -15,6 +15,10 @@ import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
 import { boneyardPlugin } from "boneyard-js/vite";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+// `astro-expressive-code` only auto-wires the `.md` processor; for `.mdx` we add the
+// underlying rehype plugin to the mdx() pipeline ourselves. It's the default export of
+// `rehype-expressive-code` (which `astro-expressive-code` does not re-export by name).
+import rehypeExpressiveCode from "rehype-expressive-code";
 import rehypeExternalLinks from "rehype-external-links";
 import rehypeUnwrapImages from "rehype-unwrap-images";
 // Remark plugins
@@ -103,7 +107,16 @@ export default defineConfig({
 		// GFM, etc. here. The core `.md` pipeline is fed by `markdown.processor` below.
 		mdx({
 			remarkPlugins: remarkPlugins as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["remarkPlugins"]>,
-			rehypePlugins: rehypePlugins as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["rehypePlugins"]>,
+			// Expressive Code only auto-injects into the `.md` `processor` (see `markdown`
+			// below) and globally sets `syntaxHighlight: false`. MDX has its own plugin
+			// pipeline that doesn't read `processor`, so without adding EC's rehype plugin
+			// here, `.mdx` code blocks render completely unstyled. Keep it LAST so it runs
+			// on the final code nodes; the inherited `syntaxHighlight: false` avoids any
+			// double highlighting.
+			rehypePlugins: [
+				...rehypePlugins,
+				[rehypeExpressiveCode, expressiveCodeOptions],
+			] as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["rehypePlugins"]>,
 			remarkRehype: remarkRehypeOptions,
 			gfm: true,
 		}),
