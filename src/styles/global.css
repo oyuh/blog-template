@@ -184,32 +184,6 @@ body {
 	}
 }
 
-/* Native page transitions (cross-document View Transitions API). Pure CSS — no
-   client router, no JS: opting in here tells the browser to cross-fade between
-   full pages on same-origin navigations. Kept deliberately plain (a short
-   opacity cross-fade, no slide or lift) so it reads as a gentle settle rather
-   than an effect. Browsers without support just navigate normally. The
-   theme-toggle wipe above is scoped to `html.theme-vt`, so it stays separate. */
-@view-transition {
-	navigation: auto;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-	::view-transition-old(root),
-	::view-transition-new(root) {
-		animation-duration: 0.22s;
-		animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-	}
-}
-
-/* Honour reduced-motion: skip the cross-fade and swap instantly. */
-@media (prefers-reduced-motion: reduce) {
-	::view-transition-old(root),
-	::view-transition-new(root) {
-		animation: none !important;
-	}
-}
-
 /* Set code font */
 code,
 pre,
@@ -224,12 +198,6 @@ samp {
 	html {
 		color-scheme: light dark;
 		accent-color: var(--color-accent);
-		/* Background lives on the ROOT (not just <body>) so the cross-document
-		   view-transition snapshot of `root` is opaque — otherwise the browser's
-		   default white canvas flashes through the cross-fade on every navigation
-		   (very visible in dark mode). <body> is intentionally left transparent so
-		   the fixed `.page-bottom-glow` (z-index:-1) still shows through it. */
-		background-color: var(--color-global-bg);
 
 		&[data-theme="light"] {
 			color-scheme: light;
