@@ -3,15 +3,16 @@ import ClientErrorPage from "@/components/ClientErrorPage.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 const statusParam = Number(Astro.url.searchParams.get("status") ?? 400);
-const statusCode = Number.isInteger(statusParam) && statusParam >= 400 && statusParam <= 499 ? statusParam : 400;
+const statusCode = Number.isInteger(statusParam) && statusParam >= 400 && statusParam <= 599 ? statusParam : 400;
+const category = statusCode >= 500 ? "Server Error" : "Client Error";
 
 const meta = {
-	description: "Client error page",
-	title: `Client Error (${statusCode})`,
+	description: "Error page",
+	title: `${category} (${statusCode})`,
 };
 
 ---
 
-<PageLayout meta={meta}>
+<PageLayout meta={meta} centerMain>
 	<ClientErrorPage attemptedPath={Astro.url.searchParams.get("from") ?? Astro.url.pathname} statusCode={statusCode} />
 </PageLayout>

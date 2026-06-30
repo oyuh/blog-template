@@ -78,6 +78,8 @@ export default defineConfig({
 				mdi: [
 					"account-circle",
 					"api",
+					"arrow-left",
+					"home-outline",
 					"coffee",
 					"cloud",
 					"code-tags",

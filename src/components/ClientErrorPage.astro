@@ -1,4 +1,7 @@
 ---
+import ASCIIText from "@/components/ASCIIText.vue";
+import { Icon } from "astro-icon/components";
+
 interface Props {
 	statusCode?: number;
 	attemptedPath: string;
@@ -14,47 +17,138 @@ function toCanonicalRoute(pathname: string): string {
 	const withLeadingSlash = pathname.startsWith("/") ? pathname : `/${pathname}`;
 	return withLeadingSlash.endsWith("/") ? withLeadingSlash : `${withLeadingSlash}/`;
 }
+
+// Per-status copy. Anything not listed falls back to a sensible 4xx/5xx default,
+// so this component stays correct for any error code we route through it.
+const ERROR_COPY: Record<number, { heading: string; body: string }> = {
+	400: { heading: "Bad request", body: "The request was malformed and couldn't be processed." },
+	401: { heading: "Sign-in required", body: "You need to be authenticated to view this page." },
+	403: { heading: "Access restricted", body: "You don't have permission to view this page." },
+	404: { heading: "Page not found", body: "The page you're after doesn't exist, or it has since moved." },
+	408: { heading: "Request timed out", body: "The request took too long. Try again in a moment." },
+	410: { heading: "Gone", body: "This page used to exist but has been permanently removed." },
+	429: { heading: "Slow down", body: "Too many requests in a short window. Give it a moment." },
+	500: { heading: "Something broke", body: "An unexpected error happened on my end, not yours." },
+	502: { heading: "Bad gateway", body: "An upstream service returned an invalid response." },
+	503: { heading: "Service unavailable", body: "The site is temporarily down. Please try again soon." },
+};
+
+const isServerError = statusCode >= 500;
+const copy =
+	ERROR_COPY[statusCode] ??
+	(isServerError
+		? { heading: "Server error", body: "An unexpected error happened on my end, not yours." }
+		: { heading: "Something went wrong", body: "That request couldn't be completed." });
 ---
 
-<section class="mx-auto w-full max-w-3xl py-10 sm:py-14" data-attempted-path={attemptedCanonicalPath}>
-	<p class="text-xs font-semibold uppercase tracking-wide text-accent">Client Error · {statusCode}</p>
-	<h1 class="title mt-2 mb-4">This page could not be loaded.</h1>
-	<p class="mb-3 text-base text-global-text/90">
-		The requested URL
-		<code class="mx-1 rounded-md border border-accent/20 bg-global-bg px-1.5 py-0.5 text-sm">
-			{attemptedCanonicalPath}
-		</code>
-		is unavailable.
-	</p>
-	<p class="mb-6 text-sm text-global-text/75">
-		Client errors are in the 4xx range and usually happen because a link changed, the path was typed incorrectly, or access is restricted.
-	</p>
+<section
+	class="error-page mx-auto flex w-full max-w-xl flex-col items-center py-10 text-center"
+	data-attempted-path={attemptedCanonicalPath}
+>
+	{/* ASCII status code — the hero. Decorative: the real code lives in the heading below. */}
+	<div class="ascii-stage" aria-hidden="true">
+		<ASCIIText
+			client:only="vue"
+			text={String(statusCode)}
+			asciiFontSize={6}
+			textFontSize={180}
+			planeBaseHeight={10}
+			enableWaves={false}
+			gradient="radial-gradient(circle, var(--color-accent) 0%, var(--color-accent-dark) 60%, var(--color-accent-2) 100%)"
+		/>
+		<span class="ascii-stage__fallback">{statusCode}</span>
+	</div>
 
-	<div class="flex flex-wrap gap-3">
-		<button
-			class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
-			id="go-back-button"
-			type="button"
-		>
-			Go Back
+	<h1 class="title mt-2 text-2xl sm:text-3xl">{copy.heading}</h1>
+	<p class="mt-3 max-w-md text-base text-global-text/85">{copy.body}</p>
+
+	{
+		!isServerError && (
+			<p class="mt-2 text-sm text-global-text/60">
+				Requested
+				<code class="mx-1 rounded border border-global-text/15 bg-global-bg px-1.5 py-0.5 font-mono text-xs">
+					{attemptedCanonicalPath}
+				</code>
+			</p>
+		)
+	}
+
+	<div class="mt-7 flex flex-wrap items-center justify-center gap-2">
+		<button class="error-action" id="go-back-button" type="button">
+			<Icon name="mdi:arrow-left" class="error-action__icon" aria-hidden="true" />
+			Go back
 		</button>
-		<a
-			class="inline-flex items-center rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
-			href="/"
-		>
-			Go Home
+		<a class="error-action" href="/">
+			<Icon name="mdi:home-outline" class="error-action__icon" aria-hidden="true" />
+			Go home
 		</a>
 	</div>
 
-	<div class="mt-7 hidden border-t border-accent/15 pt-5" data-suggestion-root>
-		<div class="mb-3 flex items-center justify-between gap-3">
-			<p class="text-sm font-medium text-global-text">Did you mean:</p>
-			<span class="hidden text-xs text-global-text/60" data-suggestion-tier></span>
-		</div>
-		<p class="hidden text-xs text-global-text/70" data-suggestion-loading>Checking close matches…</p>
-		<div class="flex flex-wrap gap-3" data-suggestion-list></div>
+	<div class="mt-9 hidden w-full" data-suggestion-root>
+		<p class="mb-2 text-center text-sm text-global-text/55">Did you mean</p>
+		<p class="hidden text-center text-xs text-global-text/50" data-suggestion-loading>Checking close matches…</p>
+		<ul class="flex flex-col items-center gap-1.5" data-suggestion-list></ul>
 	</div>
 </section>
+
+<style>
+	/* Sized, relatively-positioned stage for the absolutely-positioned ASCII canvas.
+	   Kept wide (full width) so the 3D text plane never clips on the sides. */
+	.ascii-stage {
+		position: relative;
+		width: 100%;
+		height: clamp(180px, 28vh, 300px);
+	}
+
+	/* Plain numeric code shown before the WebGL canvas mounts (or if JS is off /
+	   WebGL is unavailable). Once the Vue island mounts its canvas, hide it so only
+	   the glitch hero shows. */
+	.ascii-stage:has(canvas) .ascii-stage__fallback {
+		display: none;
+	}
+
+	.ascii-stage__fallback {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+		height: 100%;
+		font-family: "Geist Mono Variable", ui-monospace, monospace;
+		font-size: clamp(4rem, 18vw, 9rem);
+		font-weight: 700;
+		line-height: 1;
+		letter-spacing: -0.03em;
+		color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+		user-select: none;
+	}
+
+	.error-action {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
+		border-radius: 0.375rem;
+		padding: 0.45rem 0.9rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-global-text);
+		text-decoration: none;
+		transition:
+			border-color 0.15s ease,
+			color 0.15s ease;
+	}
+
+	.error-action__icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.error-action:hover,
+	.error-action:focus-visible {
+		border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+		color: var(--color-accent);
+	}
+</style>
 
 <script>
 	type RouteSuggestion = {
@@ -65,8 +159,7 @@ function toCanonicalRoute(pathname: string): string {
 
 	const backButton = document.getElementById("go-back-button") as HTMLButtonElement | null;
 	const suggestionRoot = document.querySelector("[data-suggestion-root]") as HTMLDivElement | null;
-	const suggestionList = document.querySelector("[data-suggestion-list]") as HTMLDivElement | null;
-	const suggestionTier = document.querySelector("[data-suggestion-tier]") as HTMLSpanElement | null;
+	const suggestionList = document.querySelector("[data-suggestion-list]") as HTMLUListElement | null;
 	const suggestionLoading = document.querySelector("[data-suggestion-loading]") as HTMLParagraphElement | null;
 	const attemptedPath =
 		document
@@ -84,14 +177,14 @@ function toCanonicalRoute(pathname: string): string {
 		});
 	}
 
-	if (suggestionRoot && suggestionList && suggestionTier && suggestionLoading) {
+	if (suggestionRoot && suggestionList && suggestionLoading) {
 		window.setTimeout(() => {
 			void loadSuggestions();
 		}, 0);
 	}
 
 	async function loadSuggestions(): Promise<void> {
-		if (!suggestionRoot || !suggestionList || !suggestionTier || !suggestionLoading) {
+		if (!suggestionRoot || !suggestionList || !suggestionLoading) {
 			return;
 		}
 
@@ -132,46 +225,30 @@ function toCanonicalRoute(pathname: string): string {
 	}
 
 	function hideSuggestions(): void {
-		if (!suggestionRoot || !suggestionList || !suggestionTier) {
+		if (!suggestionRoot || !suggestionList) {
 			return;
 		}
 		suggestionList.innerHTML = "";
-		suggestionTier.textContent = "";
-		suggestionTier.classList.add("hidden");
 		suggestionRoot.classList.add("hidden");
 	}
 
 	function renderSuggestions(suggestions: RouteSuggestion[]): void {
-		if (!suggestionList || !suggestionTier) {
+		if (!suggestionList) {
 			return;
 		}
 
 		suggestionList.innerHTML = "";
-		const hasFallback = suggestions.some((item) => item.tier === "fallback");
-		suggestionTier.textContent = hasFallback ? "Fallback match (70%+)" : "Strong match (80%+)";
-		suggestionTier.classList.remove("hidden");
 
 		for (const suggestion of suggestions) {
-			const scorePercent = Math.round(suggestion.similarity * 100);
+			const item = document.createElement("li");
+
 			const link = document.createElement("a");
 			link.href = suggestion.route;
-			link.className =
-				"inline-flex min-w-[16rem] rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-sm font-medium text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5";
+			link.textContent = suggestion.route;
+			link.className = "underline-hover font-mono text-sm text-global-text/85 hover:text-accent";
 
-			const topRow = document.createElement("span");
-			topRow.className = "flex w-full items-center justify-between gap-3";
-
-			const routeLabel = document.createElement("span");
-			routeLabel.textContent = suggestion.route;
-			routeLabel.className = "truncate";
-
-			const scoreBadge = document.createElement("span");
-			scoreBadge.textContent = `${scorePercent}%`;
-			scoreBadge.className = "font-mono text-xs text-global-text/55";
-
-			topRow.append(routeLabel, scoreBadge);
-			link.append(topRow);
-			suggestionList.append(link);
+			item.append(link);
+			suggestionList.append(item);
 		}
 	}
 </script>
