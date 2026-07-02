@@ -86,7 +86,7 @@ export const prerender = true;
                 <span class="random-post__date">{initialProject.date}</span>
               </a>
               <p class="random-post__desc">{initialProject.description}</p>
-              <script type="application/json" id="random-project-data" set:html={projectPostsJson} />
+              <script is:inline type="application/json" id="random-project-data" set:html={projectPostsJson} />
             </div>
           )}
 

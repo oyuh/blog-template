@@ -1,0 +1,32 @@
+---
+// SOFT IMPORT (template-safe): `SpotifyLogoIsland.astro` exists in my private site
+// repo, but is excluded from the public template repo. Using `import.meta.glob`
+// keeps builds working when the file is deleted; the fallback below renders the
+// plain footer logo without the Spotify now-playing wiring.
+
+type AstroComponent = (props: Record<string, unknown>) => unknown;
+
+const spotifyLogoModules = import.meta.glob("./SpotifyLogoIsland.astro", { eager: true });
+const SpotifyLogoIsland = (
+	spotifyLogoModules["./SpotifyLogoIsland.astro"] as unknown as { default?: AstroComponent }
+)?.default;
+---
+
+{
+	SpotifyLogoIsland ? (
+		<SpotifyLogoIsland {...Astro.props} />
+	) : (
+		<div class="footer-logo" data-playing="false" data-spotify-logo>
+			<span class="footer-logo__link">
+				<img
+					src="/logo.png"
+					alt="Site logo"
+					class="footer-logo__img"
+					width={32}
+					height={32}
+					style="height:2rem;width:2rem"
+				/>
+			</span>
+		</div>
+	)
+}
