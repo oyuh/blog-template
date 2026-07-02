@@ -19,6 +19,26 @@ const resumePdfExists = existsSync(resumePdfFsPath);
 const allPosts = await getAllPosts();
 const technologyUsage = getTechnologyUsage(allPosts);
 
+// Random project post for the "check this one out" card. The page is
+// prerendered, so this pick is only the build-time fallback — the inline
+// script below re-rolls it on every page load.
+const dateFormat = new Intl.DateTimeFormat("en-US", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+const projectPosts = allPosts
+  .filter((post) => post.id.startsWith("projects/") || post.data.tags.includes("project"))
+  .map((post) => ({
+    title: post.data.title,
+    url: `/posts/${post.id}/`,
+    description: post.data.description ?? "",
+    date: dateFormat.format(post.data.publishDate),
+  }));
+const initialProject = projectPosts[Math.floor(Math.random() * projectPosts.length)];
+// `</script>`-safe serialization for the inline JSON island.
+const projectPostsJson = JSON.stringify(projectPosts).replace(/</g, "\\u003c");
+
 export const prerender = true;
 ---
 <PageLayout meta={meta} centerMain>
@@ -33,27 +53,42 @@ export const prerender = true;
 
         <div class="max-w-full space-y-4 mb-6">
           <p class="text-lg text-global-text leading-relaxed">
-            Hey, I'm <span class="hero-name">Lawson Hart</span> a
+            Hey, I'm <span class="hero-name">Lawson Hart</span>, a
             <span class="hero-accent">computer science student</span> at the
-            <span class="hero-accent">University of Texas at Dallas</span>, aka The MIT of the South.
-            Dallas born and raised, never really left the <span class="hero-kw">DFW</span> bubble.
+            <span class="hero-kw">University of Texas at Dallas</span>, aka The MIT of the South.
           </p>
 
           <p class="text-base text-global-text/90 leading-relaxed">
-            I'm on the computer science track with a focus on
-            <span class="hero-kw">software engineering</span>/<span class="hero-kw">cyber security</span>. I take everything I find annoying or that I think I can do better
-            on the internet and give it a go. Most of my projects focus on a playform with <span class="hero-accent">oAuth</span> and storing some information as I learn new technologies and frameworks.
+            I like figuring things out with <span class="hero-kw">software engineering</span> —
+            everything I build starts as an issue I've run into and found no solution for. So, I
+            try my best to be
+            <span class="hero-accent">that one reddit user from 15 years ago</span> who always has
+            the fix.
           </p>
 
           <p class="text-base text-global-text/80 leading-relaxed">
-            Growing up as the family's unofficial <span class="hero-kw">tech support</span> was basically my first job
-            That curiosity naturally evolved into a love for <span class="hero-accent">full-stack development</span>
-            and building <span class="hero-accent">web applications</span>.
-            I'm a
-            <span class="hero-kw">full‑stack developer</span> with a strong interest in
-            <span class="hero-accent">web based applications</span>. When I’m not studying, I’m working with
-            personal projects or just generally procrastinating.
+            You can find more info about what I build over on the
+            <a class="lawson-link" href="/posts/">Posts</a> and
+            <a class="lawson-link" href="/tags/project/">Projects</a> pages! But since you're
+            already here, check this one out:
           </p>
+
+          {initialProject && (
+            <div class="random-post" id="random-project">
+              <div class="random-post__head">
+                <span class="random-post__label">Random project</span>
+                <button type="button" class="random-post__reroll" id="random-project-reroll">
+                  show me another
+                </button>
+              </div>
+              <a class="random-post__link" href={initialProject.url} data-astro-prefetch>
+                <span class="random-post__title">{initialProject.title}</span>
+                <span class="random-post__date">{initialProject.date}</span>
+              </a>
+              <p class="random-post__desc">{initialProject.description}</p>
+              <script type="application/json" id="random-project-data" set:html={projectPostsJson} />
+            </div>
+          )}
 
           <div class="mt-4">
             {resumePdfExists ? (
@@ -97,3 +132,134 @@ export const prerender = true;
     </section>
   </article>
 </PageLayout>
+
+<style>
+  /* Random project card — same flat language as the post rows: 1px border,
+     no shadow, underline-only hover. */
+  .random-post {
+    border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
+    border-radius: 0.5rem;
+    padding: 0.8rem 1rem 0.85rem;
+  }
+
+  .random-post__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .random-post__label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-accent);
+  }
+
+  .random-post__reroll {
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+
+  .random-post__reroll:hover,
+  .random-post__reroll:focus-visible {
+    color: var(--color-accent);
+  }
+
+  .random-post__link {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-top: 0.5rem;
+    text-decoration: none;
+  }
+
+  .random-post__title {
+    min-width: 0;
+    font-size: 1.02rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-accent-2);
+    text-underline-offset: 3px;
+  }
+
+  .random-post__link:hover .random-post__title,
+  .random-post__link:focus-visible .random-post__title {
+    text-decoration: underline;
+  }
+
+  .random-post__date {
+    flex: none;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+  }
+
+  .random-post__desc {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--color-global-text) 75%, transparent);
+  }
+
+  .random-post__desc:empty {
+    display: none;
+  }
+</style>
+
+<script>
+  // Re-roll the random project on every page load (the server-rendered one is
+  // frozen at build time), and let "show me another" cycle without repeats.
+  type ProjectPost = { title: string; url: string; description: string; date: string };
+
+  const initRandomProject = () => {
+    const root = document.getElementById("random-project");
+    const dataEl = document.getElementById("random-project-data");
+    if (!root || !dataEl) return;
+
+    let posts: ProjectPost[] = [];
+    try {
+      posts = JSON.parse(dataEl.textContent ?? "[]");
+    } catch {
+      return;
+    }
+    if (!posts.length) return;
+
+    const link = root.querySelector<HTMLAnchorElement>(".random-post__link");
+    const title = root.querySelector<HTMLElement>(".random-post__title");
+    const date = root.querySelector<HTMLElement>(".random-post__date");
+    const desc = root.querySelector<HTMLElement>(".random-post__desc");
+    if (!link || !title || !date || !desc) return;
+
+    const show = (post: ProjectPost) => {
+      link.setAttribute("href", post.url);
+      title.textContent = post.title;
+      date.textContent = post.date;
+      desc.textContent = post.description;
+    };
+
+    const pick = () => {
+      const current = link.getAttribute("href");
+      const others = posts.filter((post) => post.url !== current);
+      const pool = others.length ? others : posts;
+      return pool[Math.floor(Math.random() * pool.length)] as ProjectPost;
+    };
+
+    show(pick());
+    document
+      .getElementById("random-project-reroll")
+      ?.addEventListener("click", () => show(pick()));
+  };
+
+  initRandomProject();
+  document.addEventListener("astro:page-load", initRandomProject);
+</script>
