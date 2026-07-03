@@ -1,8 +1,8 @@
 # blog-template (lawsonhart.me)
 
-This is the Astro codebase that powers the blog/posts section of **lawsonhart.me** — and it’s also set up to be published as a lightweight **blog template**.
+This is the Astro codebase that powers the blog/posts section of **lawsonhart.me**, and it doubles as a lightweight **blog template** you can publish and reuse.
 
-It’s meant to be cloned and customized (site config + content), while letting you export a “public template snapshot” that omits private integrations.
+The idea: clone it, customize the site config and content, and when you want to share it, export a "public template snapshot" that leaves the private integrations behind.
 
 ## What you get
 
@@ -30,25 +30,23 @@ bun install
 bun dev
 ```
 
-Open http://localhost:4321
+Open http://localhost:4321 and you should be looking at the site.
 
 ## Scripts
 
-These are the main scripts you’ll use day-to-day:
+The ones you'll actually use day-to-day:
 
-- `bun dev` / `bun start` — Run the dev server
-- `bun check` — Run `astro check`
-- `bun lint` — Run Biome lint
-- `bun format` — Format code + imports (Biome + Prettier)
+- `bun dev` / `bun start` runs the dev server
+- `bun check` runs `astro check`
+- `bun lint` runs Biome lint
+- `bun format` formats code + imports (Biome + Prettier)
 
-Template-focused helpers:
+And the template-focused helpers:
 
-- `bun template:dev` — Run the site from a sandbox copy with excluded paths removed
-- `bun template:build` — Build the sandbox copy (useful to verify the template export won't break)
+- `bun template:dev` runs the site from a sandbox copy with the excluded paths removed
+- `bun template:build` builds that sandbox copy, which is a nice way to verify the template export won't break
 
-Notes:
-
-- `bun install` runs a `postinstall` patch for Astro MDX internals (see `scripts/patch-astrojs-mdx-server.cjs`).
+One heads-up: `bun install` runs a `postinstall` patch for Astro MDX internals (see `scripts/patch-astrojs-mdx-server.cjs`). That's expected, not something going wrong.
 
 ## Configure your site
 
@@ -57,7 +55,7 @@ At minimum, update the site metadata in `src/site.config.ts`:
 - `url` (your domain)
 - `title`, `author`, and `description`
 
-You’ll also probably want to adjust navigation links (`menuLinks`) and any integrations you don’t use.
+You'll also probably want to adjust the navigation links (`menuLinks`) and rip out any integrations you don't use.
 
 ## Site credits
 
@@ -69,13 +67,13 @@ The About page includes a short credits section that references:
 It also includes two quick links:
 
 - `Info & stats` (internal): `/info-stats`
-- `Blog template` (external): only shown when configured via `PUBLIC_TEMPLATE_REPO_URL`
+- `Blog template` (external): only shows up when configured via `PUBLIC_TEMPLATE_REPO_URL`
 
 ## Content & frontmatter
 
 Posts live under `src/content/post/**` and notes live under `src/content/note/**`.
 
-Frontmatter for posts supports:
+Post frontmatter supports:
 
 ```yaml
 title: "Your Post Title"           # required
@@ -94,20 +92,18 @@ technologies: []                  # optional (Adds the icons of the used technol
 
 ## Environment variables
 
-This template supports optional integrations driven by `import.meta.env`.
+Optional integrations are driven by `import.meta.env`. The common ones:
 
-Common ones:
-
-- `PUBLIC_COMMENTS_API_ORIGIN` — Comments API origin (if you use the comment service)
-- `PUBLIC_COMMENTS_DEBUG` — Enables client-side debug logging for comments
-- `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO` — Used for GitHub-powered widgets
-- `UMAMI_*` — Used for analytics proxying/widgets (if enabled)
+- `PUBLIC_COMMENTS_API_ORIGIN`: the comments API origin, if you use the comment service
+- `PUBLIC_COMMENTS_DEBUG`: enables client-side debug logging for comments
+- `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`: used for the GitHub-powered widgets
+- `UMAMI_*`: used for analytics proxying/widgets, if enabled
 
 See `src/env.d.ts` for the full list.
 
 ## Template sandbox + exporting
 
-This repo has a simple workflow for keeping the **real site** private while producing a safe-to-publish **template snapshot**.
+This is how the repo keeps the **real site** private while still producing a safe-to-publish **template snapshot**.
 
 1) Add private paths to `template-excludes.txt` (one workspace-relative path per line)
 2) Validate the template view:
@@ -122,8 +118,8 @@ bun template:dev
 node scripts/export-template.cjs --out .template-export
 ```
 
-The exporter also hard-excludes any `.env*` files as defense-in-depth.
+The exporter also hard-excludes any `.env*` files as defense-in-depth, so a stray secret can't ride along in the export.
 
 ## License
 
-MIT — see LICENSE.
+MIT, see LICENSE.
