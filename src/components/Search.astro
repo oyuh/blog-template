@@ -3,7 +3,42 @@
 // IS the input; results drop into a panel directly below it, with a toggleable
 // Tags + Technology filter menu. Dismiss by clearing the query or clicking outside
 // a result. Pagefind only exists in a production build, so dev shows a note.
+import { getAllPosts } from "@/data/post";
+import { getTechIconName } from "@/utils/techIcons";
+import { icons as mdiIcons } from "@iconify-json/mdi";
+import { icons as simpleIcons } from "@iconify-json/simple-icons";
+import { getIconData, iconToHTML, iconToSVG } from "@iconify/utils";
 import "@/styles/blocks/search.css";
+
+// Tech filter chips are rendered client-side from the Pagefind index, which has
+// no SVGs so pre-render a standalone SVG per icon the chips could need (one for
+// each tech used by a post) into an inert <template> the script clones from.
+// Built by hand via @iconify/utils rather than astro-icon's <Icon>, because that
+// component dedupes repeats into <symbol>/<use> pairs page-wide; a <use> target
+// stuck inside inert template content would break every other icon on the page.
+const iconCollections: Record<string, typeof mdiIcons> = {
+	mdi: mdiIcons,
+	"simple-icons": simpleIcons,
+};
+
+const svgFor = (fullName: string): string | null => {
+	const [prefix, iconName] = fullName.split(":");
+	const collection = prefix ? iconCollections[prefix] : undefined;
+	if (!collection || !iconName) return null;
+	const data = getIconData(collection, iconName);
+	if (!data) return null;
+	const render = iconToSVG(data);
+	return iconToHTML(render.body, render.attributes);
+};
+
+const posts = await getAllPosts();
+const techIcons = new Map<string, string>();
+for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
+	const icon = getTechIconName(tech);
+	if (techIcons.has(icon)) continue;
+	const svg = svgFor(icon);
+	if (svg) techIcons.set(icon, svg);
+}
 ---
 
 <site-search id="search" class="site-search">
@@ -66,9 +101,15 @@ import "@/styles/blocks/search.css";
 
 		<div class="site-search__results" data-results></div>
 	</div>
+
+	<template data-tech-icons>
+		{[...techIcons].map(([name, svg]) => <span data-icon={name} set:html={svg} />)}
+	</template>
 </site-search>
 
 <script>
+	import { getTechIconName } from "@/utils/techIcons";
+
 	const MAX_RESULTS = 8;
 	const DEV = import.meta.env.DEV;
 	const PAGEFIND_PATH = import.meta.env.BASE_URL.replace(/\/$/, "") + "/pagefind/pagefind.js";
@@ -96,6 +137,7 @@ import "@/styles/blocks/search.css";
 		#filterBadge = this.querySelector<HTMLElement>("[data-filter-count]");
 		#filters = this.querySelector<HTMLElement>("[data-filters]");
 		#clearFilters = this.querySelector<HTMLButtonElement>("[data-clear-filters]");
+		#techIcons = this.querySelector<HTMLTemplateElement>("[data-tech-icons]");
 		#pagefind: any = null;
 		#loadingPagefind = false;
 		#filtersLoaded = false;
@@ -154,11 +196,19 @@ import "@/styles/blocks/search.css";
 				return;
 			}
 			wrap.innerHTML = entries
-				.map(
-					([val, count]) =>
-						`<button type="button" class="site-search__chip" data-filter="${key}" data-value="${escapeHtml(val)}">${escapeHtml(val)}<span class="site-search__chip-count">${count}</span></button>`,
-				)
+				.map(([val, count]) => {
+					const icon = key === "tech" ? this.techIconFor(val) : "";
+					return `<button type="button" class="site-search__chip" data-filter="${key}" data-value="${escapeHtml(val)}">${icon}${escapeHtml(val)}<span class="site-search__chip-count">${count}</span></button>`;
+				})
 				.join("");
+		}
+
+		// Pre-rendered SVG (from the build-time <template>) for a tech's icon.
+		techIconFor(val: string): string {
+			const svg = this.#techIcons?.content.querySelector(
+				`[data-icon="${getTechIconName(val)}"]`,
+			)?.innerHTML;
+			return svg ? `<span class="site-search__chip-icon" aria-hidden="true">${svg}</span>` : "";
 		}
 
 		buildFilters() {

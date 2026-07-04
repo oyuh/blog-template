@@ -253,6 +253,17 @@
 	color: var(--color-accent);
 }
 
+/* Tech icon inside a chip — inherits the chip's colour (currentColor SVGs). */
+.site-search__chip-icon {
+	display: inline-flex;
+	flex: none;
+}
+
+.site-search__chip-icon svg {
+	width: 0.8rem;
+	height: 0.8rem;
+}
+
 .site-search__chip-count {
 	font-family: "Geist Mono Variable", monospace;
 	font-size: 0.68rem;

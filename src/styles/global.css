@@ -1259,12 +1259,16 @@ astro-static-slot {
 	opacity: 0;
 	pointer-events: none;
 	transform: translateX(-50%) rotate(var(--tilt, -5deg)) translateY(6px);
-	transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+	/* This transition governs the EXIT (un-hover): a longer, gentler fade so the
+	   readout eases away instead of snapping off. Entrance is overridden below. */
+	transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.33, 0, 0.2, 1);
 }
 
 .footer-logo[data-playing="true"]:hover .footer-logo__np {
 	opacity: 1;
 	transform: translateX(-50%) rotate(var(--tilt, -5deg)) translateY(0);
+	/* Entrance stays quick so the readout feels responsive on hover. */
+	transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .footer-logo__np-art {
@@ -1335,7 +1339,8 @@ astro-static-slot {
 
 @media (prefers-reduced-motion: reduce) {
 	.footer-logo__note { animation-duration: 5s; }
-	.footer-logo__np { transition: opacity 0.15s ease; }
+	.footer-logo__np,
+	.footer-logo[data-playing="true"]:hover .footer-logo__np { transition: opacity 0.15s ease; }
 }
 
 /* ---------------------------------------------------------------------------
