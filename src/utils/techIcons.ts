@@ -22,7 +22,6 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	tailwind: "simple-icons:tailwindcss",
 	"shadcn ui": "simple-icons:shadcnui",
 	shadcn: "simple-icons:shadcnui",
-	heroui: "simple-icons:nextui",
 	nextui: "simple-icons:nextui",
 
 	// Databases
@@ -58,6 +57,9 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	electron: "simple-icons:electron",
 	"electron.js": "simple-icons:electron",
 	electronjs: "simple-icons:electron",
+	tauri: "simple-icons:tauri",
+	"tauri 2": "simple-icons:tauri",
+	rust: "simple-icons:rust",
 
 	// Infra
 	vercel: "simple-icons:vercel",
