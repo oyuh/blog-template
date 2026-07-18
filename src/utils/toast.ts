@@ -1,5 +1,61 @@
 type ToastType = "success" | "info" | "warning" | "error";
 
+type CopyTipAnchor = HTMLElement | { x: number; y: number };
+
+const COPY_TIP_VISIBLE_MS = 1200;
+const COPY_TIP_EXIT_MS = 600;
+const COPY_TIP_MARGIN = 8;
+
+/**
+ * Small anchored "Copied!" tip that pops up at the element/point that was
+ * clicked — same tilted, card-less language as the footer now-playing readout.
+ * Pass the clicked element, or a {x, y} viewport point (e.g. the mouse position).
+ */
+export function showCopyTip(message: string, anchor: CopyTipAnchor) {
+	let x: number;
+	let y: number;
+	if (anchor instanceof HTMLElement) {
+		const rect = anchor.getBoundingClientRect();
+		x = rect.left + rect.width / 2;
+		y = rect.top;
+	} else {
+		x = anchor.x;
+		y = anchor.y;
+	}
+
+	const tip = document.createElement("div");
+	tip.className = "copy-tip";
+	tip.setAttribute("role", "status");
+	tip.textContent = message;
+
+	// Random slight tilt (±2–5deg) so repeated tips feel hand-placed.
+	const tilt = (Math.random() * 3 + 2) * (Math.random() < 0.5 ? -1 : 1);
+	tip.style.setProperty("--tip-tilt", `${tilt.toFixed(1)}deg`);
+
+	document.body.appendChild(tip);
+
+	// Measure after mount, then clamp inside the viewport. If the anchor sits too
+	// close to the top edge, flip the tip below the point instead.
+	const halfWidth = tip.offsetWidth / 2;
+	const clampedX = Math.min(
+		Math.max(x, halfWidth + COPY_TIP_MARGIN),
+		window.innerWidth - halfWidth - COPY_TIP_MARGIN,
+	);
+	const flipBelow = y - tip.offsetHeight - COPY_TIP_MARGIN * 2 < 0;
+	if (flipBelow) tip.classList.add("is-below");
+	tip.style.left = `${clampedX}px`;
+	tip.style.top = `${flipBelow ? y + COPY_TIP_MARGIN * 2 : y - COPY_TIP_MARGIN}px`;
+
+	// The offsetWidth read above already flushed the hidden state, so adding the
+	// class now transitions in (no rAF — it can be throttled in occluded tabs).
+	tip.classList.add("show");
+
+	window.setTimeout(() => {
+		tip.classList.remove("show");
+		window.setTimeout(() => tip.remove(), COPY_TIP_EXIT_MS);
+	}, COPY_TIP_VISIBLE_MS);
+}
+
 let hideTimeoutId: number | undefined;
 
 function getOrCreateToastHost() {

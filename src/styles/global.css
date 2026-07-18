@@ -89,6 +89,54 @@
 	pointer-events: auto;
 }
 
+/* Anchored "Copied!" tip — spawns at the clicked element/point. Card-less and
+   tilted, mirroring the footer now-playing readout: quick pop-in entrance,
+   longer gentle fade on the way out. Positioned by JS (utils/toast.ts). */
+.copy-tip {
+	position: fixed;
+	z-index: 9999;
+	pointer-events: none;
+	white-space: nowrap;
+	font-size: 0.85rem;
+	font-weight: 700;
+	letter-spacing: 0.01em;
+	color: var(--color-accent-2);
+	/* Dark drop shadow so the text cuts through any background, plus a real
+	   subtle accent glow so it reads as a deliberate little signal. */
+	text-shadow:
+		0 1px 2px rgb(0 0 0 / 0.6),
+		0 2px 12px rgb(0 0 0 / 0.4),
+		0 0 14px color-mix(in srgb, var(--color-accent) 35%, transparent);
+	opacity: 0;
+	transform: translate(-50%, -100%) rotate(var(--tip-tilt, -5deg)) translateY(6px);
+	transform-origin: bottom center;
+	/* Exit: longer, gentler fade (matches the footer readout). Entrance below. */
+	transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.33, 0, 0.2, 1);
+}
+
+.copy-tip.show {
+	opacity: 1;
+	transform: translate(-50%, -100%) rotate(var(--tip-tilt, -5deg)) translateY(0);
+	transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Flipped below the anchor when there's no room above (JS adds .is-below). */
+.copy-tip.is-below {
+	transform: translate(-50%, 0) rotate(var(--tip-tilt, -5deg)) translateY(-6px);
+	transform-origin: top center;
+}
+
+.copy-tip.is-below.show {
+	transform: translate(-50%, 0) rotate(var(--tip-tilt, -5deg)) translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.copy-tip,
+	.copy-tip.show {
+		transition: opacity 0.15s ease;
+	}
+}
+
 .lawson-toast__content {
 	display: flex;
 	flex-direction: column;

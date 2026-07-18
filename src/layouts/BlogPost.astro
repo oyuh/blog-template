@@ -359,7 +359,7 @@ const CommentsIsland =
 </style>
 
 <script>
-	import { showToast } from "@/utils/toast";
+	import { showCopyTip } from "@/utils/toast";
 
 	const scrollBtn = document.getElementById("to-top-btn") as HTMLButtonElement;
 	const targetHeader = document.getElementById("blog-hero") as HTMLDivElement;
@@ -421,7 +421,13 @@ const CommentsIsland =
 
 					try {
 						await navigator.clipboard.writeText(url);
-						showToast("Link copied to clipboard!", "success", 2000);
+						// Anchor the tip to the pointer when this was a real click;
+						// keyboard/synthetic clicks (detail === 0) anchor to the heading.
+						const mouse = e as MouseEvent;
+						showCopyTip(
+							"Copied!",
+							mouse.detail > 0 ? { x: mouse.clientX, y: mouse.clientY } : heading,
+						);
 
 						// Update URL without scrolling
 						history.pushState(null, '', `#${id}`);
@@ -458,7 +464,7 @@ const CommentsIsland =
 		buttons.forEach((btn) => {
 			btn.addEventListener("click", () => {
 				const copied = btn.getAttribute('data-copied');
-				showToast(copied && copied.trim().length > 0 ? copied : "Copied!", "success", 2000);
+				showCopyTip(copied && copied.trim().length > 0 ? copied : "Copied!", btn);
 			});
 		});
 	}
