@@ -421,13 +421,10 @@ const CommentsIsland =
 
 					try {
 						await navigator.clipboard.writeText(url);
-						// Anchor the tip to the pointer when this was a real click;
-						// keyboard/synthetic clicks (detail === 0) anchor to the heading.
+						// Anchor above the heading; on a real click hug the pointer's X so
+						// it stays near the cursor. Keyboard clicks (detail === 0) center it.
 						const mouse = e as MouseEvent;
-						showCopyTip(
-							"Copied!",
-							mouse.detail > 0 ? { x: mouse.clientX, y: mouse.clientY } : heading,
-						);
+						showCopyTip("Copied!", heading, mouse.detail > 0 ? mouse.clientX : undefined);
 
 						// Update URL without scrolling
 						history.pushState(null, '', `#${id}`);

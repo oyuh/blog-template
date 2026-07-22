@@ -1,27 +1,22 @@
 type ToastType = "success" | "info" | "warning" | "error";
 
-type CopyTipAnchor = HTMLElement | { x: number; y: number };
-
 const COPY_TIP_VISIBLE_MS = 1200;
 const COPY_TIP_EXIT_MS = 600;
-const COPY_TIP_MARGIN = 8;
+// The tip's tilt/entrance transform drifts its box ~7px back toward the anchor,
+// so the visible gap ends up ~MARGIN-7px. 14 leaves a clear few-pixel gap above
+// the pressed element instead of touching it.
+const COPY_TIP_MARGIN = 14;
 
 /**
- * Small anchored "Copied!" tip that pops up at the element/point that was
+ * Small anchored "Copied!" tip that pops up just clear of the element that was
  * clicked — same tilted, card-less language as the footer now-playing readout.
- * Pass the clicked element, or a {x, y} viewport point (e.g. the mouse position).
+ * Sits above the element (or flips just below it near the top of the viewport),
+ * always keeping COPY_TIP_MARGIN of space so it never covers the element. Pass
+ * an optional cursorX (e.g. mouse.clientX) to hug the pointer horizontally.
  */
-export function showCopyTip(message: string, anchor: CopyTipAnchor) {
-	let x: number;
-	let y: number;
-	if (anchor instanceof HTMLElement) {
-		const rect = anchor.getBoundingClientRect();
-		x = rect.left + rect.width / 2;
-		y = rect.top;
-	} else {
-		x = anchor.x;
-		y = anchor.y;
-	}
+export function showCopyTip(message: string, anchor: HTMLElement, cursorX?: number) {
+	const rect = anchor.getBoundingClientRect();
+	const x = cursorX ?? rect.left + rect.width / 2;
 
 	const tip = document.createElement("div");
 	tip.className = "copy-tip";
@@ -34,17 +29,18 @@ export function showCopyTip(message: string, anchor: CopyTipAnchor) {
 
 	document.body.appendChild(tip);
 
-	// Measure after mount, then clamp inside the viewport. If the anchor sits too
-	// close to the top edge, flip the tip below the point instead.
+	// Measure after mount, then clamp inside the viewport. Sit above the element;
+	// if there's no room above, flip below its bottom edge instead — either way
+	// the tip clears the element by COPY_TIP_MARGIN and never lands on top of it.
 	const halfWidth = tip.offsetWidth / 2;
 	const clampedX = Math.min(
 		Math.max(x, halfWidth + COPY_TIP_MARGIN),
 		window.innerWidth - halfWidth - COPY_TIP_MARGIN,
 	);
-	const flipBelow = y - tip.offsetHeight - COPY_TIP_MARGIN * 2 < 0;
+	const flipBelow = rect.top - tip.offsetHeight - COPY_TIP_MARGIN < 0;
 	if (flipBelow) tip.classList.add("is-below");
 	tip.style.left = `${clampedX}px`;
-	tip.style.top = `${flipBelow ? y + COPY_TIP_MARGIN * 2 : y - COPY_TIP_MARGIN}px`;
+	tip.style.top = `${flipBelow ? rect.bottom + COPY_TIP_MARGIN : rect.top - COPY_TIP_MARGIN}px`;
 
 	// The offsetWidth read above already flushed the hidden state, so adding the
 	// class now transitions in (no rAF — it can be throttled in occluded tabs).
