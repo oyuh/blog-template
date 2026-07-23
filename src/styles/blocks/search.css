@@ -18,7 +18,7 @@
 	width: 100%;
 	height: 2.25rem;
 	padding: 0 0.4rem 0 0.6rem;
-	border-radius: 0.6rem;
+	border-radius: 0.3rem;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
 	background: var(--color-global-bg);
 	transition: border-color 0.2s ease;
@@ -114,7 +114,7 @@
 	overflow-y: auto;
 	overscroll-behavior: contain;
 	padding: 0.5rem;
-	border-radius: 0.85rem;
+	border-radius: 0.45rem;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
 	background: var(--color-global-bg);
 	animation: search-pop 0.16s ease;
@@ -145,7 +145,7 @@
 	align-items: center;
 	gap: 0.4rem;
 	padding: 0.3rem 0.55rem;
-	border-radius: 0.5rem;
+	border-radius: 0.25rem;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
 	background: transparent;
 	color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
@@ -279,7 +279,7 @@
 
 .site-search__result {
 	padding: 0.7rem 0.75rem;
-	border-radius: 0.6rem;
+	border-radius: 0.3rem;
 	border: 1px solid transparent;
 	transition: border-color 0.15s ease, background 0.15s ease;
 }
@@ -324,7 +324,7 @@
 	display: block;
 	margin-top: 0.4rem;
 	padding: 0.35rem 0.5rem;
-	border-radius: 0.45rem;
+	border-radius: 0.25rem;
 	text-decoration: none;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
 	transition: border-color 0.15s ease, background 0.15s ease;

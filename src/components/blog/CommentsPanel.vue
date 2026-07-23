@@ -41,7 +41,7 @@ const decorated = computed(() =>
 				v-if="ctl.me"
 				type="button"
 				:disabled="ctl.signingOut"
-				class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-global-text/70 transition-colors hover:text-accent disabled:opacity-60 disabled:cursor-not-allowed"
+				class="inline-flex items-center gap-1.5 rounded px-2 py-1 text-xs text-global-text/70 transition-colors hover:text-accent disabled:opacity-60 disabled:cursor-not-allowed"
 				:aria-label="ctl.signingOut ? 'Signing out' : 'Sign out'"
 				:title="ctl.signingOut ? 'Signing out…' : 'Sign out'"
 				@click="ctl.signOut()"
@@ -55,7 +55,7 @@ const decorated = computed(() =>
 			<a
 				v-else
 				:href="ctl.signInUrl"
-				class="inline-flex items-center gap-2 rounded-lg border border-global-text/15 px-3 py-1.5 text-xs text-global-text/80 transition-colors hover:text-accent hover:border-accent/40"
+				class="inline-flex items-center gap-2 rounded border border-global-text/15 px-3 py-1.5 text-xs text-global-text/80 transition-colors hover:text-accent hover:border-accent/40"
 				aria-label="Sign in with GitHub"
 				title="Sign in with GitHub"
 				@click="ctl.onLoginClick()"
@@ -67,14 +67,14 @@ const decorated = computed(() =>
 
 		<div
 			v-if="ctl.error"
-			class="mt-3 rounded-lg border border-global-text/15 px-3 py-2 text-xs text-global-text"
+			class="mt-3 rounded border border-global-text/15 px-3 py-2 text-xs text-global-text"
 		>
 			{{ ctl.error }}
 		</div>
 
 		<div
 			v-if="ctl.isDesktop && ctl.me && !ctl.replyTo"
-			class="mt-4 rounded-lg border border-global-text/15 bg-global-text/[0.03] p-3"
+			class="mt-4 rounded border border-global-text/15 bg-global-text/[0.03] p-3"
 		>
 			<div class="flex items-start gap-3">
 				<img
@@ -93,7 +93,7 @@ const decorated = computed(() =>
 						:rows="3"
 						:maxlength="5000"
 						placeholder="Write a comment…"
-						class="w-full resize-none rounded-lg border border-global-text/15 bg-global-text/[0.03] px-3 py-2 text-sm text-global-text placeholder:text-global-text/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+						class="w-full resize-none rounded border border-global-text/15 bg-global-text/[0.03] px-3 py-2 text-sm text-global-text placeholder:text-global-text/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
 					/>
 					<div class="mt-2 flex items-center justify-between gap-3">
 						<div class="truncate text-xs text-global-text/60">
@@ -102,7 +102,7 @@ const decorated = computed(() =>
 						<button
 							type="button"
 							:disabled="ctl.submitting || ctl.body.trim().length === 0 || !ctl.canReply"
-							class="rounded-lg border border-global-text/15 px-3 py-2 text-xs text-global-text transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
+							class="rounded border border-global-text/15 px-3 py-2 text-xs text-global-text transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
 							@click="ctl.submit()"
 						>
 							{{ ctl.submitting ? "Posting…" : "Post" }}
@@ -120,7 +120,7 @@ const decorated = computed(() =>
 			<Skeleton name="comments-list" :loading="ctl.loading" animate="pulse" :transition="300">
 				<div
 					v-if="!ctl.loading && ctl.comments.length === 0"
-					class="rounded-lg border border-global-text/15 px-3 py-2 text-xs text-global-text/70"
+					class="rounded border border-global-text/15 px-3 py-2 text-xs text-global-text/70"
 				>
 					No comments yet.
 				</div>
@@ -129,10 +129,10 @@ const decorated = computed(() =>
 						v-for="d in decorated"
 						:key="d.c.id"
 						:id="`comment-${d.c.id}`"
-						class="rounded-lg border border-global-text/15 bg-global-text/[0.03] p-3"
+						class="rounded border border-global-text/15 bg-global-text/[0.03] p-3"
 						:style="{ marginLeft: `${d.marginLeft}px` }"
 					>
-						<div :class="d.c.parentCommentId ? 'rounded-lg border-l border-global-text/10 pl-3' : undefined">
+						<div :class="d.c.parentCommentId ? 'rounded border-l border-global-text/10 pl-3' : undefined">
 							<div class="flex items-start justify-between gap-3">
 								<div class="flex min-w-0 items-center gap-3">
 									<img
@@ -187,7 +187,7 @@ const decorated = computed(() =>
 									<button
 										type="button"
 										:id="`comment-menu-btn-${d.c.id}`"
-										class="inline-flex items-center justify-center rounded-lg p-1 text-global-text/60 hover:text-accent transition-colors"
+										class="inline-flex items-center justify-center rounded p-1 text-global-text/60 hover:text-accent transition-colors"
 										aria-haspopup="menu"
 										:aria-expanded="ctl.openMenuId === d.c.id"
 										:aria-controls="`comment-menu-${d.c.id}`"
@@ -202,7 +202,7 @@ const decorated = computed(() =>
 
 							<div
 								v-if="d.parentUser?.githubLogin"
-								class="mt-2 flex items-start gap-2 rounded-lg border border-global-text/15 px-2 py-2 text-xs text-global-text/65"
+								class="mt-2 flex items-start gap-2 rounded border border-global-text/15 px-2 py-2 text-xs text-global-text/65"
 							>
 								<Icon icon="mdi:subdirectory-arrow-right" class="mt-0.5 h-4 w-4 text-global-text/55" />
 								<div class="min-w-0">
@@ -233,7 +233,7 @@ const decorated = computed(() =>
 										v-model="ctl.editBody"
 										:rows="4"
 										:maxlength="5000"
-										class="w-full resize-none rounded-lg border border-global-text/15 bg-global-text/[0.03] px-3 py-2 text-sm text-global-text placeholder:text-global-text/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+										class="w-full resize-none rounded border border-global-text/15 bg-global-text/[0.03] px-3 py-2 text-sm text-global-text placeholder:text-global-text/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
 									/>
 									<div class="mt-2 flex items-center justify-end gap-2">
 										<button
@@ -247,7 +247,7 @@ const decorated = computed(() =>
 										<button
 											type="button"
 											:disabled="ctl.editSubmitting || ctl.editBody.trim().length === 0"
-											class="rounded-lg border border-global-text/15 px-3 py-2 text-xs text-global-text transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
+											class="rounded border border-global-text/15 px-3 py-2 text-xs text-global-text transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
 											@click="ctl.saveEdit(d.c.id, ctl.editBody)"
 										>
 											{{ ctl.editSubmitting ? "Saving…" : "Save" }}
@@ -257,7 +257,7 @@ const decorated = computed(() =>
 								<!-- eslint-disable-next-line vue/no-v-html: bodyHtml is sanitized server-side via a strict allowlist (see comments/EMBEDDING.md) -->
 								<div
 									v-else-if="d.c.bodyHtml"
-									class="comment-body space-y-2 break-words [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent/80 [&_blockquote]:border-l-2 [&_blockquote]:border-global-text/20 [&_blockquote]:pl-3 [&_blockquote]:text-global-text/70 [&_code]:rounded [&_code]:bg-global-text/10 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_em]:italic [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_pre]:overflow-auto [&_pre]:rounded-lg [&_pre]:bg-global-text/[0.06] [&_pre]:p-3 [&_pre]:text-xs [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5"
+									class="comment-body space-y-2 break-words [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent/80 [&_blockquote]:border-l-2 [&_blockquote]:border-global-text/20 [&_blockquote]:pl-3 [&_blockquote]:text-global-text/70 [&_code]:rounded [&_code]:bg-global-text/10 [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em] [&_em]:italic [&_li]:my-0.5 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:whitespace-pre-wrap [&_pre]:overflow-auto [&_pre]:rounded [&_pre]:bg-global-text/[0.06] [&_pre]:p-3 [&_pre]:text-xs [&_pre_code]:bg-transparent [&_pre_code]:p-0 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5"
 									v-html="d.c.bodyHtml"
 								/>
 								<p v-else class="whitespace-pre-wrap">{{ ctl.getCommentBodyText(d.c) }}</p>
@@ -270,7 +270,7 @@ const decorated = computed(() =>
 								<button
 									v-if="d.canReplyHere"
 									type="button"
-									class="inline-flex items-center gap-2 rounded-lg border border-global-text/15 px-2 py-1 text-xs text-global-text/60 transition-colors hover:text-accent hover:border-accent/40"
+									class="inline-flex items-center gap-2 rounded border border-global-text/15 px-2 py-1 text-xs text-global-text/60 transition-colors hover:text-accent hover:border-accent/40"
 									:aria-label="d.u?.githubLogin ? `Reply to @${d.u.githubLogin}` : 'Reply to comment'"
 									title="Reply"
 									@click="ctl.beginReply(d.c); ctl.focusComposer()"
@@ -281,7 +281,7 @@ const decorated = computed(() =>
 								<button
 									type="button"
 									:disabled="ctl.reactingCommentId === d.c.id"
-									class="inline-flex items-center gap-2 rounded-lg border border-global-text/15 px-2 py-1 text-xs text-global-text/60 transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
+									class="inline-flex items-center gap-2 rounded border border-global-text/15 px-2 py-1 text-xs text-global-text/60 transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
 									title=""
 									:aria-label="d.reactions.viewerHasLiked ? 'Unlike' : 'Like'"
 									@click="ctl.toggleLike(d.c.id)"
@@ -306,7 +306,7 @@ const decorated = computed(() =>
 
 							<div
 								v-if="ctl.replyTo && ctl.replyTo.id === d.c.id && ctl.me && !d.c.deletedAt && ctl.editingCommentId !== d.c.id"
-								class="mt-3 rounded-lg border border-global-text/15 bg-global-text/[0.03] p-3"
+								class="mt-3 rounded border border-global-text/15 bg-global-text/[0.03] p-3"
 							>
 								<div class="flex items-start gap-3">
 									<img
@@ -339,13 +339,13 @@ const decorated = computed(() =>
 											:rows="3"
 											:maxlength="5000"
 											placeholder="Write a reply…"
-											class="w-full resize-none rounded-lg border border-global-text/15 bg-global-text/[0.03] px-3 py-2 text-sm text-global-text placeholder:text-global-text/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+											class="w-full resize-none rounded border border-global-text/15 bg-global-text/[0.03] px-3 py-2 text-sm text-global-text placeholder:text-global-text/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
 										/>
 										<div class="mt-2 flex items-center justify-end gap-2">
 											<button
 												type="button"
 												:disabled="ctl.submitting || ctl.body.trim().length === 0 || !ctl.canReply"
-												class="rounded-lg border border-global-text/15 px-3 py-2 text-xs text-global-text transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
+												class="rounded border border-global-text/15 px-3 py-2 text-xs text-global-text transition-colors hover:text-accent hover:border-accent/40 disabled:opacity-50 disabled:cursor-not-allowed"
 												@click="ctl.submit()"
 											>
 												{{ ctl.submitting ? "Posting…" : "Post reply" }}

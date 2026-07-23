@@ -62,7 +62,7 @@
 	/* Solid surface (no translucency) so it stands out on both light + dark */
 	background: color-mix(in srgb, var(--color-global-bg) 92%, var(--color-global-text) 8%);
 	color: var(--color-global-text);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	padding: 0.75rem 1.25rem;
 	font-size: 0.875rem;
 	font-weight: 600;
@@ -320,7 +320,7 @@ samp {
 
 	.admonition {
 		--admonition-color: var(--tw-prose-quotes);
-		@apply my-4 rounded-xl border border-white/10 p-4;
+		@apply my-4 rounded-md border border-white/10 p-4;
 		/* Kill the “left stripe” look even if something else injects it */
 		border-left: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent) !important;
 		border-inline-start: 1px solid color-mix(in srgb, var(--color-global-text) 14%, transparent) !important;
@@ -521,7 +521,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	padding: 1.25rem;
 	margin: 1.5rem 0;
 	border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	background: color-mix(in srgb, var(--color-accent) 3%, transparent);
 	transition: all 0.3s ease;
 	text-decoration: none !important;
@@ -565,7 +565,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	display: block;
 	margin: 1.5rem 0;
 	border: 1px solid color-mix(in srgb, var(--color-accent) 20%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	overflow: hidden;
 	background: var(--color-global-bg);
 	transition: all 0.3s ease;
@@ -590,7 +590,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	max-width: 90vw;
 	background: var(--color-global-bg);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	z-index: 1000;
 	opacity: 0;
 	animation: fadeInUp 0.3s ease forwards;
@@ -632,7 +632,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	aspect-ratio: 2 / 1;
 	height: auto;
 	object-fit: cover;
-	border-radius: 0.5rem;
+	border-radius: 0.25rem;
 	display: block;
 	margin: 0 0 0.75rem !important;
 }
@@ -700,7 +700,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	padding: 0.85rem;
 	background: var(--color-global-bg);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	pointer-events: none;
 	opacity: 0;
 	transform: translateY(6px);
@@ -787,7 +787,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	padding: 1.25rem 1.25rem 1rem;
 	background: color-mix(in srgb, var(--color-accent) 3%, transparent);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	transition: border-color 0.2s ease;
 }
 
@@ -820,7 +820,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 .chart-seg {
 	display: inline-flex;
 	padding: 2px;
-	border-radius: 0.6rem;
+	border-radius: 0.3rem;
 	background: color-mix(in srgb, var(--color-global-text) 6%, transparent);
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
 }
@@ -832,7 +832,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
 	font: 600 0.8125rem "Plus Jakarta Sans Variable", sans-serif;
 	padding: 0.3rem 0.7rem;
-	border-radius: 0.45rem;
+	border-radius: 0.25rem;
 	cursor: pointer;
 	transition: color 0.15s ease, background 0.15s ease;
 }
@@ -852,7 +852,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	cursor: pointer;
 	font: 600 0.8125rem "Plus Jakarta Sans Variable", sans-serif;
 	padding: 0.32rem 0.7rem;
-	border-radius: 0.5rem;
+	border-radius: 0.25rem;
 	color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
 	background: transparent;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
@@ -879,7 +879,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	align-items: center;
 	justify-content: center;
 	border: 1px dashed color-mix(in srgb, var(--color-global-text) 14%, transparent);
-	border-radius: 0.5rem;
+	border-radius: 0.25rem;
 }
 
 .chart-loading {
@@ -936,7 +936,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 .chart-tip {
 	background: var(--color-global-bg);
 	border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	padding: 0.6rem 0.75rem;
 	font-family: "Geist Mono Variable", monospace;
 	min-width: 8rem;
@@ -979,7 +979,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 .dtable-wrap {
 	margin: 1.75rem 0;
 	border: 1px solid color-mix(in srgb, var(--color-accent) 18%, transparent);
-	border-radius: 0.75rem;
+	border-radius: 0.375rem;
 	background: color-mix(in srgb, var(--color-accent) 3%, transparent);
 	overflow: hidden;
 }
@@ -1093,7 +1093,7 @@ html:has(article[data-pagefind-body])::-webkit-scrollbar {
 	padding: 0.9rem 1.1rem;
 	border: 1px solid color-mix(in srgb, var(--callout) 28%, transparent);
 	border-left: 3px solid var(--callout);
-	border-radius: 0.6rem;
+	border-radius: 0.3rem;
 	background: color-mix(in srgb, var(--callout) 6%, transparent);
 	transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -1323,7 +1323,7 @@ astro-static-slot {
 	height: 2.6rem;
 	width: 2.6rem;
 	flex: none;
-	border-radius: 0.45rem;
+	border-radius: 0.25rem;
 	object-fit: cover;
 }
 
@@ -1614,7 +1614,7 @@ astro-static-slot {
 	gap: 0.12rem;
 	padding: 0.6rem 0.7rem;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	border-radius: 0.6rem;
+	border-radius: 0.3rem;
 	background: var(--color-global-bg);
 	text-align: left;
 	opacity: 0;
@@ -1730,7 +1730,7 @@ astro-static-slot {
 	align-items: center;
 	gap: 0.7rem;
 	padding: 0.65rem 0.8rem;
-	border-radius: 0.7rem;
+	border-radius: 0.35rem;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
 	background: var(--color-global-bg);
 	text-decoration: none;
@@ -1752,7 +1752,7 @@ astro-static-slot {
 	flex: none;
 	width: 2.1rem;
 	height: 2.1rem;
-	border-radius: 0.55rem;
+	border-radius: 0.3rem;
 	color: var(--color-accent-2);
 	background: color-mix(in srgb, var(--color-global-text) 6%, transparent);
 	transition: color 0.18s ease, background 0.18s ease;
@@ -1817,7 +1817,7 @@ astro-static-slot {
 	flex-direction: column;
 	overflow: hidden;
 	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	border-radius: 0.85rem;
+	border-radius: 0.45rem;
 	background: var(--color-global-bg);
 	text-decoration: none;
 	transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);

@@ -71,7 +71,7 @@ const CommentsIsland =
 	{!!headings.length && <TOCMobile headings={headings} />}
 
 	<button
-		class="fixed end-6 bottom-6 z-40 flex h-12 w-12 items-center justify-center rounded-xl border border-global-text/15 bg-global-bg text-global-text transition-all duration-300 opacity-0 translate-y-16 cursor-pointer hover:text-accent hover:border-accent/40 hover:scale-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-global-bg active:scale-95 data-[show=true]:translate-y-0 data-[show=true]:opacity-100"
+		class="fixed end-6 bottom-6 z-40 flex h-12 w-12 items-center justify-center rounded-md border border-global-text/15 bg-global-bg text-global-text transition-all duration-300 opacity-0 translate-y-16 cursor-pointer hover:text-accent hover:border-accent/40 hover:scale-[1.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 focus-visible:ring-offset-global-bg active:scale-95 data-[show=true]:translate-y-0 data-[show=true]:opacity-100"
 		data-show="false"
 		id="to-top-btn"
 		aria-label="Back to top"
@@ -206,7 +206,7 @@ const CommentsIsland =
 	.blog-prose :is(h1, h2, h3, h4, h5, h6)[role='button']:focus-visible {
 		outline: 2px solid color-mix(in srgb, var(--color-accent) 55%, transparent);
 		outline-offset: 4px;
-		border-radius: 0.5rem;
+		border-radius: 0.25rem;
 	}
 
 	/* Heading anchor links from rehype-autolink-headings */
@@ -296,7 +296,7 @@ const CommentsIsland =
 	/* Expressive Code: fit the site's “card” language */
 	.blog-prose .expressive-code figure.frame {
 		border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-		border-radius: 0.75rem;
+		border-radius: 0.375rem;
 		overflow: hidden;
 	}
 
@@ -306,7 +306,7 @@ const CommentsIsland =
 
 	/* Expressive Code copy button: match site icon buttons */
 	.blog-prose .expressive-code .copy button {
-		border-radius: 0.75rem;
+		border-radius: 0.375rem;
 		color: var(--color-accent);
 	}
 

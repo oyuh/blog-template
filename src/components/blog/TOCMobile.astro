@@ -17,7 +17,7 @@ const toc = generateToc(headings);
       <!-- Mobile TOC Button - matches site theme -->
       <button
         id="mobile-toc-btn"
-        class="flex items-center gap-2 px-4 py-3 min-h-[48px] bg-global-bg border border-global-text/15 text-global-text rounded-xl transition-colors duration-200 hover:text-accent hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/50 touch-manipulation"
+        class="flex items-center gap-2 px-4 py-3 min-h-[48px] bg-global-bg border border-global-text/15 text-global-text rounded-md transition-colors duration-200 hover:text-accent hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/50 touch-manipulation"
         aria-label="Open table of contents"
         title="Table of Contents"
       >
@@ -32,7 +32,7 @@ const toc = generateToc(headings);
 
       <button
         id="mobile-comments-btn"
-        class="flex items-center justify-center min-h-[48px] min-w-[48px] bg-global-bg border border-global-text/15 text-global-text rounded-xl transition-colors duration-200 hover:text-accent hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/50 touch-manipulation"
+        class="flex items-center justify-center min-h-[48px] min-w-[48px] bg-global-bg border border-global-text/15 text-global-text rounded-md transition-colors duration-200 hover:text-accent hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/50 touch-manipulation"
         aria-label="Open comments"
         title="Comments"
         type="button"
@@ -54,7 +54,7 @@ const toc = generateToc(headings);
       <!-- Modal Content -->
       <div
         id="mobile-toc-content"
-        class="fixed bottom-0 left-0 right-0 bg-global-bg border-t border-global-text/15 rounded-t-2xl transform translate-y-full transition-transform duration-300 max-h-[70vh] overflow-hidden safe-area-padding-bottom"
+        class="fixed bottom-0 left-0 right-0 bg-global-bg border-t border-global-text/15 rounded-t-lg transform translate-y-full transition-transform duration-300 max-h-[70vh] overflow-hidden safe-area-padding-bottom"
       >
         <!-- Header -->
         <div class="flex items-center justify-between px-4 py-3 border-b border-global-text/10">

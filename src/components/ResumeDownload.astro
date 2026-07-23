@@ -33,7 +33,7 @@ const { pdfUrl = "/Lawson_Hart_Resume.pdf" } = Astro.props;
 			open
 			aria-labelledby="resume-modal-title"
 			aria-modal="true"
-			class="relative w-full max-w-4xl rounded-2xl border border-global-text/15 bg-global-bg p-4"
+			class="relative w-full max-w-4xl rounded-lg border border-global-text/15 bg-global-bg p-4"
 		>
 			<div class="flex items-center justify-between gap-4 border-b border-global-text/10 pb-3">
 				<div>
@@ -49,7 +49,7 @@ const { pdfUrl = "/Lawson_Hart_Resume.pdf" } = Astro.props;
 						data-resume-download
 						href={pdfUrl}
 						download
-						class="inline-flex items-center gap-2 rounded-lg border border-accent/45 px-3 py-1.5 text-sm font-medium text-accent transition-colors hover:border-accent hover:bg-accent/10"
+						class="inline-flex items-center gap-2 rounded border border-accent/45 px-3 py-1.5 text-sm font-medium text-accent transition-colors hover:border-accent hover:bg-accent/10"
 					>
 						<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path
@@ -64,7 +64,7 @@ const { pdfUrl = "/Lawson_Hart_Resume.pdf" } = Astro.props;
 					<button
 						type="button"
 						data-resume-close
-						class="inline-flex items-center rounded-lg border border-global-text/15 px-3 py-1.5 text-sm text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
+						class="inline-flex items-center rounded border border-global-text/15 px-3 py-1.5 text-sm text-global-text transition-colors hover:border-accent/40 hover:text-accent hover:bg-accent/5"
 					>
 						Close
 					</button>
@@ -73,7 +73,7 @@ const { pdfUrl = "/Lawson_Hart_Resume.pdf" } = Astro.props;
 
 			<div data-resume-preview>
 				<div
-					class="mt-4 overflow-hidden rounded-xl border border-global-text/15 bg-global-text/[0.03]"
+					class="mt-4 overflow-hidden rounded-md border border-global-text/15 bg-global-text/[0.03]"
 				>
 					<iframe title="Resume preview" data-resume-iframe src="" class="h-[70vh] w-full"
 					></iframe>

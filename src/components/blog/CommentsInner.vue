@@ -974,7 +974,7 @@ provide(commentsCtxKey, ctx);
 				@click="closeCommentsMobile"
 			/>
 			<div
-				class="fixed top-0 left-0 right-0 bg-global-bg border-b border-global-text/15 rounded-b-2xl max-h-[70vh] overflow-hidden"
+				class="fixed top-0 left-0 right-0 bg-global-bg border-b border-global-text/15 rounded-b-lg max-h-[70vh] overflow-hidden"
 			>
 				<div class="flex items-center justify-between px-4 py-3 border-b border-global-text/10">
 					<h2 class="text-base font-medium text-accent-2">Comments</h2>
@@ -1034,7 +1034,7 @@ provide(commentsCtxKey, ctx);
 				:id="`comment-menu-${openMenuId}`"
 				role="menu"
 				aria-label="Comment actions"
-				class="fixed z-[60] min-w-[180px] overflow-hidden rounded-lg border border-global-text/15 bg-global-bg"
+				class="fixed z-[60] min-w-[180px] overflow-hidden rounded border border-global-text/15 bg-global-bg"
 				:style="{ top: `${openMenuPos.top}px`, left: `${openMenuPos.left}px`, transform: 'translateX(-100%)' }"
 			>
 				<div class="max-h-56 overflow-auto p-1">
@@ -1042,7 +1042,7 @@ provide(commentsCtxKey, ctx);
 						v-if="menuCanReply"
 						type="button"
 						role="menuitem"
-						class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
+						class="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
 						@click="() => { const c = actionsMenuComment!; openMenuId = null; openMenuPos = null; beginReply(c); focusComposer(); }"
 					>
 						<Icon icon="mdi:reply" class="h-4 w-4" />
@@ -1052,7 +1052,7 @@ provide(commentsCtxKey, ctx);
 						v-if="menuCanModify"
 						type="button"
 						role="menuitem"
-						class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
+						class="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
 						@click="startEdit(actionsMenuComment!)"
 					>
 						<Icon icon="mdi:pencil" class="h-4 w-4" />
@@ -1062,13 +1062,13 @@ provide(commentsCtxKey, ctx);
 						v-if="menuCanModify && confirmDeleteCommentId !== actionsMenuComment.id"
 						type="button"
 						role="menuitem"
-						class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
+						class="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
 						@click="confirmDeleteCommentId = actionsMenuComment.id"
 					>
 						<Icon icon="mdi:trash-can-outline" class="h-4 w-4" />
 						Delete
 					</button>
-					<div v-else-if="menuCanModify" class="rounded-lg px-2 py-2">
+					<div v-else-if="menuCanModify" class="rounded px-2 py-2">
 						<div class="flex items-center gap-2 text-xs text-global-text/70">
 							<Icon icon="mdi:alert-circle-outline" class="h-4 w-4" />
 							<span>Delete this comment?</span>
@@ -1077,7 +1077,7 @@ provide(commentsCtxKey, ctx);
 							<button
 								type="button"
 								role="menuitem"
-								class="flex-1 rounded-lg px-2 py-1.5 text-xs text-global-text/80 hover:bg-global-text/[0.06] transition-colors"
+								class="flex-1 rounded px-2 py-1.5 text-xs text-global-text/80 hover:bg-global-text/[0.06] transition-colors"
 								:disabled="deletingCommentId === actionsMenuComment.id"
 								@click="confirmDeleteCommentId = null"
 							>
@@ -1086,7 +1086,7 @@ provide(commentsCtxKey, ctx);
 							<button
 								type="button"
 								role="menuitem"
-								class="flex flex-1 items-center justify-center gap-2 rounded-lg px-2 py-1.5 text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
+								class="flex flex-1 items-center justify-center gap-2 rounded px-2 py-1.5 text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
 								:disabled="deletingCommentId === actionsMenuComment.id"
 								@click="confirmDelete(actionsMenuComment!)"
 							>
@@ -1107,7 +1107,7 @@ provide(commentsCtxKey, ctx);
 		<!-- Likers tooltip (portaled to body) -->
 		<Teleport v-if="likersTooltip" to="body">
 			<div
-				class="fixed z-[60] max-w-[260px] rounded-lg border border-global-text/15 bg-global-bg px-3 py-2 text-xs text-global-text/80"
+				class="fixed z-[60] max-w-[260px] rounded border border-global-text/15 bg-global-bg px-3 py-2 text-xs text-global-text/80"
 				:style="{ top: `${likersTooltip.top}px`, left: `${likersTooltip.left}px`, transform: 'translateY(-100%)' }"
 				role="tooltip"
 				aria-label="People who liked"
