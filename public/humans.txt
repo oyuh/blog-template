@@ -1,0 +1,31 @@
+ ██╗      █████╗ ██╗    ██╗███████╗ ██████╗ ███╗   ██╗
+ ██║     ██╔══██╗██║    ██║██╔════╝██╔═══██╗████╗  ██║
+ ██║     ███████║██║ █╗ ██║███████╗██║   ██║██╔██╗ ██║
+ ██║     ██╔══██║██║███╗██║╚════██║██║   ██║██║╚██╗██║
+ ███████╗██║  ██║╚███╔███╔╝███████║╚██████╔╝██║ ╚████║
+ ╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝
+ ██╗  ██╗ █████╗ ██████╗ ████████╗   ███╗   ███╗███████╗
+ ██║  ██║██╔══██╗██╔══██╗╚══██╔══╝   ████╗ ████║██╔════╝
+ ███████║███████║██████╔╝   ██║      ██╔████╔██║█████╗
+ ██╔══██║██╔══██║██╔══██╗   ██║      ██║╚██╔╝██║██╔══╝
+ ██║  ██║██║  ██║██║  ██║   ██║   ██╗██║ ╚═╝ ██║███████╗
+ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝
+
+/* TEAM */
+
+	Site: https://lawsonhart.me
+	Contact: me@lawsonhart.me
+	GitHub: @oyuh
+	Discord: @wthlaw
+	Location: Dallas, Texas, USA
+
+/* SITE */
+
+	Standards: HTML5, CSS, TypeScript
+	Built with: Astro, Vue islands, Tailwind CSS, MDX
+	Runtime: Bun
+	Search: Pagefind
+	Hosted on: Vercel
+	Components: Chart.js, Expressive Code, Satori (OG images)
+	Doctype: HTML5
+	Language: English

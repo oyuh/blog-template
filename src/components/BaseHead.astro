@@ -64,8 +64,9 @@ const enableSpeedInsights =
 <meta content={description} property="twitter:description" />
 <meta content={socialImageURL} property="twitter:image" />
 
-{/* Sitemap */}
+{/* Sitemap + humans.txt (the conventional rel for it) */}
 <link href="/sitemap-index.xml" rel="sitemap" />
+<link href="/humans.txt" rel="author" type="text/plain" />
 
 {/* RSS auto-discovery */}
 <link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml" />

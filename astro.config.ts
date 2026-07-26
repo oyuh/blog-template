@@ -11,7 +11,6 @@ import type { AstroUserConfig } from "astro";
 import { defineConfig } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
-import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
 import { boneyardPlugin } from "boneyard-js/vite";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -121,16 +120,6 @@ export default defineConfig({
 			] as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["rehypePlugins"]>,
 			remarkRehype: remarkRehypeOptions,
 			gfm: true,
-		}),
-		robotsTxt({
-			policy: [
-				{
-					userAgent: "*",
-					allow: "/",
-				},
-			],
-			sitemap: true,
-			host: true,
 		}),
 		// PWA manifest generation. Not strictly required for the site to run,
 		// but enabling it avoids browsers repeatedly requesting a missing manifest.

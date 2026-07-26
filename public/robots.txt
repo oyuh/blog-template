@@ -1,0 +1,33 @@
+#  ██╗      █████╗ ██╗    ██╗███████╗ ██████╗ ███╗   ██╗
+#  ██║     ██╔══██╗██║    ██║██╔════╝██╔═══██╗████╗  ██║
+#  ██║     ███████║██║ █╗ ██║███████╗██║   ██║██╔██╗ ██║
+#  ██║     ██╔══██║██║███╗██║╚════██║██║   ██║██║╚██╗██║
+#  ███████╗██║  ██║╚███╔███╔╝███████║╚██████╔╝██║ ╚████║
+#  ╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝
+#  ██╗  ██╗ █████╗ ██████╗ ████████╗   ███╗   ███╗███████╗
+#  ██║  ██║██╔══██╗██╔══██╗╚══██╔══╝   ████╗ ████║██╔════╝
+#  ███████║███████║██████╔╝   ██║      ██╔████╔██║█████╗
+#  ██╔══██║██╔══██║██╔══██╗   ██║      ██║╚██╔╝██║██╔══╝
+#  ██║  ██║██║  ██║██║  ██║   ██║   ██╗██║ ╚═╝ ██║███████╗
+#  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝
+#
+#  howdy, crawler. everything here is fair game, help yourself.
+#  no paywall, no cloaking, just dont train without my permission.
+#
+#    humans  ->  /humans.txt
+#    llms    ->  /llms.txt
+#    feed    ->  /rss.xml
+#    sitemap ->  /sitemap-index.xml
+#    contact ->  me@lawsonhart.me
+#
+
+User-agent: *
+Allow: /
+
+# Not content: JSON endpoints (one proxies a rate-limited upstream) and the
+# CMS login screen. Nothing to index, and crawl budget is better spent on posts.
+Disallow: /api/
+Disallow: /admin/
+
+Sitemap: https://lawsonhart.me/sitemap-index.xml
+Host: lawsonhart.me
