@@ -1462,6 +1462,7 @@ astro-static-slot {
 .hero-collage__item:nth-child(6) .hero-collage__icon { animation-delay: -1.9s; animation-duration: 5.2s; }
 .hero-collage__item:nth-child(7) .hero-collage__icon { animation-delay: -1.2s; animation-duration: 4.6s; }
 .hero-collage__item:nth-child(8) .hero-collage__icon { animation-delay: -2.7s; animation-duration: 5s; }
+.hero-collage__item:nth-child(9) .hero-collage__icon { animation-delay: -3.4s; animation-duration: 4.4s; }
 
 @media (prefers-reduced-motion: reduce) {
 	.hero-collage__item {
@@ -1702,12 +1703,13 @@ astro-static-slot {
 }
 
 /* ---------------------------------------------------------------------------
-   Contact cards (About page). Legible, labelled, flat + themed.
+   Contact rows (About page). Same flat language as the post list: separator
+   lines, bare muted icons, underline-only hover, mono handles.
    --------------------------------------------------------------------------- */
 .contact-list {
 	display: grid;
 	grid-template-columns: 1fr;
-	gap: 0.6rem;
+	column-gap: 2.5rem;
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -1719,71 +1721,53 @@ astro-static-slot {
 	}
 }
 
-@media (min-width: 1024px) {
-	.contact-list {
-		grid-template-columns: repeat(3, 1fr);
-	}
-}
-
-.contact-card {
+.contact-row {
 	display: flex;
 	align-items: center;
-	gap: 0.7rem;
-	padding: 0.65rem 0.8rem;
-	border-radius: 0.35rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	background: var(--color-global-bg);
+	gap: 0.6rem;
+	padding: 0.55rem 0.25rem;
+	border-top: 1px solid color-mix(in srgb, var(--color-global-text) 12%, transparent);
 	text-decoration: none;
 	color: var(--color-global-text);
-	transition: border-color 0.18s ease, color 0.18s ease, background 0.18s ease;
 }
 
-.contact-card:hover,
-.contact-card:focus-visible {
-	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-	background: color-mix(in srgb, var(--color-accent) 6%, transparent);
+.contact-row:focus-visible {
 	outline: none;
 }
 
-.contact-card__icon {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+.contact-row__icon {
 	flex: none;
-	width: 2.1rem;
-	height: 2.1rem;
-	border-radius: 0.3rem;
-	color: var(--color-accent-2);
-	background: color-mix(in srgb, var(--color-global-text) 6%, transparent);
-	transition: color 0.18s ease, background 0.18s ease;
+	width: 1.15rem;
+	height: 1.15rem;
+	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+	transition: color 0.18s ease;
 }
 
-.contact-card:hover .contact-card__icon,
-.contact-card:focus-visible .contact-card__icon {
+.contact-row:hover .contact-row__icon,
+.contact-row:focus-visible .contact-row__icon {
 	color: var(--color-accent);
-	background: color-mix(in srgb, var(--color-accent) 14%, transparent);
 }
 
-.contact-card__icon svg {
-	width: 1.25rem;
-	height: 1.25rem;
-}
-
-.contact-card__text {
-	display: flex;
-	flex-direction: column;
+.contact-row__name {
 	min-width: 0;
-	line-height: 1.2;
+	font-size: 0.95rem;
+	font-weight: 500;
+	color: var(--color-accent-2);
+	text-underline-offset: 3px;
+	white-space: nowrap;
 }
 
-.contact-card__name {
-	font-size: 0.9rem;
-	font-weight: 600;
+/* Hover = underline, not a colour change (matches the post rows). */
+.contact-row:hover .contact-row__name,
+.contact-row:focus-visible .contact-row__name {
+	text-decoration: underline;
 }
 
-.contact-card__handle {
-	font-size: 0.78rem;
-	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+.contact-row__handle {
+	margin-left: auto;
+	font-family: "Geist Mono Variable", monospace;
+	font-size: 0.76rem;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

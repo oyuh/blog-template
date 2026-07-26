@@ -29,6 +29,11 @@ const allPostsByDate = allPosts
           I make things for all kinds of spaces and corners around the internet. I build
           things to make using a computer <span class="hero-accent">less dehumanzing</span>. I do things in the realm of <span class="hero-kw">streaming and niche gaming tools</span>. You can find more
           info about what I do using the buttons.
+          <span id="hero-arrow" aria-hidden="true">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </span>
         </p>
 		</div>
 		<div class="hero__art">
@@ -125,6 +130,17 @@ const allPostsByDate = allPosts
 		transform: translateY(-8px);
 	}
 
+	/* Inline arrow after the last hero sentence — the script rotates it to point
+	   at the centre of the social collage (right on desktop, down on mobile). */
+	#hero-arrow {
+		display: inline-block;
+		vertical-align: middle;
+		margin-left: 0.1rem;
+		color: var(--color-accent);
+		transform: rotate(var(--point, 0deg));
+		transition: transform 0.3s ease;
+	}
+
 	/* Tight, flat list — rows handle their own separators. */
 	.post-list {
 		display: flex;
@@ -166,6 +182,32 @@ const allPostsByDate = allPosts
 		}, 4000);
 	}
 
+	// Rotate the inline arrow so it always points at the centre of the collage.
+	// Rotation is about the arrow's own centre, so its centre point stays put.
+	function pointHeroArrow() {
+		const arrow = document.getElementById("hero-arrow");
+		const target = document.querySelector<HTMLElement>(".hero-collage");
+		if (!arrow || !target) return;
+		const a = arrow.getBoundingClientRect();
+		const t = target.getBoundingClientRect();
+		const deg =
+			(Math.atan2(
+				t.top + t.height / 2 - (a.top + a.height / 2),
+				t.left + t.width / 2 - (a.left + a.width / 2),
+			) *
+				180) /
+			Math.PI;
+		arrow.style.setProperty("--point", `${deg}deg`);
+	}
+
 	scheduleHowdyExit();
-	document.addEventListener("astro:page-load", scheduleHowdyExit);
+	pointHeroArrow();
+	window.addEventListener("resize", pointHeroArrow);
+	document.fonts?.ready.then(pointHeroArrow);
+	// The greeting's collapse shifts the hero text — re-aim once it settles.
+	document.getElementById("hero-howdy")?.addEventListener("transitionend", pointHeroArrow);
+	document.addEventListener("astro:page-load", () => {
+		scheduleHowdyExit();
+		pointHeroArrow();
+	});
 </script>
