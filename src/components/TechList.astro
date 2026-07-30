@@ -3,6 +3,7 @@
 // socials). Hover → a tilted tooltip (like the home post cards). Click → the tech's
 // resource link. Shift+click → the /tech/<slug>/ page listing posts using it. No
 // modal / popup window — that was removed.
+import TechInvaders from "@/components/TechInvaders.vue";
 import type { TechnologyUsage } from "@/data/post";
 import { getTechIconName, techSlug } from "@/utils/techIcons";
 import { Icon } from "astro-icon/components";
@@ -123,6 +124,8 @@ const items = allCategories.flatMap((c) =>
 			link: i.link,
 			description: i.description,
 			hasProjects,
+			// Post titles ride along on the icon so the game can name one when it's shot.
+			postTitles: (usage?.projects ?? []).slice(0, 4).map((p) => p.title),
 			slug: techSlug(i.name),
 			tilt: rndTilt(3, 6),
 			tipTilt: rndTilt(2, 4),
@@ -143,6 +146,7 @@ const items = allCategories.flatMap((c) =>
 					target="_blank"
 					rel="noreferrer"
 					data-tech-slug={t.hasProjects ? t.slug : undefined}
+					data-tech-posts={t.postTitles.length ? JSON.stringify(t.postTitles) : undefined}
 					aria-label={t.name}
 				>
 					<Icon name={t.icon} class="tech-collage__icon" aria-hidden="true" />
@@ -164,7 +168,13 @@ const items = allCategories.flatMap((c) =>
 	an icon for its posts
 	<span class="tech-collage__hint-sep">·</span>
 	<span class="tech-collage__dot is-project" aria-hidden="true"></span> has posts
+	<span class="tech-collage__hint-sep">·</span>
+	<button type="button" class="tech-collage__play" data-ti-launch>or shoot them</button>
 </p>
+
+{/* `client:idle`: the game renders nothing until opened, so `client:visible`
+    would never fire — same reason as CommentsIsland. */}
+<TechInvaders client:idle />
 
 <script>
 	function setupTechCollage() {

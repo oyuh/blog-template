@@ -18,7 +18,7 @@ const navLinks = [
 			<Search />
 			{
 				pathname !== "/" && (
-					<a href="/" class="nav-icon" aria-label="Home" title="Home">
+					<a href="/" class="nav-icon" data-ti-home aria-label="Home" title="Home">
 						<svg
 							viewBox="0 0 24 24"
 							fill="none"
@@ -35,6 +35,27 @@ const navLinks = [
 					</a>
 				)
 			}
+			{/* Takes the Home slot while Tech Invaders is running (TechInvaders.vue). */}
+			<button
+				type="button"
+				class="nav-icon nav-icon--exit"
+				data-ti-exit
+				hidden
+				aria-label="Exit Tech Invaders"
+			>
+				<svg
+					viewBox="0 0 24 24"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="1.7"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+					aria-hidden="true"
+				>
+					<path d="M6 6l12 12M18 6 6 18" />
+				</svg>
+				<span class="nav-icon__kbd">Esc</span>
+			</button>
 		</div>
 		<div class="flex flex-none items-center gap-1 sm:gap-2">
 			{
@@ -80,6 +101,59 @@ const navLinks = [
 	.nav-icon svg {
 		height: 1.4rem;
 		width: 1.4rem;
+	}
+
+	/* Swapped in for the Home icon while the game is running — same size, colour
+	   and hover as the icon it replaces, plus the site's usual keycap. */
+	.nav-icon--exit {
+		width: auto;
+		gap: 0.4rem;
+		padding: 0 0.45rem;
+		border: none;
+		background: none;
+		cursor: pointer;
+	}
+
+	.nav-icon[hidden] {
+		display: none;
+	}
+
+	.nav-icon--exit svg {
+		height: 1.15rem;
+		width: 1.15rem;
+	}
+
+	/* A wide pill scaling up reads as a wobble, so only the colour shifts. */
+	.nav-icon--exit:hover,
+	.nav-icon--exit:focus-visible {
+		transform: none;
+	}
+
+	.nav-icon__kbd {
+		font-family: "Geist Mono Variable", ui-monospace, monospace;
+		font-size: 0.68rem;
+		padding: 0.05rem 0.35rem;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 25%, transparent);
+		border-radius: 0.3rem;
+		color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
+		transition: color 0.2s ease, border-color 0.2s ease;
+	}
+
+	.nav-icon--exit:hover .nav-icon__kbd,
+	.nav-icon--exit:focus-visible .nav-icon__kbd {
+		border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+		color: var(--color-accent);
+	}
+
+	/* No keyboard on touch — the bare ✕ is the exit there. */
+	@media (max-width: 767px) {
+		.nav-icon__kbd {
+			display: none;
+		}
+	}
+
+	:global(html.ti-playing) [data-ti-home] {
+		display: none;
 	}
 
 	/* Hover = underline, not a colour change (matches the rest of the site). */

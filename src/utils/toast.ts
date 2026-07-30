@@ -9,7 +9,7 @@ const COPY_TIP_MARGIN = 14;
 
 /**
  * Small anchored "Copied!" tip that pops up just clear of the element that was
- * clicked — same tilted, card-less language as the footer now-playing readout.
+ * clicked same tilted, card-less language as the footer now-playing readout.
  * Sits above the element (or flips just below it near the top of the viewport),
  * always keeping COPY_TIP_MARGIN of space so it never covers the element. Pass
  * an optional cursorX (e.g. mouse.clientX) to hug the pointer horizontally.

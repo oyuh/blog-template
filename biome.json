@@ -43,5 +43,18 @@
 		"clientKind": "git",
 		"enabled": true,
 		"useIgnoreFile": true
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.vue"],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUnusedImports": "off",
+						"noUnusedVariables": "off"
+					}
+				}
+			}
+		}
+	]
 }

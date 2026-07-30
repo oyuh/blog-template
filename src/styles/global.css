@@ -1696,6 +1696,26 @@ astro-static-slot {
 	background: var(--color-accent);
 }
 
+/* Launches Tech Invaders (TechInvaders.vue) — keyboard/mouse on desktop,
+   touch controls on narrow screens. */
+.tech-collage__play {
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
+	font: inherit;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+	text-decoration: underline dotted;
+	text-underline-offset: 3px;
+}
+
+.tech-collage__play:hover,
+.tech-collage__play:focus-visible {
+	color: var(--color-accent);
+	text-decoration: underline;
+}
+
+
 @media (hover: none) {
 	.tech-collage__tip {
 		display: none;
