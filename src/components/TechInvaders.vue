@@ -188,7 +188,13 @@ const announce = (msg: string) => {
 function measure() {
 	const header = document.getElementById("site-header");
 	if (rootEl.value) {
-		rootEl.value.style.top = `${Math.max(0, header?.getBoundingClientRect().bottom ?? 0)}px`;
+		// Document-space bottom, not viewport-space. The page is being scrolled to
+		// the top as the game opens, and a viewport reading taken mid-scroll is
+		// hugely negative — which clamped the overlay to top:0 and hid the header
+		// for the whole first level.
+		const rect = header?.getBoundingClientRect();
+		const bottom = rect ? rect.bottom + window.scrollY : 0;
+		rootEl.value.style.top = `${Math.max(0, bottom)}px`;
 	}
 	fieldW = fieldEl.value?.clientWidth ?? 0;
 	fieldH = fieldEl.value?.clientHeight ?? 0;
@@ -612,8 +618,10 @@ async function openGame() {
 	if (open.value) return;
 	restore = document.activeElement as HTMLElement | null;
 	scrollY = window.scrollY;
-	// The header has to be on screen: it holds the exit control.
-	window.scrollTo(0, 0);
+	// The header has to be on screen: it holds the exit control. `instant` because
+	// the site sets `scroll-behavior: smooth`, which would make this async and
+	// leave the board being measured against a half-scrolled page.
+	window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 	open.value = true;
 	document.documentElement.classList.add("ti-playing");
 	document.documentElement.style.overflow = "hidden";
@@ -639,7 +647,9 @@ function close() {
 	window.removeEventListener("resize", onResize);
 	window.removeEventListener("mouseup", releaseFire);
 	keys.left = keys.right = fireHeld = false;
-	window.scrollTo(0, scrollY);
+	// Instant here too, so exiting drops you exactly where you were rather than
+	// animating the whole page back.
+	window.scrollTo({ top: scrollY, left: 0, behavior: "instant" });
 	restore?.focus();
 }
 
