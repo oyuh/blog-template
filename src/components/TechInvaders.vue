@@ -13,8 +13,10 @@ import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
 /* ---------- geometry, in px. Deliberately chunky: the fleet fills the page. ---------- */
 /** Board tuning per form factor. Everything else scales off the measured field,
  *  so these are ceilings rather than fixed sizes. */
-const DESKTOP = { icon: 44, cellH: 62, cellW: 76, cols: 8, pw: 42, ph: 32 };
-const MOBILE = { icon: 30, cellH: 46, cellW: 50, cols: 6, pw: 32, ph: 26 };
+/** `pw`/`ph` track the hull's own 20:21 proportions, so the ship fills its
+ *  hitbox exactly without being stretched to fit it. */
+const DESKTOP = { icon: 44, cellH: 62, cellW: 76, cols: 8, pw: 54, ph: 56 };
+const MOBILE = { icon: 30, cellH: 46, cellW: 50, cols: 6, pw: 42, ph: 44 };
 /** Share of the field the fleet may occupy at the start, so short windows
  *  squeeze the rows instead of opening on top of the player. */
 const FLEET_H_RATIO = 0.5;
@@ -24,6 +26,8 @@ const LIVES = 3;
 const AUTO_FIRE = 0.42;
 /** Outer share of the field on each side that steers; the middle band fires. */
 const MOVE_ZONE = 0.34;
+/** Outer share of the field where the ship sits over HUD text and fades it out. */
+const HUD_ZONE = 0.3;
 /** How fast the fleet creeps down at the start of a level, in px/s. The drop per
  *  edge-bounce is derived from this so every screen width descends alike. */
 const DESCENT_PER_SEC = 3.2;
@@ -127,6 +131,10 @@ const lives = ref(LIVES);
 const killed = ref(0);
 const playerX = ref(0);
 const playerTop = ref(0);
+/** Where the fleet's lowest survivor sits, and where the next edge-bounce will
+ *  put it. Drawn as two rules so the descent is something you can read. */
+const fleetLine = ref(0);
+const nextLine = ref(0);
 const announcement = ref("");
 /** Drives both the board size and the control scheme. */
 const isMobile = ref(false);
@@ -135,6 +143,7 @@ const playerH = ref(DESKTOP.ph);
 
 const rootEl = ref<HTMLElement | null>(null);
 const fieldEl = ref<HTMLElement | null>(null);
+const hudEl = ref<HTMLElement | null>(null);
 const primaryBtn = ref<HTMLButtonElement | null>(null);
 
 let fx = 0;
@@ -148,13 +157,14 @@ let autoFireTimer = 0;
 let travelScale = 1;
 let fieldW = 0;
 let fieldH = 0;
+/** The HUD overlays the bottom of the field; the ship parks inside its band. */
+let hudH = 0;
 let bombTimer = 0;
 let raf = 0;
 let prev = 0;
 let running = false;
 let uid = 0;
 let restore: HTMLElement | null = null;
-let scrollY = 0;
 let launchBtn: HTMLElement | null = null;
 let headerExit: HTMLElement | null = null;
 const keys = { left: false, right: false };
@@ -178,26 +188,31 @@ const marqueeText = () =>
 		`${String(killed.value).padStart(2, " ")}/${invaders.value.length}`,
 		(feed.value[0] ?? "—").padEnd(18, " ").slice(0, 18),
 	].join("  ·  ");
-const playerY = () => fieldH - playerH.value - 12;
+/** Desktop tucks the ship into the HUD band — the readouts are left-aligned and
+ *  fade out of its way. The mobile HUD is centred and full-width, so there is
+ *  nowhere to hide and the ship sits just above it instead. */
+const playerY = () =>
+	fieldH - (isMobile.value ? hudH + playerH.value + 12 : Math.max(hudH, playerH.value + 12));
+/** Each HUD corner fades only for the side the ship is actually parked on. */
+const overLeft = () => playerX.value < fieldW * HUD_ZONE;
+const overRight = () => playerX.value + playerW.value > fieldW * (1 - HUD_ZONE);
 const announce = (msg: string) => {
 	announcement.value = msg;
 };
 
 /* ------------------------------------ setup ------------------------------------ */
-/** The header stays visible above the game, so the overlay starts under it. */
+/** The header stays visible above the game, so the overlay starts under it.
+ *  `--ti-scroll` has already lifted the header to the top of the viewport (see
+ *  Header.astro), so its box reads straight off the viewport. */
 function measure() {
 	const header = document.getElementById("site-header");
 	if (rootEl.value) {
-		// Document-space bottom, not viewport-space. The page is being scrolled to
-		// the top as the game opens, and a viewport reading taken mid-scroll is
-		// hugely negative — which clamped the overlay to top:0 and hid the header
-		// for the whole first level.
-		const rect = header?.getBoundingClientRect();
-		const bottom = rect ? rect.bottom + window.scrollY : 0;
+		const bottom = header?.getBoundingClientRect().bottom ?? 0;
 		rootEl.value.style.top = `${Math.max(0, bottom)}px`;
 	}
 	fieldW = fieldEl.value?.clientWidth ?? 0;
 	fieldH = fieldEl.value?.clientHeight ?? 0;
+	hudH = hudEl.value?.offsetHeight ?? 0;
 }
 
 /** Everything about the fleet icon, colour, post titles comes from the
@@ -295,6 +310,7 @@ function startLevel(reset = false) {
 
 	playerX.value = (fieldW - playerW.value) / 2;
 	playerTop.value = playerY();
+	markDescent();
 	running = true;
 	prev = performance.now();
 	cancelAnimationFrame(raf);
@@ -316,6 +332,12 @@ function bounds() {
 		if (inv.by + icon > bottom) bottom = inv.by + icon;
 	}
 	return { left, right, bottom };
+}
+
+/** Park the two descent rules on the fleet's current and next-drop floor. */
+function markDescent(bottom = bounds().bottom) {
+	fleetLine.value = fy + bottom;
+	nextLine.value = fleetLine.value + drop;
 }
 
 function shoot() {
@@ -430,6 +452,7 @@ function step(dt: number) {
 		inv.x = fx + inv.bx;
 		inv.y = fy + inv.by;
 	}
+	markDescent(b.bottom);
 	if (fy + b.bottom >= playerY()) {
 		end(false, "they reached the bottom");
 		return;
@@ -617,11 +640,11 @@ function onResize() {
 async function openGame() {
 	if (open.value) return;
 	restore = document.activeElement as HTMLElement | null;
-	scrollY = window.scrollY;
-	// The header has to be on screen: it holds the exit control. `instant` because
-	// the site sets `scroll-behavior: smooth`, which would make this async and
-	// leave the board being measured against a half-scrolled page.
-	window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+	// The header has to be on screen: it holds the exit control. Rather than
+	// scroll the page up to it (which visibly shunts everything, header included),
+	// freeze the page where it is and hand the header the offset to lift itself
+	// back to the top of the viewport.
+	document.documentElement.style.setProperty("--ti-scroll", `${window.scrollY}px`);
 	open.value = true;
 	document.documentElement.classList.add("ti-playing");
 	document.documentElement.style.overflow = "hidden";
@@ -641,15 +664,14 @@ function close() {
 	open.value = false;
 	document.documentElement.classList.remove("ti-playing");
 	document.documentElement.style.overflow = "";
+	document.documentElement.style.removeProperty("--ti-scroll");
 	if (headerExit) headerExit.hidden = true;
 	window.removeEventListener("keydown", onKeyDown);
 	window.removeEventListener("keyup", onKeyUp);
 	window.removeEventListener("resize", onResize);
 	window.removeEventListener("mouseup", releaseFire);
 	keys.left = keys.right = fireHeld = false;
-	// Instant here too, so exiting drops you exactly where you were rather than
-	// animating the whole page back.
-	window.scrollTo({ top: scrollY, left: 0, behavior: "instant" });
+	// The page never moved, so there is nothing to scroll back to.
 	restore?.focus();
 }
 
@@ -703,6 +725,14 @@ onBeforeUnmount(() => {
 				@touchend="onTouchEnd"
 				@touchcancel="onTouchEnd"
 			>
+				<!-- Descent rules: where the fleet's floor is now, and where the next
+				     edge-bounce drops it to. -->
+				<div class="ti__dropline" :style="{ transform: `translateY(${fleetLine}px)` }" />
+				<div
+					class="ti__dropline is-next"
+					:style="{ transform: `translateY(${nextLine}px)` }"
+				/>
+
 				<div
 					v-for="inv in invaders"
 					:key="inv.id"
@@ -739,8 +769,27 @@ onBeforeUnmount(() => {
 					<i v-if="p.post">{{ p.post }}</i>
 				</span>
 
-				<div class="ti__player" :style="{ transform: `translate(${playerX}px, ${playerTop}px)` }">
-					<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1 22 22 12 16.5 2 22Z" /></svg>
+				<!-- Where the fleet finishes you: the ship's own line, faded out around
+				     the ship itself so it never crowds it. -->
+				<div
+					class="ti__deadline"
+					:style="{
+						transform: `translateY(${playerTop - 8}px)`,
+						'--ti-ship': `${playerX + playerW / 2}px`,
+					}"
+				/>
+
+				<div
+					class="ti__player"
+					:style="{
+						width: `${playerW}px`,
+						height: `${playerH}px`,
+						transform: `translate(${playerX}px, ${playerTop}px)`,
+					}"
+				>
+					<svg viewBox="0 0 20 21" preserveAspectRatio="none" aria-hidden="true">
+						<path d="M10 0 20 21 10 17.5 0 21Z" />
+					</svg>
 				</div>
 
 				<div v-if="over" class="ti__panel">
@@ -777,7 +826,7 @@ onBeforeUnmount(() => {
 
 			<!-- Touch build: lives on their own line, everything else scrolling
 			     underneath, all centred. No control hints — the screen is the pad. -->
-			<div v-if="isMobile" class="ti__hud ti__hud--mobile">
+			<div v-if="isMobile" ref="hudEl" class="ti__hud ti__hud--mobile">
 				<span class="ti__lives">
 					<i v-for="n in LIVES" :key="n" class="ti__pip" :class="{ 'is-lost': n > lives }" />
 				</span>
@@ -790,8 +839,8 @@ onBeforeUnmount(() => {
 				</div>
 			</div>
 
-			<div v-else class="ti__hud">
-				<div class="ti__readouts">
+			<div v-else ref="hudEl" class="ti__hud">
+					<div class="ti__readouts" :class="{ 'is-dim': !over && overLeft() }">
 					<div class="ti__row">
 						<svg class="ti__icon" viewBox="0 0 24 24" aria-hidden="true">
 							<path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" />
@@ -841,7 +890,7 @@ onBeforeUnmount(() => {
 					<span class="ti__sep">·</span>
 					<span class="ti__kbd">Enter</span> choose
 				</p>
-				<p v-else class="ti__keys">
+				<p v-else class="ti__keys" :class="{ 'is-dim': overRight() }">
 					<span class="ti__kbd">←</span><span class="ti__kbd">→</span> move
 					<span class="ti__sep">·</span>
 					<span class="ti__kbd">Space</span> fire
@@ -927,10 +976,11 @@ onBeforeUnmount(() => {
 	}
 }
 
+/* The field is the whole overlay — the HUD sits on top of its bottom edge, so
+   the ship can fly down into the readouts instead of hovering above them. */
 .ti__field {
-	position: relative;
-	flex: 1;
-	width: 100%;
+	position: absolute;
+	inset: 0;
 	overflow: hidden;
 	/* The field owns touch gestures: no scroll or double-tap zoom mid-game. */
 	touch-action: none;
@@ -968,9 +1018,9 @@ onBeforeUnmount(() => {
 	transition: opacity 0.12s linear;
 }
 
+/* Above the HUD it overlaps, and above its own shots. */
 .ti__player {
-	width: 42px;
-	height: 32px;
+	z-index: 2;
 	color: var(--color-accent);
 }
 
@@ -978,6 +1028,62 @@ onBeforeUnmount(() => {
 	width: 100%;
 	height: 100%;
 	fill: currentColor;
+}
+
+/* The line the fleet must not cross. Barely there on purpose — and masked away
+   entirely around the ship, whose x sits in `--ti-ship`. */
+.ti__deadline {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	will-change: transform;
+	background: repeating-linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-global-text) 14%, transparent) 0 10px,
+		transparent 10px 20px
+	);
+	--ti-fade: radial-gradient(
+		150px 100% at var(--ti-ship, 50%) 50%,
+		transparent 0 35%,
+		#000 100%
+	);
+	-webkit-mask-image: var(--ti-fade);
+	mask-image: var(--ti-fade);
+}
+
+/* Blue = the fleet's floor right now; grey = where the next drop puts it. Only
+   ticked in at the two walls the fleet bounces off, not ruled across the board. */
+.ti__dropline {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	will-change: transform;
+	background: repeating-linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-accent) 50%, transparent) 0 6px,
+		transparent 6px 14px
+	);
+	--ti-tick: 72px;
+	--ti-ticks: linear-gradient(
+		90deg,
+		#000 0 var(--ti-tick),
+		transparent var(--ti-tick) calc(100% - var(--ti-tick)),
+		#000 calc(100% - var(--ti-tick))
+	);
+	-webkit-mask-image: var(--ti-ticks);
+	mask-image: var(--ti-ticks);
+}
+
+.ti__dropline.is-next {
+	background: repeating-linear-gradient(
+		90deg,
+		color-mix(in srgb, var(--color-global-text) 24%, transparent) 0 6px,
+		transparent 6px 14px
+	);
 }
 
 .ti__shot {
@@ -1040,6 +1146,8 @@ onBeforeUnmount(() => {
 /* Level over: the fleet clears out so the result stands alone. */
 .ti__field.is-over .ti__invader,
 .ti__field.is-over .ti__shot,
+.ti__field.is-over .ti__deadline,
+.ti__field.is-over .ti__dropline,
 .ti__field.is-over .ti__player {
 	opacity: 0;
 	transition: opacity 0.25s ease;
@@ -1138,14 +1246,32 @@ onBeforeUnmount(() => {
 	outline: none;
 }
 
-/* --- Bottom left: level, score, lives, kills one icon per row. --- */
+/* --- Bottom left: level, score, lives, kills one icon per row. Laid over the
+   field, so it never steals clicks and fades when the ship parks on it. --- */
 .ti__hud {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	z-index: 1;
 	display: flex;
 	align-items: flex-end;
 	justify-content: space-between;
 	gap: 2rem;
 	padding: 0.75rem 1.25rem 1rem;
 	min-width: 0;
+	pointer-events: none;
+}
+
+/* Only the corner the ship is actually parked on gets out of the way. */
+.ti__readouts,
+.ti__keys {
+	transition: opacity 0.2s ease;
+}
+
+.ti__readouts.is-dim,
+.ti__keys.is-dim {
+	opacity: 0.2;
 }
 
 .ti__readouts {

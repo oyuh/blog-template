@@ -36,25 +36,9 @@ const navLinks = [
 				)
 			}
 			{/* Takes the Home slot while Tech Invaders is running (TechInvaders.vue). */}
-			<button
-				type="button"
-				class="nav-icon nav-icon--exit"
-				data-ti-exit
-				hidden
-				aria-label="Exit Tech Invaders"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.7"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-				>
-					<path d="M6 6l12 12M18 6 6 18" />
-				</svg>
-				<span class="nav-icon__kbd">Esc</span>
+			<button type="button" class="nav-exit" data-ti-exit hidden>
+				<span class="nav-exit__kbd" aria-hidden="true">Esc</span>
+				Go Back
 			</button>
 		</div>
 		<div class="flex flex-none items-center gap-1 sm:gap-2">
@@ -103,33 +87,42 @@ const navLinks = [
 		width: 1.4rem;
 	}
 
-	/* Swapped in for the Home icon while the game is running — same size, colour
-	   and hover as the icon it replaces, plus the site's usual keycap. */
-	.nav-icon--exit {
-		width: auto;
-		gap: 0.4rem;
-		padding: 0 0.45rem;
-		border: none;
-		background: none;
-		cursor: pointer;
-	}
-
 	.nav-icon[hidden] {
 		display: none;
 	}
 
-	.nav-icon--exit svg {
-		height: 1.15rem;
-		width: 1.15rem;
+	/* Swapped in for the Home icon while the game is running — same bordered
+	   button as the policy pages, with the site's usual keycap in front. */
+	.nav-exit {
+		display: inline-flex;
+		flex: none;
+		align-items: center;
+		gap: 0.45rem;
+		height: 2.25rem;
+		padding: 0 0.7rem;
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 0.25rem;
+		background: var(--color-global-bg);
+		cursor: pointer;
+		font-size: 0.95rem;
+		font-weight: 500;
+		color: var(--color-global-text);
+		transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
 	}
 
-	/* A wide pill scaling up reads as a wobble, so only the colour shifts. */
-	.nav-icon--exit:hover,
-	.nav-icon--exit:focus-visible {
-		transform: none;
+	.nav-exit[hidden] {
+		display: none;
 	}
 
-	.nav-icon__kbd {
+	.nav-exit:hover,
+	.nav-exit:focus-visible {
+		border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-global-bg));
+		color: var(--color-accent);
+		outline: none;
+	}
+
+	.nav-exit__kbd {
 		font-family: "Geist Mono Variable", ui-monospace, monospace;
 		font-size: 0.68rem;
 		padding: 0.05rem 0.35rem;
@@ -139,21 +132,40 @@ const navLinks = [
 		transition: color 0.2s ease, border-color 0.2s ease;
 	}
 
-	.nav-icon--exit:hover .nav-icon__kbd,
-	.nav-icon--exit:focus-visible .nav-icon__kbd {
+	.nav-exit:hover .nav-exit__kbd,
+	.nav-exit:focus-visible .nav-exit__kbd {
 		border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
 		color: var(--color-accent);
 	}
 
-	/* No keyboard on touch — the bare ✕ is the exit there. */
+	/* No keyboard on touch — the label alone is the exit there. */
 	@media (max-width: 767px) {
-		.nav-icon__kbd {
+		.nav-exit__kbd {
 			display: none;
 		}
 	}
 
 	:global(html.ti-playing) [data-ti-home] {
 		display: none;
+	}
+
+	/* Narrow screens can't fit both search and the exit; search is dead weight
+	   mid-game, so it gives up its room. */
+	@media (max-width: 767px) {
+		:global(html.ti-playing .site-search) {
+			display: none;
+		}
+	}
+
+	/* While the game runs the page is frozen where it was, so the header is
+	   lifted back to the top of the viewport instead of scrolling the page under
+	   it — nothing on screen moves on the way in or out. Opaque and above the
+	   overlay, since the frozen page is still sitting behind it. */
+	:global(html.ti-playing) #site-header {
+		position: relative;
+		z-index: 201;
+		translate: 0 var(--ti-scroll, 0px);
+		background: var(--color-global-bg);
 	}
 
 	/* Hover = underline, not a colour change (matches the rest of the site). */
