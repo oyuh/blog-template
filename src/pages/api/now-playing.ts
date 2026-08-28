@@ -16,18 +16,19 @@ const MUSIC_API_URL = "https://music-thing.lawson-hart.workers.dev/";
 type WorkerTrack = {
 	title?: string;
 	artists?: string[];
-	albumArt?: string;
-	url?: string;
-	durationMs?: number;
-	progressMs?: number;
+	album?: string | null;
+	albumArt?: string | null;
+	url?: string | null;
 };
 
 type WorkerColor = { hex?: string };
 
 type WorkerResponse = {
-	state?: "playing" | "paused" | "stopped";
+	// Last.fm only knows playing vs not — there is no "paused".
+	state?: "playing" | "stopped";
 	source?: "now-playing" | "recently-played";
 	track?: WorkerTrack | null;
+	playCount?: number;
 	colors?: {
 		dominant?: WorkerColor;
 		accents?: WorkerColor[];
@@ -95,8 +96,10 @@ export const GET: APIRoute = async () => {
 				track: track.title ?? "",
 				artist: Array.isArray(track.artists) ? track.artists.join(", ") : "",
 				albumArt: track.albumArt ?? "",
-				duration: track.durationMs ?? 0,
-				progress: track.progressMs ?? 0,
+				album: track.album ?? "",
+				// Lifetime scrobbles of this track. Replaces the old progress bar:
+				// scrobbles carry no playback position, so there is nothing to fill.
+				plays: typeof data.playCount === "number" ? data.playCount : 0,
 				colors,
 			},
 		});

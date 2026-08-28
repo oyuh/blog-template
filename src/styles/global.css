@@ -1347,42 +1347,17 @@ astro-static-slot {
 	color: var(--np-text, color-mix(in srgb, var(--color-global-text) 70%, transparent));
 }
 
-/* Compact "elapsed — bar — total" progress row. */
-.footer-logo__np-progress {
-	display: flex;
-	align-items: center;
-	gap: 0.4rem;
+/* Album · play-count line under the artist. */
+.footer-logo__np-meta {
+	display: block;
 	margin-top: 0.15rem;
-}
-
-.footer-logo__np-time {
 	font-size: 0.62rem;
 	font-variant-numeric: tabular-nums;
 	letter-spacing: 0.02em;
-	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
-}
-
-.footer-logo__np-bar {
-	position: relative;
-	flex: 1;
-	height: 0.2rem;
-	min-width: 2.5rem;
-	border-radius: 999px;
-	background: color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	white-space: nowrap;
 	overflow: hidden;
-}
-
-.footer-logo__np-bar-fill {
-	position: absolute;
-	inset: 0 auto 0 0;
-	width: 0%;
-	border-radius: inherit;
-	background: color-mix(in srgb, var(--np-accent-1, var(--color-accent)) 90%, transparent);
-	transition: width 0.9s linear;
-}
-
-@media (prefers-reduced-motion: reduce) {
-	.footer-logo__np-bar-fill { transition: none; }
+	text-overflow: ellipsis;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
