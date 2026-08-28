@@ -1327,6 +1327,12 @@ astro-static-slot {
 	object-fit: cover;
 }
 
+/* Track has no usable cover, or it failed to load: collapse rather than
+   showing a broken-image glyph. */
+.footer-logo__np-art[hidden] {
+	display: none;
+}
+
 .footer-logo__np-text {
 	display: flex;
 	flex-direction: column;
