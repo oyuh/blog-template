@@ -95,6 +95,7 @@ export default defineConfig({
 					"linkedin",
 					"lock",
 					"palette",
+					"puzzle-outline",
 					"cellphone",
 					"rss",
 					"tools",

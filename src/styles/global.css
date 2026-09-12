@@ -1531,6 +1531,14 @@ astro-static-slot {
 	padding: 0.75rem 0;
 }
 
+/* Vertical hairline between categories, riding along in the same wrapped row. */
+.tech-collage__sep {
+	flex: 0 0 auto;
+	width: 1px;
+	height: 1.9rem;
+	background: color-mix(in srgb, var(--color-global-text) 18%, transparent);
+}
+
 .tech-collage__cell {
 	position: relative;
 	display: inline-flex;
@@ -1564,23 +1572,8 @@ astro-static-slot {
 }
 
 .tech-collage__icon {
-	width: 2.1rem;
-	height: 2.1rem;
-}
-
-.tech-collage__item.is-lg .tech-collage__icon {
-	width: 2.65rem;
-	height: 2.65rem;
-}
-
-.tech-collage__item.is-md .tech-collage__icon {
-	width: 2.1rem;
-	height: 2.1rem;
-}
-
-.tech-collage__item.is-sm .tech-collage__icon {
-	width: 1.7rem;
-	height: 1.7rem;
+	width: 2.2rem;
+	height: 2.2rem;
 }
 
 /* Tilted hover tooltip — same flat, border-only card as the home post tips. */

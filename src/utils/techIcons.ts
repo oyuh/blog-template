@@ -5,6 +5,9 @@ const normalizeTechName = (name: string) => name.toLowerCase().trim();
 export const TECH_ICON_MAP: Record<string, string> = {
 	// Web
 	react: "simple-icons:react",
+	"react 19": "simple-icons:react",
+	"tanstack start": "simple-icons:tanstack",
+	tanstack: "simple-icons:tanstack",
 	"next.js": "simple-icons:nextdotjs",
 	nextjs: "simple-icons:nextdotjs",
 	express: "simple-icons:express",
@@ -21,7 +24,10 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	"tailwind css": "simple-icons:tailwindcss",
 	tailwind: "simple-icons:tailwindcss",
 	"shadcn ui": "simple-icons:shadcnui",
+	"shadcn/ui": "simple-icons:shadcnui",
 	shadcn: "simple-icons:shadcnui",
+	"kibo-ui": "mdi:puzzle-outline",
+	"kibo ui": "mdi:puzzle-outline",
 	nextui: "simple-icons:nextui",
 
 	// Databases
@@ -64,6 +70,8 @@ export const TECH_ICON_MAP: Record<string, string> = {
 	// Infra
 	vercel: "simple-icons:vercel",
 	cloudflare: "simple-icons:cloudflare",
+	"cloudflare r2": "simple-icons:cloudflare",
+	r2: "simple-icons:cloudflare",
 	railway: "simple-icons:railway",
 	docker: "simple-icons:docker",
 	github: "simple-icons:github",

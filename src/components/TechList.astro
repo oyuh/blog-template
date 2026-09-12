@@ -22,7 +22,8 @@ const categories: Category[] = [
 	{
 		title: "Web Development",
 		items: [
-			{ name: "React", link: "https://reactjs.org/", description: "A popular JavaScript library for building user interfaces." },
+			{ name: "React", link: "https://reactjs.org/", description: "A popular JavaScript library for building user interfaces.", aliases: ["react 19"] },
+			{ name: "TanStack Start", link: "https://tanstack.com/start", description: "A full-stack React framework built on TanStack Router, with server functions and typed routes." },
 			{ name: "Next.js", link: "https://nextjs.org/", description: "A React-based full-stack framework with server-side rendering." },
 			{ name: "Express", link: "https://expressjs.com/", description: "A minimal and flexible Node.js web application framework." },
 			{ name: "Hono", link: "https://hono.dev/", description: "A lightweight web framework for building fast APIs and edge apps." },
@@ -31,7 +32,8 @@ const categories: Category[] = [
 			{ name: "Svelte 5", link: "https://svelte.dev/", description: "A compiler-first UI framework; v5 brought fine-grained reactivity with runes.", aliases: ["svelte"] },
 			{ name: "SvelteKit", link: "https://svelte.dev/docs/kit", description: "Svelte's official full-stack app framework with routing and SSR.", aliases: ["svelte kit"] },
 			{ name: "Tailwind CSS", link: "https://tailwindcss.com/", description: "A utility-first CSS framework for rapidly building UIs.", aliases: ["tailwind"] },
-			{ name: "ShadCN UI", link: "https://ui.shadcn.com/", description: "A beautifully styled component system for modern apps." },
+			{ name: "ShadCN UI", link: "https://ui.shadcn.com/", description: "A beautifully styled component system for modern apps.", aliases: ["shadcn/ui", "shadcn"] },
+			{ name: "kibo-ui", link: "https://www.kibo-ui.com/", description: "A shadcn-compatible registry of the bigger components I'd rather not hand-roll." },
 			{ name: "MDX", link: "https://mdxjs.com/", description: "Markdown with JSX support for rich content-driven applications." },
 		],
 	},
@@ -41,6 +43,7 @@ const categories: Category[] = [
 			{ name: "PostgreSQL", link: "https://www.postgresql.org/", description: "I use the serverless Postgres, powered by Neon, integrated into Vercel." },
 			{ name: "Drizzle", link: "https://orm.drizzle.team/", description: "A TypeScript-first ORM and schema toolkit for SQL databases." },
 			{ name: "Rocicorp Zero", link: "https://zero.rocicorp.dev/", description: "A sync engine for realtime query and mutation flows over your app data.", aliases: ["zero"] },
+			{ name: "Cloudflare R2", link: "https://developers.cloudflare.com/r2/", description: "S3-compatible object storage with no egress fees, where loife keeps its file attachments." },
 			{ name: "Redis", link: "https://redis.io/", description: "An in-memory data structure store for caching and queues." },
 			{ name: "MongoDB", link: "https://www.mongodb.com/", description: "A NoSQL database known for flexibility and scalability." },
 		],
@@ -48,7 +51,7 @@ const categories: Category[] = [
 	{
 		title: "Programming Languages & Tools",
 		items: [
-			{ name: "TypeScript", link: "https://www.typescriptlang.org/", description: "JavaScript with type safety — modern dev standard.", aliases: ["ts"] },
+			{ name: "TypeScript", link: "https://www.typescriptlang.org/", description: "JavaScript with type safety, the modern dev standard.", aliases: ["ts"] },
 			{ name: "Python", link: "https://www.python.org/", description: "A general-purpose language known for readability." },
 			{ name: "Node.js", link: "https://nodejs.org/", description: "The JavaScript runtime I use for APIs, tooling, and desktop app backends.", aliases: ["nodejs", "node"] },
 			{ name: "Bun", link: "https://bun.sh/", description: "A fast all-in-one JavaScript runtime, bundler, and package manager." },
@@ -58,8 +61,8 @@ const categories: Category[] = [
 			{ name: "pnpm", link: "https://pnpm.io/", description: "Fast, disk space efficient package manager." },
 			{ name: "Turbo", link: "https://turbo.build/repo", description: "Monorepo build tooling for coordinating apps, packages, and task pipelines.", aliases: ["turborepo"] },
 			{ name: "Electron", link: "https://www.electronjs.org/", description: "Build cross-platform desktop apps with web technologies.", aliases: ["electron.js", "electronjs"] },
-			{ name: "Tauri", link: "https://tauri.app/", description: "Lightweight desktop apps with a Rust core and the system webview — what FiveLaunch v2 is built on.", aliases: ["tauri 2"] },
-			{ name: "Rust", link: "https://www.rust-lang.org/", description: "A systems language with memory safety enforced at compile time — my pick for code that touches people's files." },
+			{ name: "Tauri", link: "https://tauri.app/", description: "Lightweight desktop apps with a Rust core and the system webview, what FiveLaunch v2 is built on.", aliases: ["tauri 2"] },
+			{ name: "Rust", link: "https://www.rust-lang.org/", description: "A systems language with memory safety enforced at compile time, my pick for code that touches people's files." },
 			{ name: "Kotlin", link: "https://kotlinlang.org/", description: "A modern programming language for JVM and Android." },
 		],
 	},
@@ -102,24 +105,22 @@ const allCategories = projectSpecificItems.length
 	? [...categories, { title: "Project-Specific Tools", items: projectSpecificItems }]
 	: categories;
 
-// Stable-ish scattered size per icon (re-tilted on the client, see <script>).
-const sizeFor = (name: string) => {
-	let h = 0;
-	for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-	return ["is-lg", "is-md", "is-sm"][h % 3];
-};
+// Every icon renders at one size; only the tilt is random (re-rolled on the
+// client, see <script>).
 const rndTilt = (min: number, range: number) => {
 	const sign = Math.random() < 0.5 ? -1 : 1;
 	return Math.round(sign * (min + Math.random() * range) * 100) / 100;
 };
 
-const items = allCategories.flatMap((c) =>
-	c.items.map((i) => {
+const items = allCategories.flatMap((c, ci) =>
+	c.items.map((i, ii) => {
 		const usage = getUsage(i);
 		const hasProjects = (usage?.projects?.length ?? 0) > 0;
 		return {
 			name: i.name,
 			category: c.title,
+			// A hairline goes in ahead of the first icon of every category but the first.
+			startsCategory: ci > 0 && ii === 0,
 			icon: getTechIconName(i.name, i.aliases),
 			link: i.link,
 			description: i.description,
@@ -129,7 +130,6 @@ const items = allCategories.flatMap((c) =>
 			slug: techSlug(i.name),
 			tilt: rndTilt(3, 6),
 			tipTilt: rndTilt(2, 4),
-			size: sizeFor(i.name),
 		};
 	}),
 );
@@ -138,9 +138,11 @@ const items = allCategories.flatMap((c) =>
 <div class="tech-collage" data-tech-collage>
 	{
 		items.map((t) => (
+			<Fragment>
+				{t.startsCategory && <span class="tech-collage__sep" aria-hidden="true" />}
 			<div class="tech-collage__cell">
 				<a
-					class:list={["tech-collage__item", t.size, t.hasProjects && "is-project"]}
+					class:list={["tech-collage__item", t.hasProjects && "is-project"]}
 					style={`--tilt:${t.tilt}deg`}
 					href={t.link ?? "#"}
 					target="_blank"
@@ -158,6 +160,7 @@ const items = allCategories.flatMap((c) =>
 					{t.description && <span class="tech-collage__tip-desc">{t.description}</span>}
 				</span>
 			</div>
+			</Fragment>
 		))
 	}
 </div>
