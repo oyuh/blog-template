@@ -29,7 +29,6 @@ Notes:
 - Missing paths are ignored.
 */
 
-const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
 const { spawn } = require("node:child_process");

@@ -171,6 +171,7 @@ const keys = { left: false, right: false };
 /** One shot per press: held keys and held mouse buttons must not auto-fire. */
 let fireHeld = false;
 
+// biome-ignore lint/style/noNonNullAssertion: modulo of length is always in range
 const formation = () => FORMATIONS[(level.value - 1) % FORMATIONS.length]!;
 // NOTE: scoreText/nextLevel/onMove are referenced only from the template. Don't
 // let an unused-vars autofix rename them to `_foo` — it can't see template usage
@@ -474,6 +475,7 @@ function step(dt: number) {
 	}
 
 	for (let i = shots.value.length - 1; i >= 0; i--) {
+		// biome-ignore lint/style/noNonNullAssertion: i is bounded by the loop
 		const s = shots.value[i]!;
 		s.y += s.vy * dt;
 		if (s.y < -20) {
@@ -491,6 +493,7 @@ function step(dt: number) {
 	}
 
 	for (let i = bombs.value.length - 1; i >= 0; i--) {
+		// biome-ignore lint/style/noNonNullAssertion: i is bounded by the loop
 		const s = bombs.value[i]!;
 		s.y += s.vy * dt;
 		if (s.y > fieldH) {

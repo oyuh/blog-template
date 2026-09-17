@@ -25,26 +25,28 @@ declare module "astro-webmanifest" {
 	export default webmanifest;
 }
 
-interface ImportMetaEnv {
-	readonly BASE_URL: string;
-	readonly PUBLIC_TEMPLATE_REPO_URL?: string;
-	readonly PUBLIC_COMMENTS_API_ORIGIN?: string;
-	readonly PUBLIC_ENABLE_VERCEL_ANALYTICS?: string;
-	readonly PUBLIC_ENABLE_SPEED_INSIGHTS?: string;
-	readonly VERCEL?: string;
-	readonly PUBLIC_COMMENTS_DEBUG?: string;
-	readonly GITHUB_TOKEN?: string;
-	readonly GITHUB_OWNER?: string;
-	readonly GITHUB_REPO?: string;
-	// Secret for the music-thing worker, read server-side only by /api/now-playing.
-	readonly MUSIC_THING_SECRET?: string;
-	readonly UMAMI_API_KEY?: string;
-	readonly UMAMI_HOST?: string;
-	readonly UMAMI_WEBSITE_ID?: string;
-}
+declare global {
+	interface ImportMetaEnv {
+		readonly BASE_URL: string;
+		readonly PUBLIC_TEMPLATE_REPO_URL?: string;
+		readonly PUBLIC_COMMENTS_API_ORIGIN?: string;
+		readonly PUBLIC_ENABLE_VERCEL_ANALYTICS?: string;
+		readonly PUBLIC_ENABLE_SPEED_INSIGHTS?: string;
+		readonly VERCEL?: string;
+		readonly PUBLIC_COMMENTS_DEBUG?: string;
+		readonly GITHUB_TOKEN?: string;
+		readonly GITHUB_OWNER?: string;
+		readonly GITHUB_REPO?: string;
+		// Secret for the music-thing worker, read server-side only by /api/now-playing.
+		readonly MUSIC_THING_SECRET?: string;
+		readonly UMAMI_API_KEY?: string;
+		readonly UMAMI_HOST?: string;
+		readonly UMAMI_WEBSITE_ID?: string;
+	}
 
-interface ImportMeta {
-	readonly env: ImportMetaEnv;
+	interface ImportMeta {
+		readonly env: ImportMetaEnv;
+	}
 }
 
 export {};

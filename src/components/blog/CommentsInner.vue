@@ -33,7 +33,7 @@ const OPEN_STATE_KEY = "comments:open:v1";
 const DESKTOP_MQL = "(min-width: 1024px)";
 const SITE_AUTHOR_GITHUB_LOGIN = "oyuh";
 
-const variant = computed(() => props.variant ?? "sidebar");
+const resolvedVariant = computed(() => props.variant ?? "sidebar");
 
 const debug = String(import.meta.env.PUBLIC_COMMENTS_DEBUG ?? "").toLowerCase() === "true";
 function log(...args: unknown[]) {
@@ -765,15 +765,15 @@ onMounted(() => {
 	// open/close events route to the right instance
 	const onOpen = () => {
 		if (isDesktop.value) {
-			if (variant.value !== "overlay") dockOpen.value = true;
-		} else if (variant.value === "overlay") {
+			if (resolvedVariant.value !== "overlay") dockOpen.value = true;
+		} else if (resolvedVariant.value === "overlay") {
 			mobileOpen.value = true;
 		}
 	};
 	const onClose = () => {
 		if (isDesktop.value) {
-			if (variant.value !== "overlay") dockOpen.value = false;
-		} else if (variant.value === "overlay") {
+			if (resolvedVariant.value !== "overlay") dockOpen.value = false;
+		} else if (resolvedVariant.value === "overlay") {
 			mobileOpen.value = false;
 		}
 	};
@@ -785,7 +785,7 @@ onMounted(() => {
 	};
 
 	// restore desktop dock open state
-	if (isDesktop.value && variant.value !== "overlay") {
+	if (isDesktop.value && resolvedVariant.value !== "overlay") {
 		try {
 			if (window.localStorage.getItem(OPEN_STATE_KEY) === "true") dockOpen.value = true;
 		} catch {
@@ -821,7 +821,7 @@ let tocPrev = { actions: "", navToggle: "" };
 
 // persist dock state
 watch(dockOpen, (v) => {
-	if (variant.value === "overlay") return;
+	if (resolvedVariant.value === "overlay") return;
 	try {
 		window.localStorage.setItem(OPEN_STATE_KEY, String(v));
 	} catch {
@@ -999,7 +999,7 @@ provide(commentsCtxKey, ctx);
 
 	<!-- Desktop dock (sidebar instance) -->
 	<section
-		v-else-if="isDesktop && variant !== 'overlay'"
+		v-else-if="isDesktop && resolvedVariant !== 'overlay'"
 		class="comments-dock__inner"
 		aria-label="Comments"
 	>

@@ -11,7 +11,7 @@ export function calculateReadingTime(post: CollectionEntry<"post">): string {
 		const result = getReadingTime(postBody);
 		const minutes = Math.max(1, Math.ceil(result.minutes));
 		return `${minutes} min read`;
-	} catch (e) {
+	} catch {
 		return "1 min read";
 	}
 }

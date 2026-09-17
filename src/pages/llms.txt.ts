@@ -7,7 +7,7 @@ export const prerender = true;
 
 // https://llmstxt.org — a plain-markdown index of the site for LLMs, generated
 // from the collections so it can't drift out of date the way a hand-written one would.
-const BANNER = String.raw`
+const BANNER = `
 ██╗      █████╗ ██╗    ██╗███████╗ ██████╗ ███╗   ██╗
 ██║     ██╔══██╗██║    ██║██╔════╝██╔═══██╗████╗  ██║
 ██║     ███████║██║ █╗ ██║███████╗██║   ██║██╔██╗ ██║

@@ -1,7 +1,7 @@
 {
 	"$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
 	"files": {
-		"includes": ["**", "!**/*.astro", "!**/*.css", "!public/admin", "!.vscode"]
+		"includes": ["**", "!**/*.astro", "!**/*.css", "!**/*.svg", "!public/admin", "!.vscode"]
 	},
 	"formatter": {
 		"indentStyle": "tab",
@@ -14,13 +14,16 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"a11y": {
 				"noSvgWithoutTitle": "off",
 				"noStaticElementInteractions": "off"
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "off"
+			},
+			"style": {
+				"useVueMultiWordComponentNames": "off"
 			},
 			"suspicious": {
 				"noArrayIndexKey": "off",
