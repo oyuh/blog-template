@@ -2,7 +2,6 @@
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
 import "@/styles/global.css";
-import SpeedInsights from "@vercel/speed-insights/astro";
 
 type Props = SiteMeta;
 
@@ -12,9 +11,6 @@ const titleSeparator = "|";
 const siteTitle = `${title} ${titleSeparator} ${siteConfig.title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const socialImageURL = new URL(ogImage ? ogImage : "/social-card.png", Astro.url).href;
-const enableSpeedInsights =
-	(import.meta.env.PUBLIC_ENABLE_SPEED_INSIGHTS ?? "").toLowerCase() === "true" ||
-	import.meta.env.VERCEL === "1";
 ---
 
 <meta charset="utf-8" />
@@ -71,17 +67,6 @@ const enableSpeedInsights =
 {/* RSS auto-discovery */}
 <link href="/rss.xml" title="Blog" rel="alternate" type="application/rss+xml" />
 <link href="/notes/rss.xml" title="Notes" rel="alternate" type="application/rss+xml" />
-
-{
-	enableSpeedInsights && (
-		<>
-			<script is:inline>
-				window.speedInsightsBeforeSend = (data) => data;
-			</script>
-			<SpeedInsights />
-		</>
-	)
-}
 
 {/* Umami Analytics - silently handle ad blocker */}
 <script is:inline>

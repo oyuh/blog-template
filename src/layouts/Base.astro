@@ -6,7 +6,6 @@ import Footer from "@/components/layout/Footer.astro";
 import Header from "@/components/layout/Header.astro";
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
-import Analytics from "@vercel/analytics/astro";
 // Self-hosted fonts (default weight 400 for the sans).
 import "@fontsource-variable/plus-jakarta-sans/index.css";
 import "@fontsource-variable/geist-mono/index.css";
@@ -20,16 +19,10 @@ const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
 	centerMain = false,
 } = Astro.props;
-
-const enableVercelAnalytics =
-	(import.meta.env.PUBLIC_ENABLE_VERCEL_ANALYTICS ?? "").toLowerCase() === "true" ||
-	import.meta.env.VERCEL === "1";
 ---
 <html class="scroll-smooth" lang={siteConfig.lang}>
 	<head>
 		<BaseHead articleDate={articleDate} description={description} ogImage={ogImage} title={title} />
-
-		{enableVercelAnalytics && <Analytics />}
 
 		{/* Apply personal site settings before paint to avoid a flash of removed/disabled UI.
 		    Mirrors `applySettingsToDocument` in src/utils/siteSettings.ts. */}

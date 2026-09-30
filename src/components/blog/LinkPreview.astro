@@ -33,23 +33,10 @@ try {
 			</div>
 		</a>
 	) : (
-		<span
-			class="link-preview-wrapper"
-			data-link-preview
-			data-url={url}
-			data-display-url={displayUrl}
-			data-mode="hover"
-		>
-			<a
-				class="link-preview-link"
-				href={url}
-				target="_blank"
-				rel="noopener noreferrer"
-				data-link-preview-link
-			>
-				<slot>{url}</slot>
-			</a>
-		</span>
+		// Astro 7 keeps whitespace between these tags, which would put a space
+		// inside the link and before any following punctuation. Keep them touching.
+		// prettier-ignore
+		<span class="link-preview-wrapper" data-link-preview data-url={url} data-display-url={displayUrl} data-mode="hover"><a class="link-preview-link" href={url} target="_blank" rel="noopener noreferrer" data-link-preview-link><slot>{url}</slot></a></span>
 	)
 }
 

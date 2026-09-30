@@ -33,3 +33,7 @@ yarn-error.log*
 
 # ShipStudio metadata
 .shipstudio/
+
+# Cloudflare
+.wrangler/
+.dev.vars

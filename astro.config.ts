@@ -1,14 +1,13 @@
 import fs from "node:fs";
 // Rehype plugins
 import { rehypeHeadingIds, unified } from "@astrojs/markdown-remark";
+import cloudflare from "@astrojs/cloudflare";
 import mdx from "@astrojs/mdx";
-import node from "@astrojs/node";
 import sitemap from "@astrojs/sitemap";
-import vercel from "@astrojs/vercel";
 import vue from "@astrojs/vue";
 import tailwind from "@tailwindcss/vite";
 import type { AstroUserConfig } from "astro";
-import { defineConfig } from "astro/config";
+import { defineConfig, envField } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
 import webmanifest from "astro-webmanifest";
@@ -27,19 +26,15 @@ import { remarkAdmonitions } from "./src/plugins/remark-admonitions"; /* Add adm
 import remarkInlineImages from "./src/plugins/remark-inline-images";
 import { expressiveCodeOptions, siteConfig } from "./src/site.config";
 
-// `@astrojs/vercel` intentionally does not support `astro preview`.
-// Our `bun preview` script rebuilds with `ASTRO_ADAPTER=node` so local preview works.
-const useNodeAdapter = process.env.ASTRO_ADAPTER === "node";
 const vitePlugins = [
 	tailwind(),
 	rawFonts([".ttf", ".woff"]),
 	boneyardPlugin(),
 ] as unknown as NonNullable<NonNullable<AstroUserConfig["vite"]>["plugins"]>;
 
-// Markdown pipeline plugins. Defined once and applied to BOTH the core `.md`
-// pipeline (via the `processor` below) AND the top-level keys — `@astrojs/mdx`
-// reads the top-level `remarkPlugins`/`rehypePlugins`/`gfm`, NOT `markdown.processor`,
-// so `.mdx` posts need them here or they lose `:::` directives, GFM tables, etc.
+// Markdown pipeline plugins, shared by the `.md` processor (`markdown.processor`)
+// and the `.mdx` processor (`mdx({ processor })`). Both stay on unified so these
+// remark/rehype plugins keep running; Astro 7's default Sätteri processor ignores them.
 type MarkdownConfig = NonNullable<AstroUserConfig["markdown"]>;
 const remarkPlugins: NonNullable<MarkdownConfig["remarkPlugins"]> = [
 	remarkDirective,
@@ -64,7 +59,16 @@ export default defineConfig({
 	// which forces a reflow that the centred layout amplifies. It's dev-only and we
 	// don't use it, so disable it.
 	devToolbar: { enabled: false },
-	adapter: useNodeAdapter ? node({ mode: "standalone" }) : vercel(),
+	// Prerender in Node, not workerd: the OG image route uses the native
+	// `@resvg/resvg-js` binary and about.astro reads the filesystem.
+	// `passthrough` keeps images unprocessed, matching the `noop` service below.
+	adapter: cloudflare({ prerenderEnvironment: "node", imageService: "passthrough" }),
+	env: {
+		schema: {
+			// Secret for the music-thing worker, read server-side only by /api/now-playing.
+			MUSIC_THING_SECRET: envField.string({ context: "server", access: "secret", optional: true }),
+		},
+	},
 	image: {
 		service: { entrypoint: "astro/assets/services/noop" },
 	},
@@ -104,23 +108,17 @@ export default defineConfig({
 			},
 		}),
 		sitemap(),
-		// `@astrojs/mdx` reads its plugins from these integration options (it does
-		// NOT read `markdown.processor`), so the `.mdx` pipeline gets directives,
-		// GFM, etc. here. The core `.md` pipeline is fed by `markdown.processor` below.
+		// Expressive Code only auto-injects into the `.md` processor and globally sets
+		// `syntaxHighlight: false`, so `.mdx` gets its own processor with EC's rehype
+		// plugin added LAST (it must run on the final code nodes). Without it, `.mdx`
+		// code blocks render completely unstyled.
 		mdx({
-			remarkPlugins: remarkPlugins as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["remarkPlugins"]>,
-			// Expressive Code only auto-injects into the `.md` `processor` (see `markdown`
-			// below) and globally sets `syntaxHighlight: false`. MDX has its own plugin
-			// pipeline that doesn't read `processor`, so without adding EC's rehype plugin
-			// here, `.mdx` code blocks render completely unstyled. Keep it LAST so it runs
-			// on the final code nodes; the inherited `syntaxHighlight: false` avoids any
-			// double highlighting.
-			rehypePlugins: [
-				...rehypePlugins,
-				[rehypeExpressiveCode, expressiveCodeOptions],
-			] as NonNullable<NonNullable<Parameters<typeof mdx>[0]>["rehypePlugins"]>,
-			remarkRehype: remarkRehypeOptions,
-			gfm: true,
+			processor: unified({
+				remarkPlugins,
+				rehypePlugins: [...rehypePlugins, [rehypeExpressiveCode, expressiveCodeOptions]],
+				remarkRehype: remarkRehypeOptions,
+				gfm: true,
+			}),
 		}),
 		// PWA manifest generation. Not strictly required for the site to run,
 		// but enabling it avoids browsers repeatedly requesting a missing manifest.
@@ -161,10 +159,6 @@ export default defineConfig({
 		vue(),
 	],
 	markdown: {
-		// Only `processor` here — the deprecated top-level `remarkPlugins`/
-		// `rehypePlugins`/`remarkRehype`/`gfm` keys are gone (Astro warns on them).
-		// This `processor` feeds the core `.md` pipeline; `.mdx` gets the same
-		// plugins via the `mdx({...})` integration options above.
 		processor: unified({
 			remarkPlugins,
 			rehypePlugins,
@@ -172,6 +166,9 @@ export default defineConfig({
 			gfm: true,
 		}),
 	},
+	// Astro 7 defaults to JSX-style compression, which drops the spaces between
+	// newline-separated inline elements (footer links, tech lists). Keep HTML-aware.
+	compressHTML: true,
 	// https://docs.astro.build/en/guides/prefetch/
 	prefetch: true,
 	vite: {
@@ -182,6 +179,11 @@ export default defineConfig({
 		optimizeDeps: {
 			exclude: ["@resvg/resvg-js"],
 			include: ["aos", "baffle"],
+		},
+		environments: {
+			// Dev renders on-demand pages in workerd. A dependency discovered on first
+			// request triggers a reload that drops that request, so pre-bundle it.
+			ssr: { optimizeDeps: { include: ["astro-icon/components"] } },
 		},
 		plugins: vitePlugins,
 	},

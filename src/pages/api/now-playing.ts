@@ -1,3 +1,4 @@
+import { MUSIC_THING_SECRET } from "astro:env/server";
 import type { APIRoute } from "astro";
 
 // Server-side proxy for the music-thing worker (https://github.com/oyuh/music-thing).
@@ -58,7 +59,7 @@ function json(body: unknown, status = 200): Response {
 const idle = () => json({ status: "idle", currentTrack: null });
 
 export const GET: APIRoute = async () => {
-	const secret = import.meta.env.MUSIC_THING_SECRET ?? process.env.MUSIC_THING_SECRET;
+	const secret = MUSIC_THING_SECRET;
 	if (!secret) {
 		console.error("[now-playing] MUSIC_THING_SECRET is not configured");
 		return json({ status: "idle", currentTrack: null, error: "not_configured" }, 500);

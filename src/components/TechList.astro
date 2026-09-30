@@ -106,7 +106,7 @@ const allCategories = projectSpecificItems.length
 	: categories;
 
 // Every icon renders at one size; only the tilt is random (re-rolled on the
-// client, see <script>).
+// client, see the script below).
 const rndTilt = (min: number, range: number) => {
 	const sign = Math.random() < 0.5 ? -1 : 1;
 	return Math.round(sign * (min + Math.random() * range) * 100) / 100;
