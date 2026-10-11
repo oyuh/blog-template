@@ -60,8 +60,8 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 //post page
 ---
 
-<PageLayout meta={meta} centerMain>
-	<div class="mb-6 flex items-center gap-3">
+<PageLayout meta={meta}>
+	<div class="mb-8 flex items-center gap-3">
 		<h1 class="title">Posts</h1>
 		<a class="text-accent" href="/rss.xml" target="_blank">
 			<span class="sr-only">RSS feed</span>
@@ -77,7 +77,7 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 							<span class="sr-only">Posts in</span>
 							{yearKey}
 						</h2>
-						<ul class="mt-5 mb-16 text-start">
+						<ul class="mt-3 mb-10 text-start">
 							{groupedByYear[yearKey]?.map((p) => (
 								<li class="w-full">
 									<PostPreview post={p} />
@@ -113,13 +113,12 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 									<path d="M6 9h-.01" />
 								</svg>
 							</h2>
-							<ul class="flex flex-wrap gap-2">
+							<ul class="flex flex-wrap gap-x-3.5 gap-y-2">
 								{uniqueTags.map((tag) => (
 									<li>
-										<a class="lawson-link flex items-center justify-center" href={`/tags/${tag}/`}>
-											<span aria-hidden="true">#</span>
+										<a class="text-accent-2" href={`/tags/${tag}/`}>
 											<span class="sr-only">View all posts with the tag</span>
-											{tag}
+											<span class="hl-hover"><span aria-hidden="true">#</span>{tag}</span>
 										</a>
 									</li>
 								))}
@@ -139,16 +138,13 @@ const descYearKeys = Object.keys(groupedByYear).sort((a, b) => +b - +a);
 								Tech
 								<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:tools" />
 							</h2>
-							<ul class="flex flex-wrap gap-2">
+							<ul class="flex flex-wrap gap-x-3.5 gap-y-2">
 								{uniqueTechs.map((tech) => (
 									<li>
-										<a
-											class="lawson-link inline-flex items-center gap-1.5"
-											href={`/tech/${tech.slug}/`}
-										>
-											<Icon aria-hidden="true" class="h-4 w-4" focusable="false" name={getTechIconName(tech.name)} />
+										<a class="inline-flex items-center gap-1.5 text-accent-2" href={`/tech/${tech.slug}/`}>
+											<Icon aria-hidden="true" class="h-4 w-4 text-accent" focusable="false" name={getTechIconName(tech.name)} />
 											<span class="sr-only">View all posts using</span>
-											{tech.name}
+											<span class="hl-hover">{tech.name}</span>
 										</a>
 									</li>
 								))}

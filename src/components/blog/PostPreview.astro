@@ -1,110 +1,42 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import FormattedDate from "@/components/FormattedDate.astro";
+import PostTip from "@/components/blog/PostTip.astro";
 import { calculateReadingTime } from "@/utils/readingTime";
-import { getTechIconName } from "@/utils/techIcons";
-import { tiltFromSeed } from "@/utils/tilt";
-import { Icon } from "astro-icon/components";
 import type { HTMLTag, Polymorphic } from "astro/types";
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
 	post: CollectionEntry<"post">;
+	/** Show the tilted preview card on hover. */
+	tip?: boolean;
 	withDesc?: boolean;
 };
 
-const { post, as: Tag = "div" } = Astro.props;
+const { post, as: Tag = "div", tip = true } = Astro.props;
 
-const technologies = (post.data.technologies ?? []).map((tech: string) => tech.trim()).filter(Boolean);
-const tags = post.data.tags ?? [];
-
-// Tags (plain text) + technologies (icon + name) feed the hover card marquee.
-const marqueeCount = tags.length + technologies.length;
-
-// Reading time — shared helper (guards an undefined body) so the row matches the
-// post header exactly. NOTE: the old `post.render()` API was removed in the content
-// layer; calling it threw every time and then `post.body.split()` crashed on posts
-// whose body is undefined (e.g. some MDX project posts surfaced on tag/tech pages).
-const readingTime = calculateReadingTime(post);
-
-const hasTip = Boolean(post.data.coverImage || post.data.description || marqueeCount);
-
-// Gentle, per-post random tilt (stable for a given post).
-const tilt = tiltFromSeed(post.id);
+// "5 min read" → "5 min" for the compact meta column.
+const readMinutes = calculateReadingTime(post).replace(/ read$/, "");
 ---
 
-<div class="post-row group">
+<div class:list={["post-row", { "post-tip-host": tip }]}>
 	<a href={`/posts/${post.id}/`} data-astro-prefetch class="post-row__link" data-pagefind-body={true}>
-		<Tag class="post-row__title">{post.data.title}</Tag>
+		<Tag class="post-row__title">
+			<span class="hl-hover">{post.data.title}</span>
+		</Tag>
 		<span class="post-row__date">
 			{post.data.draft && <span class="post-row__draft">Draft</span>}
+			<span>{readMinutes}</span>
+			<span aria-hidden="true">·</span>
 			<FormattedDate
 				date={post.data.publishDate}
 				dateTimeOptions={{ day: "numeric", month: "short", year: "numeric" }}
 			/>
 		</span>
 	</a>
-
-	{hasTip && (
-		<div class="post-row__tip" style={`--tilt:${tilt}deg`} aria-hidden="true">
-			{post.data.coverImage && (
-				<div class="post-row__tip-img" style={`background-image:url(${post.data.coverImage.src.src});`} />
-			)}
-			<div class="post-row__tip-body">
-				<div class="post-row__tip-meta">
-					{readingTime && (
-						<span class="post-row__tip-read">
-							<svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-							</svg>
-							{readingTime}
-						</span>
-					)}
-					<span class="post-row__tip-date">
-						<FormattedDate
-							date={post.data.publishDate}
-							dateTimeOptions={{ day: "numeric", month: "short", year: "numeric" }}
-						/>
-					</span>
-				</div>
-				{post.data.description && (
-					<p class="post-row__tip-desc">{post.data.description}</p>
-				)}
-			</div>
-
-			{marqueeCount > 0 && (
-				<div class="post-row__marquee">
-					<div class="post-row__marquee-track">
-						{[0, 1].map(() => (
-							<span class="post-row__marquee-group" aria-hidden="true">
-								{tags.map((tag: string) => (
-									<>
-										<span class="post-row__marquee-item">#{tag}</span>
-										<span class="post-row__marquee-sep">·</span>
-									</>
-								))}
-								{technologies.map((tech: string) => (
-									<>
-										<span class="post-row__marquee-item post-row__marquee-tech">
-											<Icon class="post-row__marquee-icon" name={getTechIconName(tech)} />
-											{tech}
-										</span>
-										<span class="post-row__marquee-sep">·</span>
-									</>
-								))}
-							</span>
-						))}
-					</div>
-				</div>
-			)}
-		</div>
-	)}
+	{tip && <PostTip post={post} />}
 </div>
 
 <style>
-	.post-row {
-		position: relative;
-	}
-
 	.post-row__link {
 		display: flex;
 		align-items: baseline;
@@ -122,13 +54,6 @@ const tilt = tiltFromSeed(post.id);
 		font-weight: 500;
 		line-height: 1.35;
 		color: var(--color-accent-2);
-		text-underline-offset: 3px;
-	}
-
-	/* Hover = underline, not a colour change. */
-	.post-row:hover .post-row__title,
-	.post-row__link:focus-visible .post-row__title {
-		text-decoration: underline;
 	}
 
 	.post-row__date {
@@ -149,156 +74,4 @@ const tilt = tiltFromSeed(post.id);
 		letter-spacing: 0.04em;
 		color: var(--color-red-500, oklch(62% 0.18 25));
 	}
-
-	/* ---- Tilted hover card (right side, flat — no glow / no shadow) ---------- */
-	.post-row__tip {
-		position: absolute;
-		bottom: calc(100% - 0.25rem);
-		right: 0.25rem;
-		z-index: 50;
-		width: 19rem;
-		max-width: min(19rem, calc(100vw - 2rem));
-		overflow: hidden;
-		border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-		border-radius: 0.25rem;
-		background: var(--color-global-bg);
-		opacity: 0;
-		transform: translateY(8px) rotate(var(--tilt, -2deg)) scale(0.98);
-		transform-origin: bottom right;
-		pointer-events: none;
-		transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-
-	.post-row:hover .post-row__tip,
-	.post-row__link:focus-visible ~ .post-row__tip {
-		opacity: 1;
-		transform: translateY(0) rotate(var(--tilt, -2deg)) scale(1);
-	}
-
-	/* Cover image is full at the top and fades out toward the bottom. */
-	.post-row__tip-img {
-		width: 100%;
-		aspect-ratio: 5 / 2;
-		background-size: cover;
-		background-position: center;
-		-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
-		mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
-	}
-
-	.post-row__tip-body {
-		padding: 0.6rem 0.85rem 0.55rem;
-	}
-
-	.post-row__tip-meta {
-		display: flex;
-		align-items: center;
-		gap: 0.55rem;
-		font-size: 0.72rem;
-		color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
-	}
-
-	.post-row__tip-read {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3rem;
-		font-weight: 600;
-		color: var(--color-accent);
-	}
-
-	.post-row__tip-date {
-		font-variant-numeric: tabular-nums;
-	}
-
-	.post-row__tip-desc {
-		margin: 0.4rem 0 0;
-		font-size: 0.82rem;
-		line-height: 1.5;
-		color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
-		display: -webkit-box;
-		-webkit-line-clamp: 3;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
-	}
-
-	/* ---- Sliding tag + tech strip — plain text, separators, slow ------------- */
-	.post-row__marquee {
-		overflow: hidden;
-		border-top: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
-		padding: 0.45rem 0;
-		-webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-		mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
-	}
-
-	.post-row__marquee-track {
-		display: flex;
-		width: max-content;
-		animation: post-row-marquee 36s linear infinite;
-	}
-
-	.post-row__marquee-group {
-		display: inline-flex;
-		align-items: center;
-	}
-
-	.post-row__marquee-item {
-		flex: none;
-		padding-inline: 0.45rem;
-		font-size: 0.74rem;
-		font-weight: 500;
-		white-space: nowrap;
-		color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
-	}
-
-	.post-row__marquee-tech {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.3rem;
-	}
-
-	.post-row__marquee-icon {
-		width: 0.95rem;
-		height: 0.95rem;
-		color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
-	}
-
-	.post-row__marquee-sep {
-		flex: none;
-		color: color-mix(in srgb, var(--color-accent) 70%, transparent);
-		font-weight: 700;
-	}
-
-	@keyframes post-row-marquee {
-		from { transform: translateX(0); }
-		to { transform: translateX(-50%); }
-	}
-
-	/* Touch / no-hover devices: the card is decorative, so suppress it. */
-	@media (hover: none) {
-		.post-row__tip {
-			display: none;
-		}
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.post-row__marquee-track {
-			animation: none;
-		}
-		.post-row__tip {
-			transition: opacity 0.15s ease;
-		}
-	}
 </style>
-
-<script>
-	// Re-randomise each card's tilt on every load so it's never the same twice.
-	import { randomTilt } from "@/utils/tilt";
-
-	const applyTilts = () => {
-		for (const tip of document.querySelectorAll<HTMLElement>(".post-row__tip")) {
-			tip.style.setProperty("--tilt", `${randomTilt()}deg`);
-		}
-	};
-
-	applyTilts();
-	document.addEventListener("astro:page-load", applyTilts);
-</script>

@@ -1,6 +1,6 @@
 ---
 // Contact links as condensed rows — same flat language as the post list:
-// separator lines, bare muted icons, underline-only hover, mono handles.
+// separator lines, bare muted icons, marker hover, mono handles.
 import { Icon } from "astro-icon/components";
 
 type Social = {
@@ -34,7 +34,7 @@ const socials: Social[] = [
 					aria-label={`${s.friendlyName}: ${s.label}`}
 				>
 					<Icon class="contact-row__icon" aria-hidden="true" name={s.name} />
-					<span class="contact-row__name">{s.friendlyName}</span>
+					<span class="contact-row__name"><span class="hl-hover">{s.friendlyName}</span></span>
 					<span class="contact-row__handle">{s.label}</span>
 				</a>
 			</li>

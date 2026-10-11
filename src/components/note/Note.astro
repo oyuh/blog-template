@@ -21,8 +21,8 @@ const { Content } = await render(note);
 	<Tag class="title" class:list={{ "text-base": isPreview }}>
 		{
 			isPreview ? (
-				<a class="lawson-link" href={`/notes/${note.id}/`}>
-					{note.data.title}
+				<a href={`/notes/${note.id}/`}>
+					<span class="hl-hover">{note.data.title}</span>
 				</a>
 			) : (
 				<>{note.data.title}</>

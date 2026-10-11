@@ -1,26 +1,29 @@
 ---
+import type { CollectionEntry } from "astro:content";
+import PostPreview from "@/components/blog/PostPreview.astro";
 import { getAllPosts, getTechnologyUsage } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 import { getTechIconName, techSlug } from "@/utils/techIcons";
 import { Icon } from "astro-icon/components";
 
 const allPosts = await getAllPosts();
+const postsById = new Map(allPosts.map((post) => [post.id, post]));
 const usage = getTechnologyUsage(allPosts);
 
-const techCards = Object.values(usage)
+const techGroups = Object.values(usage)
 	.sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-	.map((u) => {
-		const coverSrc = u.projects.find((p) => p.coverImage?.src)?.coverImage?.src ?? null;
-		const featuredPosts = u.projects.slice(0, 3).map((p) => ({ id: p.id, title: p.title }));
-		return {
-			name: u.name,
-			slug: techSlug(u.name),
-			count: u.count,
-			icon: getTechIconName(u.name),
-			coverSrc,
-			featuredPosts,
-		};
-	});
+	.map((u) => ({
+		name: u.name,
+		slug: techSlug(u.name),
+		count: u.count,
+		icon: getTechIconName(u.name),
+		posts: u.projects
+			.map((p) => postsById.get(p.id))
+			.filter((post): post is CollectionEntry<"post"> => post !== undefined),
+	}));
+
+// Latest few posts per group; the rest live on the detail page.
+const SHOWN = 3;
 
 const meta = {
 	description: "Explore the technologies I build with and jump into the posts that use them.",
@@ -30,49 +33,40 @@ const meta = {
 export const prerender = true;
 ---
 
-<PageLayout meta={meta} centerMain>
+<PageLayout meta={meta}>
 	<div data-pagefind-ignore="all">
 		<div class="mb-10 space-y-3">
 			<h1 class="title text-3xl">Tech</h1>
 			<p class="max-w-2xl text-base text-global-text/80 dark:text-global-text/70">
-				The tools and frameworks I build with — each card jumps to the posts where I actually use it.
+				The tools and frameworks I build with, and the posts where I actually use them.
 			</p>
 		</div>
-		<div class="index-grid">
+		<div class="index-groups">
 			{
-				techCards.map(({ name, slug, count, icon, coverSrc, featuredPosts }) => (
-					<a
-						class="index-card"
-						data-astro-prefetch
-						href={`/tech/${slug}/`}
-						title={`View ${count} post${count === 1 ? "" : "s"} using ${name}`}
-					>
-						{coverSrc ? (
-							<div class="index-card__img" style={`background-image: url(${coverSrc});`} aria-hidden="true" />
-						) : (
-							<div class="index-card__img index-card__img--none" aria-hidden="true" />
-						)}
-						<div class="index-card__body">
-							<span class="index-card__kicker">Tech</span>
-							<h2 class="index-card__title">
-								<Icon aria-hidden="true" class="index-card__title-icon" focusable="false" name={icon} />
-								{name}
+				techGroups.map(({ name, slug, count, icon, posts }) => (
+					<section aria-label={name}>
+						<div class="index-group__head">
+							<h2 class="index-group__title">
+								<a class="index-group__name" data-astro-prefetch href={`/tech/${slug}/`}>
+									<Icon aria-hidden="true" class="index-group__icon" focusable="false" name={icon} />
+									<span class="hl-hover">{name}</span>
+								</a>
+								<span class="index-group__count">{count}</span>
 							</h2>
-							<span class="index-card__count">
-								{count} post{count === 1 ? "" : "s"}
-							</span>
-							{featuredPosts.length > 0 && (
-								<ul class="index-card__posts">
-									{featuredPosts.map((post) => (
-										<li class="index-card__post">
-											<span class="index-card__dot" aria-hidden="true" />
-											<span class="truncate">{post.title}</span>
-										</li>
-									))}
-								</ul>
+							{count > SHOWN && (
+								<a class="index-group__all underline-hover" data-astro-prefetch href={`/tech/${slug}/`}>
+									View all →
+								</a>
 							)}
 						</div>
-					</a>
+						<ul role="list">
+							{posts.slice(0, SHOWN).map((post) => (
+								<li>
+									<PostPreview as="h3" post={post} tip={false} />
+								</li>
+							))}
+						</ul>
+					</section>
 				))
 			}
 		</div>

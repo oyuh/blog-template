@@ -9,7 +9,7 @@ import { getTechIconName, techSlug } from "@/utils/techIcons";
 import { Icon } from "astro-icon/components";
 
 type Tech = { name: string; link?: string; description?: string; aliases?: string[] };
-type Category = { title: string; items: Tech[] };
+type Category = { title: string; icon: string; items: Tech[] };
 
 interface Props {
 	techUsage?: TechnologyUsage;
@@ -21,6 +21,7 @@ const norm = (name: string) => name.toLowerCase().trim();
 const categories: Category[] = [
 	{
 		title: "Web Development",
+		icon: "mdi:web",
 		items: [
 			{ name: "React", link: "https://reactjs.org/", description: "A popular JavaScript library for building user interfaces.", aliases: ["react 19"] },
 			{ name: "TanStack Start", link: "https://tanstack.com/start", description: "A full-stack React framework built on TanStack Router, with server functions and typed routes." },
@@ -39,6 +40,7 @@ const categories: Category[] = [
 	},
 	{
 		title: "Databases & Storage",
+		icon: "mdi:database",
 		items: [
 			{ name: "PostgreSQL", link: "https://www.postgresql.org/", description: "I use the serverless Postgres, powered by Neon, integrated into Vercel." },
 			{ name: "Drizzle", link: "https://orm.drizzle.team/", description: "A TypeScript-first ORM and schema toolkit for SQL databases." },
@@ -50,6 +52,7 @@ const categories: Category[] = [
 	},
 	{
 		title: "Programming Languages & Tools",
+		icon: "mdi:code-tags",
 		items: [
 			{ name: "TypeScript", link: "https://www.typescriptlang.org/", description: "JavaScript with type safety, the modern dev standard.", aliases: ["ts"] },
 			{ name: "Python", link: "https://www.python.org/", description: "A general-purpose language known for readability." },
@@ -68,6 +71,7 @@ const categories: Category[] = [
 	},
 	{
 		title: "Infrastructure & Deployment",
+		icon: "mdi:cloud",
 		items: [
 			{ name: "Vercel", link: "https://vercel.com/", description: "A platform for frontend frameworks and static sites." },
 			{ name: "Cloudflare", link: "https://www.cloudflare.com/", description: "A web infrastructure and website security company." },
@@ -77,6 +81,7 @@ const categories: Category[] = [
 	},
 	{
 		title: "Operating Systems",
+		icon: "mdi:monitor",
 		items: [
 			{ name: "Ubuntu", link: "https://ubuntu.com/", description: "A popular Linux distribution for developers and servers." },
 			{ name: "Windows", link: "https://www.microsoft.com/windows/", description: "Mainstream OS with vast software support." },
@@ -102,7 +107,7 @@ const projectSpecificItems: Tech[] = Object.entries(techUsage)
 	.map(([, usage]) => ({ name: usage.name, description: "Used in project posts on this site." }));
 
 const allCategories = projectSpecificItems.length
-	? [...categories, { title: "Project-Specific Tools", items: projectSpecificItems }]
+	? [...categories, { title: "Project-Specific Tools", icon: "mdi:tools", items: projectSpecificItems }]
 	: categories;
 
 // Every icon renders at one size; only the tilt is random (re-rolled on the
@@ -119,6 +124,7 @@ const items = allCategories.flatMap((c, ci) =>
 		return {
 			name: i.name,
 			category: c.title,
+			categoryIcon: c.icon,
 			// A hairline goes in ahead of the first icon of every category but the first.
 			startsCategory: ci > 0 && ii === 0,
 			icon: getTechIconName(i.name, i.aliases),
@@ -155,8 +161,10 @@ const items = allCategories.flatMap((c, ci) =>
 					<span class="sr-only">{t.name}</span>
 				</a>
 				<span class="tech-collage__tip" style={`--tip-tilt:${t.tipTilt}deg`} aria-hidden="true">
-					<span class="tech-collage__tip-cat">{t.category}</span>
-					<span class="tech-collage__tip-name">{t.name}</span>
+					<span class="tech-collage__tip-name">
+						<Icon name={t.categoryIcon} class="tech-collage__tip-icon" aria-hidden="true" />
+						{t.name}
+					</span>
 					{t.description && <span class="tech-collage__tip-desc">{t.description}</span>}
 				</span>
 			</div>

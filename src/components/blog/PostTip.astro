@@ -1,0 +1,257 @@
+---
+// Tilted post preview card. Place it as a direct child of an element with the
+// `post-tip-host` class; it shows while that host is hovered or holds focus.
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "@/components/FormattedDate.astro";
+import { calculateReadingTime } from "@/utils/readingTime";
+import { getTechIconName } from "@/utils/techIcons";
+import { tiltFromSeed } from "@/utils/tilt";
+import { Icon } from "astro-icon/components";
+
+interface Props {
+	post: CollectionEntry<"post">;
+}
+
+const { post } = Astro.props;
+
+const technologies = (post.data.technologies ?? []).map((tech: string) => tech.trim()).filter(Boolean);
+const tags = post.data.tags ?? [];
+const marqueeCount = tags.length + technologies.length;
+const readingTime = calculateReadingTime(post);
+const hasTip = Boolean(post.data.coverImage || post.data.description || marqueeCount);
+
+// Gentle, per-post tilt (stable for a given post until the script re-rolls it).
+const tilt = tiltFromSeed(post.id);
+---
+
+{hasTip && (
+	<div class="post-tip" style={`--tilt:${tilt}deg`} aria-hidden="true">
+		{post.data.coverImage && (
+			<div class="post-tip__img" style={`background-image:url(${post.data.coverImage.src.src});`} />
+		)}
+		<div class="post-tip__body">
+			<div class="post-tip__meta">
+				<span class="post-tip__read">
+					<svg aria-hidden="true" class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+					</svg>
+					{readingTime}
+				</span>
+				<span class="post-tip__date">
+					<FormattedDate
+						date={post.data.publishDate}
+						dateTimeOptions={{ day: "numeric", month: "short", year: "numeric" }}
+					/>
+				</span>
+			</div>
+			{post.data.description && <p class="post-tip__desc">{post.data.description}</p>}
+		</div>
+
+		{marqueeCount > 0 && (
+			<div class="post-tip__marquee">
+				<div class="post-tip__marquee-track">
+					{[0, 1].map(() => (
+						<span class="post-tip__marquee-group">
+							{tags.map((tag: string) => (
+								<>
+									<span class="post-tip__marquee-item">#{tag}</span>
+									<span class="post-tip__marquee-sep">·</span>
+								</>
+							))}
+							{technologies.map((tech: string) => (
+								<>
+									<span class="post-tip__marquee-item post-tip__marquee-tech">
+										<Icon class="post-tip__marquee-icon" name={getTechIconName(tech)} />
+										{tech}
+									</span>
+									<span class="post-tip__marquee-sep">·</span>
+								</>
+							))}
+						</span>
+					))}
+				</div>
+			</div>
+		)}
+	</div>
+)}
+
+<style>
+	:global(.post-tip-host) {
+		position: relative;
+	}
+
+	/* Borderless floating swatch: an opaque fill a shade darker than the page, with a
+	   subtly ragged edge (--marker-swatch in global.css).
+	   No border, glow, or shadow. The script moves it over the cursor on hover;
+	   without that it sits at the host's right edge. */
+	.post-tip {
+		position: absolute;
+		bottom: calc(100% + 0.3rem);
+		right: 0;
+		z-index: 50;
+		width: 19rem;
+		max-width: calc(100vw - 2rem);
+		overflow: hidden;
+		background: color-mix(in srgb, var(--color-global-bg) 80%, black);
+		-webkit-mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+		mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+		opacity: 0;
+		transform: translateY(8px) rotate(var(--tilt, -2deg)) scale(0.98);
+		transform-origin: bottom center;
+		pointer-events: none;
+		transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	:global(.post-tip-host:hover) > .post-tip,
+	:global(.post-tip-host:has(:focus-visible)) > .post-tip {
+		opacity: 1;
+		transform: translateY(0) rotate(var(--tilt, -2deg)) scale(1);
+	}
+
+	/* Cover image is full at the top and fades out toward the bottom. */
+	.post-tip__img {
+		width: 100%;
+		aspect-ratio: 5 / 2;
+		background-size: cover;
+		background-position: center top;
+		-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+		mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+	}
+
+	.post-tip__body {
+		padding: 0.6rem 0.85rem 0.55rem;
+	}
+
+	.post-tip__meta {
+		display: flex;
+		align-items: center;
+		gap: 0.55rem;
+		font-size: 0.72rem;
+		color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	}
+
+	.post-tip__read {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+		font-weight: 600;
+		color: var(--color-accent);
+	}
+
+	.post-tip__date {
+		font-variant-numeric: tabular-nums;
+	}
+
+	.post-tip__desc {
+		margin: 0.4rem 0 0;
+		font-size: 0.82rem;
+		line-height: 1.5;
+		color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
+		display: -webkit-box;
+		-webkit-line-clamp: 3;
+		-webkit-box-orient: vertical;
+		overflow: hidden;
+	}
+
+	/* Sliding tag + tech strip: plain text, separators, slow. */
+	.post-tip__marquee {
+		overflow: hidden;
+		padding: 0.25rem 0.2rem 0.6rem;
+		-webkit-mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+		mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+	}
+
+	.post-tip__marquee-track {
+		display: flex;
+		width: max-content;
+		animation: post-tip-marquee 36s linear infinite;
+	}
+
+	.post-tip__marquee-group {
+		display: inline-flex;
+		align-items: center;
+	}
+
+	.post-tip__marquee-item {
+		flex: none;
+		padding-inline: 0.45rem;
+		font-size: 0.74rem;
+		font-weight: 500;
+		white-space: nowrap;
+		color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
+	}
+
+	.post-tip__marquee-tech {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
+	}
+
+	.post-tip__marquee-icon {
+		width: 0.95rem;
+		height: 0.95rem;
+		color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
+	}
+
+	.post-tip__marquee-sep {
+		flex: none;
+		color: color-mix(in srgb, var(--color-accent) 70%, transparent);
+		font-weight: 700;
+	}
+
+	@keyframes post-tip-marquee {
+		from { transform: translateX(0); }
+		to { transform: translateX(-50%); }
+	}
+
+	/* Touch / no-hover devices: the card is decorative, so suppress it. */
+	@media (hover: none) {
+		.post-tip {
+			display: none;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.post-tip__marquee-track {
+			animation: none;
+		}
+		.post-tip {
+			transition: opacity 0.15s ease;
+		}
+	}
+</style>
+
+<script>
+	import { randomTilt } from "@/utils/tilt";
+
+	const EDGE = 8;
+
+	// Re-roll each card's tilt on every load so it's never the same twice.
+	const applyTilts = () => {
+		for (const tip of document.querySelectorAll<HTMLElement>(".post-tip")) {
+			tip.style.setProperty("--tilt", `${randomTilt()}deg`);
+		}
+	};
+
+	// When the pointer enters a host, centre its card over the cursor (kept inside
+	// the content column), so the preview lands where you're looking instead of at
+	// the far edge of the row. It stays put while the pointer moves within the host.
+	document.addEventListener("pointerover", (e) => {
+		const target = e.target as Element | null;
+		const host = target?.closest?.<HTMLElement>(".post-tip-host");
+		if (!host || host.contains(e.relatedTarget as Node | null)) return;
+		const tip = host.querySelector<HTMLElement>(":scope > .post-tip");
+		if (!tip) return;
+		const hostLeft = host.getBoundingClientRect().left;
+		const column = document.getElementById("main")?.getBoundingClientRect();
+		const minX = Math.max(column?.left ?? 0, EDGE);
+		const maxX = Math.min(column?.right ?? window.innerWidth, window.innerWidth - EDGE);
+		const width = tip.offsetWidth;
+		const left = Math.min(Math.max(e.clientX - width / 2, minX), maxX - width);
+		tip.style.left = `${left - hostLeft}px`;
+		tip.style.right = "auto";
+	});
+
+	applyTilts();
+	document.addEventListener("astro:page-load", applyTilts);
+</script>

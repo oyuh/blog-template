@@ -65,6 +65,17 @@ const {
 		{/* Subtle blue glow rising from the bottom of the viewport, sitting behind
 		    all content so the footer reads against it without competing with the page. */}
 		<div aria-hidden="true" class="page-bottom-glow"></div>
+		{/* Marker-ink filter for hovered icons (home logos, contact rows): noise displacement wobbles the
+		    edges, then horizontal noise thins the ink into streaks. Units are CSS px. */}
+		<svg aria-hidden="true" class="absolute h-0 w-0" focusable="false">
+			<filter id="marker-ink" x="-15%" y="-15%" width="130%" height="130%">
+				<feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="3" result="wobble" />
+				<feDisplacementMap in="SourceGraphic" in2="wobble" scale="2.5" xChannelSelector="R" yChannelSelector="G" result="inked" />
+				<feTurbulence type="fractalNoise" baseFrequency="0.02 0.55" numOctaves="1" seed="8" result="streaks" />
+				<feColorMatrix in="streaks" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.9 0 0 0 1.2" result="ink" />
+				<feComposite in="inked" in2="ink" operator="in" />
+			</filter>
+		</svg>
 		<Header />
 		<main id="main" class:list={[{ "main-centered": centerMain }]}>
 			<slot />
@@ -72,7 +83,19 @@ const {
 		<Footer />
 
 		<style>
-			/* Opt-in (home): centre the main content between header and footer. */
+			/* Every other page starts a fixed gap below the header so content never
+			   sits flush against the nav or floats mid-screen. */
+			#main:not(.main-centered) {
+				padding-top: 2rem;
+			}
+
+			@media (min-width: 640px) {
+				#main:not(.main-centered) {
+					padding-top: 3rem;
+				}
+			}
+
+			/* Opt-in (home, error pages): centre the main content between header and footer. */
 			#main.main-centered {
 				flex: 1 1 auto;
 				display: flex;
@@ -184,6 +207,101 @@ const {
 				window.addEventListener("scroll", apply, { passive: true });
 				window.addEventListener("resize", apply, { passive: true });
 				apply();
+			})();
+		</script>
+
+		<script>
+			// Give every marker highlight (.hl-hover) its own random tilt. Wide labels
+			// get a gentler angle so the stroke still covers the words end to end;
+			// short ones can lean more. Direction is random too.
+			(() => {
+				const MAX_DEG = 2;
+				// Vertical room the stroke has above/below the ink at each end (px).
+				const SLACK_PX = 2.5;
+				for (const el of document.querySelectorAll<HTMLElement>(".hl-hover")) {
+					const width = el.offsetWidth + 12;
+					const limit = Math.min(MAX_DEG, (Math.asin(Math.min(1, (2 * SLACK_PX) / width)) * 180) / Math.PI);
+					const deg = (Math.random() < 0.5 ? -1 : 1) * limit * (0.5 + Math.random() * 0.5);
+					el.style.setProperty("--hl-tilt", `${deg.toFixed(2)}deg`);
+				}
+			})();
+		</script>
+
+		<script>
+			// Site-wide tooltip: swaps the browser's native `title` bubble for the
+			// .marker-tip swatch. On mouse hover the title is parked in data-tip so the
+			// native one never shows, then restored on leave so it keeps working as an
+			// accessible description. Keyboard focus shows it too (native titles don't).
+			(() => {
+				const GAP = 8;
+				const EDGE = 8;
+				const tip = document.createElement("div");
+				tip.className = "marker-tip";
+				tip.setAttribute("aria-hidden", "true");
+				document.body.append(tip);
+				let current: HTMLElement | null = null;
+
+				const hide = () => {
+					if (!current) return;
+					const parked = current.dataset.tip;
+					if (parked !== undefined) {
+						current.setAttribute("title", parked);
+						delete current.dataset.tip;
+					}
+					current = null;
+					tip.classList.remove("is-on");
+				};
+
+				const show = (el: HTMLElement, text: string) => {
+					current = el;
+					tip.textContent = text;
+					tip.style.setProperty("--tip-tilt", `${((Math.random() < 0.5 ? -1 : 1) * (0.6 + Math.random() * 1.2)).toFixed(2)}deg`);
+					const r = el.getBoundingClientRect();
+					const w = tip.offsetWidth;
+					const h = tip.offsetHeight;
+					const top = r.top - h - GAP < EDGE ? r.bottom + GAP : r.top - h - GAP;
+					const left = Math.min(Math.max(r.left + r.width / 2 - w / 2, EDGE), window.innerWidth - w - EDGE);
+					tip.style.top = `${top}px`;
+					tip.style.left = `${left}px`;
+					tip.classList.add("is-on");
+				};
+
+				const titled = (target: EventTarget | null) =>
+					(target as Element | null)?.closest?.<HTMLElement>("[title]:not(iframe, link)") ?? null;
+
+				document.addEventListener("pointerover", (e) => {
+					if (e.pointerType !== "mouse") return;
+					if (current?.contains(e.target as Node)) return;
+					hide();
+					const el = titled(e.target);
+					const text = el?.getAttribute("title")?.trim();
+					if (!el || !text) return;
+					el.dataset.tip = el.getAttribute("title") ?? "";
+					el.removeAttribute("title");
+					show(el, text);
+				});
+
+				document.addEventListener("pointerout", (e) => {
+					if (current && !current.contains(e.relatedTarget as Node | null)) hide();
+				});
+
+				document.addEventListener("focusin", (e) => {
+					const el = titled(e.target);
+					const text = el?.getAttribute("title")?.trim();
+					if (el && text && el.matches(":focus-visible")) show(el, text);
+				});
+
+				document.addEventListener("focusout", (e) => {
+					if (current && !current.matches(":hover") && !current.contains(e.relatedTarget as Node | null)) hide();
+				});
+				// Clicking, scrolling or Esc only fades the swatch: the title stays parked
+				// until the pointer leaves, so the native bubble can't sneak back in.
+				const fade = () => tip.classList.remove("is-on");
+				document.addEventListener("pointerdown", fade);
+				document.addEventListener("keydown", (e) => {
+					if (e.key === "Escape") fade();
+				});
+				window.addEventListener("scroll", fade, { passive: true });
 			})();
 		</script>
 

@@ -51,6 +51,16 @@ const VISIBLE = 5; // show this many before the "…" toggle
 			{readingTime}
 		</span>
 
+		{data.tryLink && (
+			<>
+				<span class="post-header__meta-dot" aria-hidden="true">•</span>
+				<a href={data.tryLink} target="_blank" rel="noopener noreferrer" class="post-header__try">
+					<span class="hl-hover">Try it live <span aria-hidden="true">↗</span></span>
+					<span class="sr-only">(opens in a new tab)</span>
+				</a>
+			</>
+		)}
+
 		{data.updatedDate && (
 			<span class="post-header__updated">
 				<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
@@ -61,23 +71,6 @@ const VISIBLE = 5; // show this many before the "…" toggle
 			</span>
 		)}
 	</div>
-
-	{data.tryLink && (
-		<a
-			href={data.tryLink}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="post-header__try"
-		>
-			<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M14 3h7v7"></path>
-				<path d="M10 14L21 3"></path>
-				<path d="M5 5v14h14"></path>
-			</svg>
-			<span>Try it live</span>
-			<span class="sr-only">(opens in a new tab)</span>
-		</a>
-	)}
 
 	{(tags.length > 0 || technologies.length > 0) && (
 		<div class="post-header__tax">
@@ -93,8 +86,8 @@ const VISIBLE = 5; // show this many before the "…" toggle
 						{tags.map((tag, i) => (
 							<li class:list={[i >= VISIBLE && "post-header__extra"]}>
 								<a class="post-header__taxlink" data-pagefind-filter={`tag:${tag}`} href={`/tags/${tag}/`}>
-									<span class="post-header__hash" aria-hidden="true">#</span>
-									<span class="sr-only">View more posts with the tag&nbsp;</span>{tag}
+									<span class="sr-only">View more posts with the tag&nbsp;</span>
+									<span class="hl-hover"><span class="post-header__hash" aria-hidden="true">#</span>{tag}</span>
 								</a>
 							</li>
 						))}
@@ -115,7 +108,8 @@ const VISIBLE = 5; // show this many before the "…" toggle
 							<li class:list={[i >= VISIBLE && "post-header__extra"]}>
 								<a class="post-header__taxlink" data-pagefind-filter={`tech:${tech}`} href={`/tech/${techSlug(tech)}/`}>
 									<Icon aria-hidden="true" class="post-header__tech-icon" name={getTechIconName(tech)} />
-									<span class="sr-only">View more posts using&nbsp;</span>{tech}
+									<span class="sr-only">View more posts using&nbsp;</span>
+									<span class="hl-hover">{tech}</span>
 								</a>
 							</li>
 						))}
@@ -208,33 +202,11 @@ const VISIBLE = 5; // show this many before the "…" toggle
 		color: var(--color-accent);
 	}
 
-	/* "Try it live" — flat, border-only, accent (matches the site). */
+	/* "Try it live": bold text in the meta row; hover is the site .hl-hover marker. */
 	.post-header__try {
-		align-self: flex-start;
-		display: inline-flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 1.25rem;
-		padding: 0.5rem 0.9rem;
-		border: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
-		border-radius: 0.3rem;
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: var(--color-accent);
+		font-weight: 700;
+		color: var(--color-accent-2);
 		text-decoration: none;
-		transition: border-color 0.18s ease, background 0.18s ease;
-	}
-
-	.post-header__try:hover,
-	.post-header__try:focus-visible {
-		border-color: var(--color-accent);
-		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
-		outline: none;
-	}
-
-	.post-header__try svg {
-		width: 1rem;
-		height: 1rem;
 	}
 
 	.post-header__tax {
@@ -283,18 +255,12 @@ const VISIBLE = 5; // show this many before the "…" toggle
 
 	.post-header__taxlink:hover,
 	.post-header__taxlink:focus-visible {
-		color: var(--color-accent);
-		text-decoration: underline;
-		outline: none;
+		color: var(--color-accent-2);
 	}
 
 	.post-header__hash {
 		color: color-mix(in srgb, var(--color-accent) 75%, transparent);
 		font-weight: 700;
-	}
-
-	.post-header__taxlink:hover .post-header__hash {
-		color: var(--color-accent);
 	}
 
 	.post-header__tech-icon {

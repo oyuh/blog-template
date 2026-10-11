@@ -187,7 +187,7 @@ const marqueeText = () =>
 		formation().name.toUpperCase().padEnd(7, " "),
 		scoreText(),
 		`${String(killed.value).padStart(2, " ")}/${invaders.value.length}`,
-		(feed.value[0] ?? "—").padEnd(18, " ").slice(0, 18),
+		(feed.value[0] ?? "-").padEnd(18, " ").slice(0, 18),
 	].join("  ·  ");
 /** Desktop tucks the ship into the HUD band — the readouts are left-aligned and
  *  fade out of its way. The mobile HUD is centred and full-width, so there is

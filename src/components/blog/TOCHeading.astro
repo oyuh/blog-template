@@ -40,20 +40,20 @@ const {
 
 	/*
 	 * Depth hierarchy — a distinct size + colour for every heading level (h1–h6).
-	 * The site font (Atkinson Hyperlegible) only ships 400 + 700, so weight steps
-	 * between bold (h1–h2) and regular (h3–h6); size and colour carry the rest.
+	 * Only top-level sections get weight (semibold); every nested level is
+	 * regular, so small entries never render as cramped bold text.
 	 */
 	a[data-toc-link][data-depth="1"] {
 		font-size: 1rem;
-		font-weight: 700;
+		font-weight: 600;
 		letter-spacing: 0.01em;
 		color: var(--color-accent-2);
 	}
 
 	a[data-toc-link][data-depth="2"] {
-		font-size: 0.9rem;
-		font-weight: 700;
-		color: var(--color-accent-2);
+		font-size: 0.88rem;
+		font-weight: 400;
+		color: color-mix(in srgb, var(--color-global-text) 88%, transparent);
 	}
 
 	a[data-toc-link][data-depth="3"] {
@@ -90,10 +90,9 @@ const {
 		}
 	}
 
-	/* Current section: blue text only — no background highlight. */
+	/* Current section: blue text only (no weight change, so the list never reflows). */
 	a[data-toc-link][data-active="true"] {
 		color: var(--color-accent);
-		font-weight: 700;
 	}
 
 	/*

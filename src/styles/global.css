@@ -318,6 +318,139 @@ samp {
 		text-decoration: underline;
 	}
 
+	/* Marker shapes, used as masks.
+	   --marker-stroke: a highlighter pass (jagged top/bottom edges from noise
+	   displacement, slanted chisel ends, faint streaks where the ink runs thin).
+	   Used by .hl-hover, .marker-tip and the "Try it live" link.
+	   --marker-swatch: a block with a subtly ragged edge, for card-sized
+	   surfaces (post hover card, random project). */
+	:root {
+		--marker-swatch: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 200' preserveAspectRatio='none'><filter id='r' x='-3%' y='-3%' width='106%' height='106%'><feTurbulence type='fractalNoise' baseFrequency='0.06' numOctaves='2' seed='7' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='5' xChannelSelector='R' yChannelSelector='G'/></filter><path filter='url(%23r)' d='M4 5 L296 3 L297 196 L3 197 Z'/></svg>");
+		--marker-stroke: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 24' preserveAspectRatio='none'><filter id='m' x='-5%' y='-25%' width='110%' height='150%'><feTurbulence type='fractalNoise' baseFrequency='0.09 0.45' numOctaves='2' seed='4' result='n'/><feDisplacementMap in='SourceGraphic' in2='n' scale='5' xChannelSelector='R' yChannelSelector='G' result='d'/><feTurbulence type='fractalNoise' baseFrequency='0.004 0.38' numOctaves='1' seed='9' result='s'/><feColorMatrix in='s' type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.7 0 0 0 1.25' result='a'/><feComposite in='d' in2='a' operator='in'/></filter><path filter='url(%23m)' d='M5 4 L197 2 L194 22 L2 21 Z'/></svg>");
+	}
+
+	/* List-item hover: a highlighter-marker stroke sweeps in behind the text,
+	   then a thin underline pass follows. Put it on a span inside the link;
+	   inline prose, nav and footer links keep the plain underline. Each span
+	   gets a random --hl-tilt from Base.astro. isolation keeps the z-index:-1
+	   strokes above the page background. */
+	.hl-hover {
+		--hl-tilt: -0.8deg;
+		--hl-ease: cubic-bezier(0.22, 1, 0.36, 1);
+		position: relative;
+		display: inline-block;
+		isolation: isolate;
+	}
+
+	/* Marker stroke: a translucent chisel-tip pass (shape from --marker-stroke);
+	   a touch more ink pools at both ends. */
+	.hl-hover::before {
+		content: "";
+		position: absolute;
+		/* Plus Jakarta sits low in its line box; centre on the cap-to-descender ink. */
+		inset: 0.02em -0.4em -0.22em;
+		z-index: -1;
+		background: linear-gradient(
+			to right,
+			color-mix(in srgb, var(--color-accent) 28%, transparent),
+			color-mix(in srgb, var(--color-accent) 19%, transparent) 12% 88%,
+			color-mix(in srgb, var(--color-accent) 25%, transparent)
+		);
+		-webkit-mask: var(--marker-stroke) no-repeat 0 0 / 100% 100%;
+		mask: var(--marker-stroke) no-repeat 0 0 / 100% 100%;
+		transform: rotate(var(--hl-tilt)) scaleX(0);
+		transform-origin: left center;
+		transition: transform 0.3s var(--hl-ease);
+	}
+
+	/* Underline pass right under the words (just below the baseline), drawn in
+	   after the stroke with only a hint of the tilt. */
+	.hl-hover::after {
+		content: "";
+		position: absolute;
+		left: -0.05em;
+		right: -0.05em;
+		bottom: 0.04em;
+		height: 2px;
+		z-index: -1;
+		border-radius: 2px;
+		background: color-mix(in srgb, var(--color-accent) 80%, transparent);
+		transform: rotate(calc(var(--hl-tilt) * 0.25)) scaleX(0);
+		transform-origin: left center;
+		transition: transform 0.3s var(--hl-ease) 0.08s;
+	}
+
+	a:hover .hl-hover::before,
+	a:focus-visible .hl-hover::before,
+	button:hover .hl-hover::before,
+	button:focus-visible .hl-hover::before {
+		transform: rotate(var(--hl-tilt)) scaleX(1);
+	}
+
+	a:hover .hl-hover::after,
+	a:focus-visible .hl-hover::after,
+	button:hover .hl-hover::after,
+	button:focus-visible .hl-hover::after {
+		transform: rotate(calc(var(--hl-tilt) * 0.25)) scaleX(1);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hl-hover::before,
+		.hl-hover::after {
+			transition: none;
+		}
+	}
+
+	/* Site-wide tooltip (replaces the browser's native `title` bubble; driven by
+	   the script in Base.astro). A darker-than-page marker swatch with a small
+	   random tilt that sweeps in from the left. */
+	.marker-tip {
+		position: fixed;
+		top: 0;
+		left: 0;
+		z-index: 1100;
+		max-width: min(18rem, calc(100vw - 16px));
+		padding: 0.35rem 0.8rem 0.4rem;
+		font-size: 0.78rem;
+		font-weight: 500;
+		line-height: 1.35;
+		color: var(--color-global-text);
+		pointer-events: none;
+		opacity: 0;
+		transform: rotate(var(--tip-tilt, -1deg));
+		clip-path: inset(-20% 100% -20% 0);
+		transition:
+			opacity 0.15s ease,
+			clip-path 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.marker-tip::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background: color-mix(in srgb, var(--color-global-bg) 80%, black);
+		/* The stroke mask twice over: its streaks stay faintly visible but the
+		   swatch is near-opaque, so page text never shows through the tooltip. */
+		-webkit-mask:
+			var(--marker-stroke) no-repeat 0 0 / 100% 100%,
+			var(--marker-stroke) no-repeat 0 0 / 100% 100%;
+		mask:
+			var(--marker-stroke) no-repeat 0 0 / 100% 100%,
+			var(--marker-stroke) no-repeat 0 0 / 100% 100%;
+	}
+
+	.marker-tip.is-on {
+		opacity: 1;
+		clip-path: inset(-20% -5% -20% -5%);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.marker-tip {
+			transition: opacity 0.15s ease;
+		}
+	}
+
 	.admonition {
 		--admonition-color: var(--tw-prose-quotes);
 		@apply my-4 rounded-md border border-white/10 p-4;
@@ -1407,6 +1540,14 @@ astro-static-slot {
 	outline: none;
 }
 
+/* On hover the logo itself looks drawn in marker: wobbly inked edges and
+   streaky, slightly translucent ink (SVG filter #marker-ink in Base.astro). */
+.hero-collage__item:hover .hero-collage__icon,
+.hero-collage__item:focus-visible .hero-collage__icon {
+	filter: url(#marker-ink);
+	opacity: 0.9;
+}
+
 .hero-collage__item.is-lg .hero-collage__icon {
 	width: 2.55rem;
 	height: 2.55rem;
@@ -1561,9 +1702,11 @@ astro-static-slot {
 	color: var(--color-accent);
 }
 
+/* Hover: the icon straightens and turns to marker ink, like the home logos. */
 .tech-collage__cell:hover .tech-collage__item {
 	transform: rotate(0deg) scale(1.16);
 	color: var(--color-accent);
+	filter: url(#marker-ink);
 }
 
 .tech-collage__cell:focus-within .tech-collage__item {
@@ -1576,7 +1719,8 @@ astro-static-slot {
 	height: 2.2rem;
 }
 
-/* Tilted hover tooltip — same flat, border-only card as the home post tips. */
+/* Tilted hover tooltip: the same borderless, darker, ragged-edge swatch as the
+   home post hover card (--marker-swatch). */
 .tech-collage__tip {
 	position: absolute;
 	bottom: calc(100% + 0.55rem);
@@ -1587,10 +1731,10 @@ astro-static-slot {
 	display: flex;
 	flex-direction: column;
 	gap: 0.12rem;
-	padding: 0.6rem 0.7rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	border-radius: 0.3rem;
-	background: var(--color-global-bg);
+	padding: 0.7rem 0.85rem;
+	background: color-mix(in srgb, var(--color-global-bg) 80%, black);
+	-webkit-mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+	mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
 	text-align: left;
 	opacity: 0;
 	pointer-events: none;
@@ -1605,18 +1749,21 @@ astro-static-slot {
 	transform: translateX(-50%) translateY(0) rotate(var(--tip-tilt, -3deg)) scale(1);
 }
 
-.tech-collage__tip-cat {
-	font-size: 0.62rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
-}
-
+/* Name with its category icon (web, database, code, ...) in front. */
 .tech-collage__tip-name {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
 	font-size: 0.9rem;
 	font-weight: 700;
 	color: var(--color-accent-2);
+}
+
+.tech-collage__tip-icon {
+	flex: none;
+	width: 1rem;
+	height: 1rem;
+	color: var(--color-accent);
 }
 
 .tech-collage__tip-desc {
@@ -1737,9 +1884,12 @@ astro-static-slot {
 	transition: color 0.18s ease;
 }
 
+/* Hover: the icon turns to marker ink (same as the home logos) and the name
+   gets the .hl-hover marker. */
 .contact-row:hover .contact-row__icon,
 .contact-row:focus-visible .contact-row__icon {
 	color: var(--color-accent);
+	filter: url(#marker-ink);
 }
 
 .contact-row__name {
@@ -1747,14 +1897,7 @@ astro-static-slot {
 	font-size: 0.95rem;
 	font-weight: 500;
 	color: var(--color-accent-2);
-	text-underline-offset: 3px;
 	white-space: nowrap;
-}
-
-/* Hover = underline, not a colour change (matches the post rows). */
-.contact-row:hover .contact-row__name,
-.contact-row:focus-visible .contact-row__name {
-	text-decoration: underline;
 }
 
 .contact-row__handle {
@@ -1768,144 +1911,60 @@ astro-static-slot {
 }
 
 /* ---------------------------------------------------------------------------
-   Tag / Tech index cards. Flat + border-only + theme colours to match the home
-   page (no translucency, no shadow, no white-on-image overlays). Cover image is
-   faded out at the bottom — the same technique as the home post hover cards.
+   Tag / Tech index: one block per tag or tech, laid out like the home page's
+   "Posts & Projects" section (heading + count, View all, plain post rows).
    --------------------------------------------------------------------------- */
-.index-grid {
-	display: grid;
-	grid-template-columns: 1fr;
+.index-groups {
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+}
+
+.index-group__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
 	gap: 1rem;
+	margin-bottom: 0.5rem;
 }
 
-@media (min-width: 640px) {
-	.index-grid {
-		grid-template-columns: repeat(2, 1fr);
-	}
-}
-
-@media (min-width: 1024px) {
-	.index-grid {
-		grid-template-columns: repeat(3, 1fr);
-	}
-}
-
-.index-card {
+.index-group__title {
 	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	border-radius: 0.45rem;
-	background: var(--color-global-bg);
-	text-decoration: none;
-	transition: border-color 0.2s ease, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.index-card:hover,
-.index-card:focus-visible {
-	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-	outline: none;
-}
-
-/* Cover image, full at the top, fading to the card background toward the bottom. */
-.index-card__img {
-	width: 100%;
-	aspect-ratio: 16 / 6;
-	background-size: cover;
-	background-position: center;
-	-webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
-	mask-image: linear-gradient(to bottom, #000 0%, #000 50%, transparent 100%);
-}
-
-/* No cover: a slim accent rule instead of a big blurred gradient. */
-.index-card__img--none {
-	aspect-ratio: auto;
-	height: 0.3rem;
-	background: linear-gradient(
-		90deg,
-		color-mix(in srgb, var(--color-accent) 65%, transparent),
-		transparent 75%
-	);
-	-webkit-mask-image: none;
-	mask-image: none;
-}
-
-.index-card__body {
-	display: flex;
-	flex-direction: column;
-	gap: 0.35rem;
-	padding: 0.7rem 0.95rem 0.95rem;
-	margin-top: -1.4rem; /* pull the text up into the faded part of the image */
-}
-
-.index-card__img--none + .index-card__body {
-	margin-top: 0;
-}
-
-.index-card__kicker {
-	font-size: 0.62rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.16em;
-	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
-}
-
-.index-card__title {
-	display: flex;
-	align-items: center;
-	gap: 0.45rem;
+	align-items: baseline;
+	gap: 0.5rem;
 	margin: 0;
-	font-size: 1.25rem;
+	font-size: 1.2rem;
 	font-weight: 700;
-	letter-spacing: -0.01em;
 	color: var(--color-accent-2);
 }
 
-.index-card:hover .index-card__title,
-.index-card:focus-visible .index-card__title {
-	text-decoration: underline;
-	text-underline-offset: 3px;
+.index-group__name {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	text-decoration: none;
 }
 
-.index-card__title-icon {
-	width: 1.2rem;
-	height: 1.2rem;
+.index-group__icon {
+	width: 1.15rem;
+	height: 1.15rem;
 	flex: none;
+	align-self: center;
 	color: var(--color-accent);
 }
 
-.index-card__count {
+.index-group__count {
 	font-family: "Geist Mono Variable", monospace;
-	font-size: 0.74rem;
-	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: var(--color-accent);
 }
 
-.index-card__posts {
-	margin: 0.35rem 0 0;
-	padding: 0;
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	gap: 0.3rem;
-}
-
-.index-card__post {
-	display: flex;
-	align-items: center;
-	gap: 0.5rem;
-	font-size: 0.82rem;
-	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.index-card__dot {
+.index-group__all {
 	flex: none;
-	width: 0.4rem;
-	height: 0.4rem;
-	border-radius: 999px;
-	background: var(--color-accent);
+	font-size: 0.85rem;
+	font-weight: 500;
+	color: var(--color-accent);
 }
 
 @media (prefers-reduced-motion: reduce) {

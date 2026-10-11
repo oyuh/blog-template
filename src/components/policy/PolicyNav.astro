@@ -1,26 +1,27 @@
 ---
 type PolicyPage = "info" | "privacy" | "terms";
 
-const { current } = Astro.props as { current: PolicyPage };
+const { current, updated } = Astro.props as { current: PolicyPage; updated: string };
 
 const links = [
-  { id: "info", href: "/policy", label: "Policy Info" },
-  { id: "privacy", href: "/policy/privacy", label: "Privacy Policy" },
-  { id: "terms", href: "/policy/tos", label: "Terms of Service" },
-].filter((link) => link.id !== current);
+  { id: "info", href: "/policy/", label: "Policy Info" },
+  { id: "privacy", href: "/policy/privacy/", label: "Privacy Policy" },
+  { id: "terms", href: "/policy/tos/", label: "Terms of Service" },
+];
 ---
 
-<nav aria-label="Policy navigation">
-  <div class="flex flex-col sm:flex-row gap-3 mt-6">
-    {
-      links.map((link) => (
-        <a
-          href={link.href}
-          class="inline-flex items-center justify-center px-4 py-2 rounded border border-global-text/15 bg-global-bg text-global-text font-medium transition-colors hover:text-accent hover:border-accent/40 hover:bg-accent/5"
-        >
-          {link.label}
-        </a>
-      ))
-    }
-  </div>
+<nav aria-label="Policy pages" class="flex flex-wrap items-baseline gap-x-3 gap-y-1 text-sm">
+  <span class="text-global-text/55">Updated {updated}</span>
+  {
+    links.map((link) => (
+      <>
+        <span aria-hidden="true" class="text-global-text/30">•</span>
+        {link.id === current ? (
+          <span aria-current="page" class="font-medium text-accent-2">{link.label}</span>
+        ) : (
+          <a class="underline-hover font-medium text-accent" href={link.href}>{link.label}</a>
+        )}
+      </>
+    ))
+  }
 </nav>

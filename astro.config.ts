@@ -77,7 +77,7 @@ export default defineConfig({
 		icon({
 			include: {
 				"simple-icons": ["*"],
-				// MDI is used across the site (social links, rss icons, and Java icon)
+				// MDI is used across the site (social links, rss icons, Java icon, tech category icons)
 				mdi: [
 					"account-circle",
 					"api",
@@ -98,12 +98,14 @@ export default defineConfig({
 					"language-java",
 					"linkedin",
 					"lock",
+					"monitor",
 					"palette",
 					"puzzle-outline",
 					"cellphone",
 					"rss",
 					"tools",
 					"twitter",
+					"web",
 				],
 			},
 		}),
@@ -184,6 +186,11 @@ export default defineConfig({
 			// Dev renders on-demand pages in workerd. A dependency discovered on first
 			// request triggers a reload that drops that request, so pre-bundle it.
 			ssr: { optimizeDeps: { include: ["astro-icon/components"] } },
+			// Prerendered pages run in Node in dev (prerenderEnvironment: "node"). The
+			// adapter still pre-bundles Astro's runtime there, which leaves two copies of
+			// it and breaks page scripts ("Unable to resolve ...?astro&type=script").
+			// Node loads Astro directly, so skip pre-bundling for this environment.
+			prerender: { optimizeDeps: { noDiscovery: true } },
 		},
 		plugins: vitePlugins,
 	},

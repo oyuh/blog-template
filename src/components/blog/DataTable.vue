@@ -62,7 +62,7 @@ function ariaSortFor(col: DataColumn): "ascending" | "descending" | "none" {
 }
 
 function renderCell(col: DataColumn, value: string | number | undefined): string | number {
-	if (value === undefined || value === "") return "—";
+	if (value === undefined || value === "") return "-";
 	if (col.format) return col.format(value);
 	if (numericCols.value.has(col.key) && typeof value === "number") return formatNumber(value);
 	return value;

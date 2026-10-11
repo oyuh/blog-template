@@ -15,7 +15,7 @@ export const SPLASH_TEXTS = [
 	"Just one more quick refactor.",
 	"TODO: remove TODOs.",
 	"Cache invalidation speedrun any%.",
-	"AI won't take my job—my backlog will.",
+	"AI won't take my job, my backlog will.",
 	"If this breaks, it was the pipeline.",
 ] as const;
 

@@ -12,7 +12,10 @@ export const prerender = true;
 
 <PageLayout meta={meta}>
   <article data-pagefind-body>
-    <h1 class="text-4xl font-bold mb-4 text-accent-2 tracking-tight">Privacy Policy</h1>
+    <h1 class="title text-3xl">Privacy Policy</h1>
+    <div class="mt-3 mb-8">
+      <PolicyNav current="privacy" updated="April 26, 2026" />
+    </div>
 
     <div class="prose prose-base dark:prose-invert max-w-none">
       <p class="leading-relaxed">
@@ -20,14 +23,6 @@ export const prerender = true;
         including the comments service and games website. Using the site or those services means you agree
         to this policy.
       </p>
-
-      <div class="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded border border-global-text/15 bg-global-bg text-sm font-medium tracking-tight">
-        <span class="text-accent-2">Last Updated</span>
-        <span class="text-global-text/80">April 26, 2026</span>
-        <span class="hidden sm:inline text-global-text/50">(Privacy Policy)</span>
-      </div>
-
-      <PolicyNav current="privacy" />
 
       <h2 class="text-accent-2">What I Collect</h2>
       <ul class="list-disc ms-5">

@@ -247,7 +247,7 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 			if (!DEV) this.loadFilters();
 
 			if (DEV) {
-				this.renderMessage("Search runs on the built site — try it after a production build.");
+				this.renderMessage("Search runs on the built site. Try it after a production build.");
 				return;
 			}
 			if (!query && !hasFilters) {

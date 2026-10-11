@@ -111,7 +111,7 @@ export function toCategoryRows(series: ChartSeries[]): {
 
 /** Compact, locale-aware number formatting for ticks, tooltips and tables. */
 export function formatNumber(value: number): string {
-	if (!Number.isFinite(value)) return "—";
+	if (!Number.isFinite(value)) return "-";
 	const abs = Math.abs(value);
 	if (abs >= 1_000_000) return `${trimZero(value / 1_000_000)}M`;
 	if (abs >= 10_000) return `${trimZero(value / 1_000)}k`;
