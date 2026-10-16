@@ -31,6 +31,7 @@ declare global {
 		readonly PUBLIC_TEMPLATE_REPO_URL?: string;
 		readonly PUBLIC_COMMENTS_API_ORIGIN?: string;
 		readonly PUBLIC_COMMENTS_DEBUG?: string;
+		readonly PUBLIC_COMMENTS_MOCK?: string;
 		readonly GITHUB_TOKEN?: string;
 		readonly GITHUB_OWNER?: string;
 		readonly GITHUB_REPO?: string;

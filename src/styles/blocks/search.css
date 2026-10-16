@@ -1,14 +1,20 @@
-/* Inline header search (Pagefind JS API). Flat + border-only to match the site:
-   the header bar is the input; results + a toggleable Tags/Tech filter menu drop
-   into a panel directly beneath it. */
+/* Inline header search (Pagefind JS API). A magnifier and a thin line to type
+   on, which widens while focused. Results drop into a darker marker swatch
+   below it (the same floating surface as the post hover card), with plain-text
+   Tags/Tech filters. */
 
 .site-search {
 	position: relative;
 	display: flex;
 	align-items: center;
-	flex: 1 1 auto;
+	flex: 0 1 10.5rem;
 	min-width: 0;
-	max-width: 22rem;
+	transition: flex-basis 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.site-search[data-open],
+.site-search:focus-within {
+	flex-basis: 18rem;
 }
 
 .site-search__bar {
@@ -17,54 +23,45 @@
 	gap: 0.45rem;
 	width: 100%;
 	height: 2.25rem;
-	padding: 0 0.4rem 0 0.6rem;
-	border-radius: 0.3rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	background: var(--color-global-bg);
-	transition: border-color 0.2s ease;
-}
-
-.site-search__bar:focus-within {
-	border-color: var(--color-accent);
-}
-
-/* Leading slot — holds the magnifying glass OR the live result count. */
-.site-search__lead {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	flex: none;
-	min-width: 1.15rem;
-	height: 1.15rem;
-	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
-	transition: color 0.2s ease;
-}
-
-.site-search__bar:focus-within .site-search__lead {
-	color: var(--color-accent);
+	cursor: text;
 }
 
 .site-search__icon {
-	width: 1.05rem;
-	height: 1.05rem;
+	flex: none;
+	width: 1.3rem;
+	height: 1.3rem;
+	color: var(--color-global-text);
+	transition: color 0.2s ease;
 }
 
-.site-search__count {
-	font-family: "Geist Mono Variable", monospace;
-	font-size: 0.8rem;
-	font-weight: 700;
-	line-height: 1;
+.site-search__bar:focus-within .site-search__icon {
 	color: var(--color-accent);
+}
+
+/* The "bar": an underline the query sits on. */
+.site-search__line {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	min-width: 0;
+	border-bottom: 1.5px solid color-mix(in srgb, var(--color-global-text) 22%, transparent);
+	transition: border-color 0.2s ease;
+}
+
+.site-search[data-open] .site-search__line,
+.site-search__bar:focus-within .site-search__line {
+	border-color: var(--color-accent);
 }
 
 .site-search__input {
 	flex: 1;
 	min-width: 0;
+	padding: 0.2rem 0;
 	border: 0;
 	background: transparent;
 	color: var(--color-global-text);
 	font: inherit;
-	font-size: 0.9rem;
+	font-size: 0.92rem;
 	outline: none;
 }
 
@@ -81,15 +78,14 @@
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 1.4rem;
-	height: 1.4rem;
+	width: 1.5rem;
+	height: 1.5rem;
 	flex: none;
 	border: 0;
-	border-radius: 0.35rem;
 	background: transparent;
 	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
 	cursor: pointer;
-	transition: color 0.15s ease, background 0.15s ease;
+	transition: color 0.15s ease;
 }
 
 .site-search__clear svg {
@@ -100,126 +96,97 @@
 .site-search__clear:hover,
 .site-search__clear:focus-visible {
 	color: var(--color-accent);
-	outline: none;
 }
 
-/* Results panel — flat, border-only, drops below the bar. */
+/* Results panel: borderless, a shade darker than the page, ragged edge. */
 .site-search__panel {
 	position: absolute;
-	top: calc(100% + 0.5rem);
+	top: calc(100% + 0.4rem);
 	left: 0;
 	z-index: 70;
-	width: min(34rem, calc(100vw - 2rem));
-	max-height: min(74vh, 34rem);
+	width: min(30rem, calc(100vw - 2rem));
+	max-height: min(70vh, 30rem);
 	overflow-y: auto;
 	overscroll-behavior: contain;
-	padding: 0.5rem;
-	border-radius: 0.45rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
-	background: var(--color-global-bg);
-	animation: search-pop 0.16s ease;
+	padding: 0.75rem 1rem 0.9rem;
+	background: color-mix(in srgb, var(--color-global-bg) 80%, black);
+	-webkit-mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+	mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+	animation: search-in 0.16s ease;
 }
 
-@keyframes search-pop {
+@keyframes search-in {
 	from {
 		opacity: 0;
-		transform: translateY(-6px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
 	}
 }
 
-/* Filter toolbar */
+/* One muted line: result count on the left, filter toggle on the right. */
 .site-search__toolbar {
 	display: flex;
-	align-items: center;
+	align-items: baseline;
 	justify-content: space-between;
-	gap: 0.5rem;
-	padding: 0.15rem 0.25rem 0.4rem;
-}
-
-.site-search__filter-toggle {
-	display: inline-flex;
-	align-items: center;
-	gap: 0.4rem;
-	padding: 0.3rem 0.55rem;
-	border-radius: 0.25rem;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 16%, transparent);
-	background: transparent;
-	color: color-mix(in srgb, var(--color-global-text) 80%, transparent);
-	font-size: 0.8rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: color 0.15s ease, border-color 0.15s ease;
-}
-
-.site-search__filter-toggle svg {
-	width: 0.9rem;
-	height: 0.9rem;
-}
-
-.site-search__filter-toggle:hover,
-.site-search__filter-toggle.is-active {
-	color: var(--color-accent);
-	border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
-}
-
-.site-search__filter-badge {
-	font-family: "Geist Mono Variable", monospace;
-	font-size: 0.7rem;
-	font-weight: 700;
-	min-width: 1.05rem;
-	height: 1.05rem;
-	padding: 0 0.25rem;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 999px;
-	background: var(--color-accent);
-	color: var(--color-global-bg);
-}
-
-.site-search__filter-clear {
-	border: 0;
-	background: transparent;
-	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	gap: 0.75rem;
+	padding-bottom: 0.4rem;
 	font-size: 0.78rem;
-	font-weight: 600;
-	cursor: pointer;
-	transition: color 0.15s ease;
+	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 }
 
-.site-search__filter-clear:hover {
+.site-search__toolbar-actions {
+	display: inline-flex;
+	gap: 0.9rem;
+}
+
+.site-search__text-btn {
+	border: 0;
+	padding: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+	text-underline-offset: 3px;
+}
+
+.site-search__text-btn:hover,
+.site-search__text-btn:focus-visible {
+	color: var(--color-global-text);
+	text-decoration: underline;
+}
+
+.site-search__text-btn.is-active {
 	color: var(--color-accent);
 }
 
-/* Filter menu */
+/* Filters: plain text toggles like the post header's tag/tech rows. */
 .site-search__filters {
-	padding: 0.25rem 0.25rem 0.5rem;
-	margin-bottom: 0.35rem;
+	padding: 0.35rem 0 0.7rem;
+	margin-bottom: 0.3rem;
 	border-bottom: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
-	animation: search-pop 0.16s ease;
+}
+
+.site-search__filter-group {
+	display: flex;
+	align-items: baseline;
+	gap: 0.75rem;
 }
 
 .site-search__filter-group + .site-search__filter-group {
-	margin-top: 0.6rem;
+	margin-top: 0.45rem;
 }
 
 .site-search__filter-title {
-	margin: 0 0 0.4rem;
-	font-size: 0.72rem;
-	font-weight: 700;
-	text-transform: uppercase;
-	letter-spacing: 0.04em;
-	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
+	flex: none;
+	width: 2.4rem;
+	margin: 0;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
 }
 
 .site-search__chips {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.4rem;
+	gap: 0.15rem 0.85rem;
 }
 
 .site-search__chips-empty {
@@ -231,29 +198,37 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 0.3rem;
-	padding: 0.2rem 0.55rem;
-	border-radius: 999px;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 18%, transparent);
+	border: 0;
+	padding: 0.1rem 0;
 	background: transparent;
-	color: color-mix(in srgb, var(--color-global-text) 82%, transparent);
-	font-size: 0.78rem;
-	font-weight: 500;
+	color: color-mix(in srgb, var(--color-global-text) 78%, transparent);
+	font: inherit;
+	font-size: 0.82rem;
 	cursor: pointer;
-	transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+	text-underline-offset: 3px;
 }
 
-.site-search__chip:hover {
-	border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
-	color: var(--color-accent);
+.site-search__chip:hover,
+.site-search__chip:focus-visible {
+	color: var(--color-global-text);
+	text-decoration: underline;
 }
 
 .site-search__chip.is-active {
-	background: color-mix(in srgb, var(--color-accent) 14%, transparent);
-	border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
 	color: var(--color-accent);
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
 }
 
-/* Tech icon inside a chip — inherits the chip's colour (currentColor SVGs). */
+.site-search__chip[hidden] {
+	display: none;
+}
+
+.site-search__more {
+	font-size: 0.85rem;
+	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+}
+
 .site-search__chip-icon {
 	display: inline-flex;
 	flex: none;
@@ -265,103 +240,75 @@
 }
 
 .site-search__chip-count {
-	font-family: "Geist Mono Variable", monospace;
-	font-size: 0.68rem;
-	opacity: 0.7;
+	font-size: 0.7rem;
+	color: color-mix(in srgb, var(--color-global-text) 45%, transparent);
 }
 
-/* Results */
+/* Results: condensed rows, title + one line of context. */
 .site-search__message {
-	padding: 0.85rem 0.75rem;
-	font-size: 0.875rem;
-	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+	padding: 0.35rem 0;
+	font-size: 0.85rem;
+	color: color-mix(in srgb, var(--color-global-text) 62%, transparent);
+}
+
+.site-search__results {
+	display: flex;
+	flex-direction: column;
 }
 
 .site-search__result {
-	padding: 0.7rem 0.75rem;
-	border-radius: 0.3rem;
-	border: 1px solid transparent;
-	transition: border-color 0.15s ease, background 0.15s ease;
+	display: block;
+	padding: 0.5rem 0;
+	color: inherit;
+	text-decoration: none;
 }
 
 .site-search__result + .site-search__result {
-	margin-top: 0.35rem;
+	border-top: 1px solid color-mix(in srgb, var(--color-global-text) 9%, transparent);
 }
 
-.site-search__result:hover {
-	border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-	background: color-mix(in srgb, var(--color-global-text) 4%, transparent);
-}
-
-.site-search__result-link {
-	display: block;
-	font-size: 1rem;
+.site-search__result-title {
+	font-size: 0.95rem;
 	font-weight: 600;
-	letter-spacing: -0.01em;
 	color: var(--color-accent-2);
-	text-decoration: none;
 }
 
-.site-search__result-link:hover,
-.site-search__result-link:focus-visible {
-	text-decoration: underline;
-	text-underline-offset: 3px;
+.site-search__result-section {
+	margin-left: 0.4rem;
+	font-size: 0.78rem;
+	color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
 }
 
 .site-search__result-excerpt {
-	margin-top: 0.25rem;
-	font-size: 0.85rem;
-	line-height: 1.5;
-	color: color-mix(in srgb, var(--color-global-text) 72%, transparent);
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-line-clamp: 2;
-	overflow: hidden;
-	overflow-wrap: anywhere;
-}
-
-.site-search__sub {
-	display: block;
-	margin-top: 0.4rem;
-	padding: 0.35rem 0.5rem;
-	border-radius: 0.25rem;
-	text-decoration: none;
-	border: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
-	transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.site-search__sub:hover {
-	border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-	background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-}
-
-.site-search__sub-title {
-	display: block;
+	margin-top: 0.15rem;
 	font-size: 0.8rem;
-	font-weight: 550;
-	color: color-mix(in srgb, var(--color-global-text) 85%, transparent);
+	line-height: 1.45;
+	color: color-mix(in srgb, var(--color-global-text) 65%, transparent);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
-.site-search__sub-excerpt {
-	display: block;
-	font-size: 0.75rem;
-	line-height: 1.4;
-	color: color-mix(in srgb, var(--color-global-text) 62%, transparent);
-	overflow-wrap: anywhere;
+.site-search__result:focus-visible {
+	outline: 2px solid color-mix(in srgb, var(--color-accent) 60%, transparent);
+	outline-offset: 2px;
 }
 
-/* Pagefind highlight marks inside excerpts. */
+/* Pagefind highlight marks: accent text, no fill. */
 .site-search__panel mark {
-	color: var(--color-accent);
-	background: color-mix(in srgb, var(--color-accent) 16%, transparent);
-	border-radius: 3px;
-	padding: 0 0.15em;
-	font-weight: 600;
+	color: var(--color-global-text);
+	background: none;
+	text-decoration: underline;
+	text-decoration-color: var(--color-accent);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.site-search__panel,
-	.site-search__filters {
+	.site-search__panel {
 		animation: none;
+	}
+	.site-search {
+		transition: none;
 	}
 }

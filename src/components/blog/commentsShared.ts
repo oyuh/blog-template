@@ -180,7 +180,8 @@ export interface CommentsCtx {
 	editBody: string;
 	editSubmitting: boolean;
 	reactingCommentId: string | null;
-	openMenuId: string | null;
+	confirmDeleteCommentId: string | null;
+	deletingCommentId: string | null;
 	commentById: Map<string, CommentsItem>;
 	// actions
 	signOut: () => void;
@@ -191,11 +192,12 @@ export interface CommentsCtx {
 	toggleLike: (commentId: string) => void;
 	beginReply: (c: CommentsItem) => void;
 	focusComposer: () => void;
-	toggleMenu: (commentId: string, buttonEl: HTMLElement) => void;
+	startEdit: (c: CommentsItem) => void;
+	confirmDelete: (c: CommentsItem) => void;
 	hoverLikers: (commentId: string, buttonEl: HTMLElement) => void;
 	leaveLikers: () => void;
 	scrollToComment: (commentId: string) => void;
-	onLoginClick: () => void;
+	onLoginClick: (e?: Event) => void;
 	registerTextarea: (el: Element | null) => void;
 	registerReplyTextarea: (el: Element | null) => void;
 	// derived helpers

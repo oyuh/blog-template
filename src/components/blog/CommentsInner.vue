@@ -43,6 +43,10 @@ function logError(...args: unknown[]) {
 	if (debug) console.error("[comments]", ...args);
 }
 
+// Dev-only fake service (see commentsMock.ts). Statically false in builds, so
+// the lazy import below is dropped from the bundle.
+const MOCK = import.meta.env.DEV && import.meta.env.PUBLIC_COMMENTS_MOCK === "true";
+
 const apiOrigin = (() => {
 	const fromEnv = import.meta.env.PUBLIC_COMMENTS_API_ORIGIN;
 	return fromEnv && fromEnv.trim().length > 0 ? fromEnv : "https://comments.lawsonhart.me";
@@ -64,8 +68,6 @@ const error = ref<string | null>(null);
 const replyTo = ref<ReplyTarget | null>(null);
 const dockOpen = ref(false);
 const recentLoginAttempt = ref(false);
-const openMenuId = ref<string | null>(null);
-const openMenuPos = ref<{ top: number; left: number } | null>(null);
 const editingCommentId = ref<string | null>(null);
 const editBody = ref("");
 const editSubmitting = ref(false);
@@ -101,6 +103,7 @@ const resolvedResourceId = computed(() => {
 });
 
 const signInUrl = computed(() => {
+	if (MOCK) return "#";
 	const returnTo = canonicalUrl.value || "https://lawsonhart.me";
 	return `${apiOrigin}/auth/github/start?returnTo=${encodeURIComponent(returnTo)}`;
 });
@@ -117,6 +120,7 @@ function clearRecentLoginAttempt() {
 
 // --- networking -----------------------------------------------------------
 async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
+	if (MOCK) return (await import("./commentsMock")).mockFetch<T>(path, init);
 	const url = `${apiOrigin}${path}`;
 	const method = (init?.method ?? "GET").toUpperCase();
 	const hasBody = init?.body !== undefined;
@@ -598,27 +602,8 @@ function cancelEdit() {
 	editBody.value = "";
 }
 
-function openMenuFor(commentId: string, buttonEl: HTMLElement) {
-	const rect = buttonEl.getBoundingClientRect();
-	const gap = 8;
-	const left = Math.min(rect.right, window.innerWidth - gap);
-	const top = Math.min(rect.bottom + 6, window.innerHeight - gap);
-	openMenuPos.value = { top, left: Math.max(gap, left) };
-	openMenuId.value = commentId;
-}
-
-function toggleMenu(commentId: string, buttonEl: HTMLElement) {
-	if (openMenuId.value === commentId) {
-		openMenuId.value = null;
-		openMenuPos.value = null;
-		return;
-	}
-	openMenuFor(commentId, buttonEl);
-}
-
 function startEdit(c: CommentsItem) {
-	openMenuId.value = null;
-	openMenuPos.value = null;
+	confirmDeleteCommentId.value = null;
 	editingCommentId.value = c.id;
 	editBody.value = typeof c.body === "string" ? c.body : getCommentBodyText(c);
 	try {
@@ -632,13 +617,9 @@ function startEdit(c: CommentsItem) {
 
 async function confirmDelete(c: CommentsItem) {
 	deletingCommentId.value = c.id;
-	const ok = await remove(c.id);
+	await remove(c.id);
 	deletingCommentId.value = null;
 	confirmDeleteCommentId.value = null;
-	if (ok) {
-		openMenuId.value = null;
-		openMenuPos.value = null;
-	}
 }
 
 async function listLikers(commentId: string): Promise<LikerDto[]> {
@@ -679,7 +660,12 @@ function leaveLikers() {
 	likersTooltip.value = null;
 }
 
-function onLoginClick() {
+async function onLoginClick(e?: Event) {
+	if (MOCK) {
+		e?.preventDefault();
+		(await import("./commentsMock")).mockSignIn();
+		return refresh();
+	}
 	log("auth:login:click", { signInUrl: signInUrl.value, canonicalUrl: canonicalUrl.value });
 	try {
 		window.sessionStorage.setItem("comments:loginAttemptAt", String(Date.now()));
@@ -704,27 +690,7 @@ function registerReplyTextarea(el: Element | null) {
 	replyTextareaEl.value = el as HTMLTextAreaElement | null;
 }
 
-// --- action menu / tooltip derived ---------------------------------------
-const actionsMenuComment = computed(() =>
-	openMenuId.value ? (comments.value.find((c) => c.id === openMenuId.value) ?? null) : null,
-);
-const menuCanReply = computed(() => {
-	const c = actionsMenuComment.value;
-	return Boolean(c && me.value && !c.deletedAt && (c.depth ?? 1) < 5 && isOwnComment(c));
-});
-const menuCanModify = computed(() => {
-	const c = actionsMenuComment.value;
-	return Boolean(c && !c.deletedAt && canModifyComment(c));
-});
-const actionsMenuVisible = computed(() =>
-	Boolean(
-		openMenuId.value &&
-			openMenuPos.value &&
-			actionsMenuComment.value &&
-			(menuCanReply.value || menuCanModify.value),
-	),
-);
-
+// --- likers tooltip derived ---------------------------------------------
 const likersTooltipUsers = computed(() =>
 	likersTooltip.value ? (likersByCommentId.value[likersTooltip.value.commentId] ?? []) : [],
 );
@@ -755,8 +721,6 @@ onMounted(() => {
 		if (!e.matches) {
 			mobileOpen.value = false;
 			replyTo.value = null;
-			openMenuId.value = null;
-			openMenuPos.value = null;
 		}
 	};
 	mql.addEventListener("change", onChange);
@@ -857,43 +821,6 @@ watch(replyTo, (rt) => {
 	}
 });
 
-// action menu: outside-click / escape / scroll dismissal
-let detachMenu: (() => void) | null = null;
-watch(openMenuId, (id) => {
-	confirmDeleteCommentId.value = null;
-	detachMenu?.();
-	detachMenu = null;
-	if (!id || typeof document === "undefined") return;
-
-	const close = () => {
-		openMenuId.value = null;
-		openMenuPos.value = null;
-	};
-	const onMouseDown = (e: MouseEvent) => {
-		if (!(e.target instanceof Node)) return;
-		const menuEl = document.getElementById(`comment-menu-${id}`);
-		const buttonEl = document.getElementById(`comment-menu-btn-${id}`);
-		if (menuEl?.contains(e.target)) return;
-		if (buttonEl?.contains(e.target)) return;
-		close();
-	};
-	const onKeyDown = (e: KeyboardEvent) => {
-		if (e.key === "Escape") close();
-	};
-	document.addEventListener("mousedown", onMouseDown);
-	document.addEventListener("keydown", onKeyDown);
-	window.addEventListener("resize", close);
-	window.addEventListener("scroll", close, { capture: true });
-	popupScrollRef.value?.addEventListener("scroll", close, { passive: true });
-	detachMenu = () => {
-		document.removeEventListener("mousedown", onMouseDown);
-		document.removeEventListener("keydown", onKeyDown);
-		window.removeEventListener("resize", close);
-		window.removeEventListener("scroll", close, { capture: true } as never);
-		popupScrollRef.value?.removeEventListener("scroll", close as EventListener);
-	};
-});
-
 // likers tooltip: escape dismissal
 let detachLikers: (() => void) | null = null;
 watch(likersTooltip, (t) => {
@@ -910,7 +837,6 @@ watch(likersTooltip, (t) => {
 onBeforeUnmount(() => {
 	detachMql?.();
 	detachCommentsEvents?.();
-	detachMenu?.();
 	detachLikers?.();
 	if (typeof document !== "undefined") document.body.style.overflow = bodyOverflowPrev;
 });
@@ -932,7 +858,8 @@ const ctx: CommentsCtx = reactive({
 	editBody,
 	editSubmitting,
 	reactingCommentId,
-	openMenuId,
+	confirmDeleteCommentId,
+	deletingCommentId,
 	commentById,
 	signOut,
 	submit,
@@ -942,7 +869,8 @@ const ctx: CommentsCtx = reactive({
 	toggleLike,
 	beginReply,
 	focusComposer,
-	toggleMenu,
+	startEdit,
+	confirmDelete,
 	hoverLikers,
 	leaveLikers,
 	scrollToComment,
@@ -964,35 +892,32 @@ provide(commentsCtxKey, ctx);
 </script>
 
 <template>
-	<!-- Mobile sheet (overlay instance) -->
+	<!-- Mobile sheet (overlay instance): full screen, solid, read-only. -->
 	<Teleport v-if="!isDesktop && mobileOpen" to="body">
-		<dialog open class="fixed inset-0 z-50 lg:hidden p-0 border-0 bg-transparent" aria-label="Comments">
-			<button
-				type="button"
-				aria-label="Close comments"
-				class="fixed inset-0 bg-global-bg/70"
-				@click="closeCommentsMobile"
-			/>
-			<div
-				class="fixed top-0 left-0 right-0 bg-global-bg border-b border-global-text/15 rounded-b-lg max-h-[70vh] overflow-hidden"
-			>
-				<div class="flex items-center justify-between px-4 py-3 border-b border-global-text/10">
-					<h2 class="text-base font-medium text-accent-2">Comments</h2>
-					<button
-						type="button"
-						class="inline-flex h-8 w-8 items-center justify-center rounded-md text-global-text hover:text-accent hover:bg-accent/5 transition-colors"
-						aria-label="Close comments"
-						@click="closeCommentsMobile"
-					>
-						<Icon icon="mdi:close" class="h-4 w-4" />
-					</button>
-				</div>
-				<div class="overflow-y-auto px-4 py-3" style="max-height: calc(70vh - 64px)">
-					<div><CommentsPanel /></div>
-					<div class="mt-4 border-t border-global-text/10 pt-3 text-xs text-global-text/60">
-						Access this on desktop to post comments
-					</div>
-				</div>
+		<dialog
+			open
+			class="fixed inset-0 z-50 m-0 flex h-full max-h-none w-full max-w-none flex-col border-0 bg-global-bg p-0 text-global-text lg:hidden"
+			aria-label="Comments"
+		>
+			<div class="flex items-center justify-between border-b border-global-text/10 px-4 py-2">
+				<h2 class="flex items-baseline gap-2 text-base font-semibold text-accent-2">
+					Comments
+					<span v-if="!loading" class="text-sm font-normal tabular-nums text-global-text/50">{{ count }}</span>
+				</h2>
+				<button
+					type="button"
+					class="-mr-2 inline-flex h-11 w-11 items-center justify-center text-global-text/70 transition-colors hover:text-accent"
+					aria-label="Close comments"
+					@click="closeCommentsMobile"
+				>
+					<Icon icon="mdi:close" class="h-5 w-5" />
+				</button>
+			</div>
+			<div class="flex-1 overflow-y-auto px-4 pb-6">
+				<CommentsPanel />
+				<p class="mt-2 border-t border-global-text/10 pt-3 text-xs text-global-text/55">
+					Open this post on a desktop to write a comment.
+				</p>
 			</div>
 		</dialog>
 	</Teleport>
@@ -1005,7 +930,7 @@ provide(commentsCtxKey, ctx);
 	>
 		<button
 			type="button"
-			class="group flex w-full items-center justify-between gap-2 text-left"
+			class="group flex w-full flex-shrink-0 items-center justify-between gap-2 text-left"
 			:aria-expanded="dockOpen"
 			aria-controls="comments-dock-body"
 			:title="dockOpen ? 'Hide comments' : 'Show comments'"
@@ -1013,7 +938,7 @@ provide(commentsCtxKey, ctx);
 		>
 			<span class="flex items-baseline gap-2">
 				<span class="text-xs font-bold uppercase tracking-[0.08em] text-global-text/55 group-hover:underline">Comments</span>
-				<span v-if="!loading" class="text-xs font-semibold tabular-nums text-global-text/45">{{ count }}</span>
+				<span v-if="!loading" class="text-xs tabular-nums text-global-text/45">{{ count }}</span>
 			</span>
 			<Icon
 				icon="mdi:chevron-down"
@@ -1024,90 +949,14 @@ provide(commentsCtxKey, ctx);
 			/>
 		</button>
 
-		<div v-if="dockOpen" id="comments-dock-body" ref="popupScrollRef" class="mt-3 max-h-[60vh] overflow-auto">
+		<div v-if="dockOpen" id="comments-dock-body" ref="popupScrollRef" class="comments-dock__body mt-3">
 			<CommentsPanel />
 		</div>
 
-		<!-- Action menu (portaled to body) -->
-		<Teleport v-if="actionsMenuVisible && actionsMenuComment && openMenuPos" to="body">
-			<div
-				:id="`comment-menu-${openMenuId}`"
-				role="menu"
-				aria-label="Comment actions"
-				class="fixed z-[60] min-w-[180px] overflow-hidden rounded border border-global-text/15 bg-global-bg"
-				:style="{ top: `${openMenuPos.top}px`, left: `${openMenuPos.left}px`, transform: 'translateX(-100%)' }"
-			>
-				<div class="max-h-56 overflow-auto p-1">
-					<button
-						v-if="menuCanReply"
-						type="button"
-						role="menuitem"
-						class="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
-						@click="() => { const c = actionsMenuComment!; openMenuId = null; openMenuPos = null; beginReply(c); focusComposer(); }"
-					>
-						<Icon icon="mdi:reply" class="h-4 w-4" />
-						Reply
-					</button>
-					<button
-						v-if="menuCanModify"
-						type="button"
-						role="menuitem"
-						class="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
-						@click="startEdit(actionsMenuComment!)"
-					>
-						<Icon icon="mdi:pencil" class="h-4 w-4" />
-						Edit
-					</button>
-					<button
-						v-if="menuCanModify && confirmDeleteCommentId !== actionsMenuComment.id"
-						type="button"
-						role="menuitem"
-						class="flex w-full items-center gap-2 rounded px-2 py-2 text-left text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
-						@click="confirmDeleteCommentId = actionsMenuComment.id"
-					>
-						<Icon icon="mdi:trash-can-outline" class="h-4 w-4" />
-						Delete
-					</button>
-					<div v-else-if="menuCanModify" class="rounded px-2 py-2">
-						<div class="flex items-center gap-2 text-xs text-global-text/70">
-							<Icon icon="mdi:alert-circle-outline" class="h-4 w-4" />
-							<span>Delete this comment?</span>
-						</div>
-						<div class="mt-2 flex gap-2">
-							<button
-								type="button"
-								role="menuitem"
-								class="flex-1 rounded px-2 py-1.5 text-xs text-global-text/80 hover:bg-global-text/[0.06] transition-colors"
-								:disabled="deletingCommentId === actionsMenuComment.id"
-								@click="confirmDeleteCommentId = null"
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								role="menuitem"
-								class="flex flex-1 items-center justify-center gap-2 rounded px-2 py-1.5 text-xs text-global-text/80 hover:bg-global-text/[0.06] hover:text-accent transition-colors"
-								:disabled="deletingCommentId === actionsMenuComment.id"
-								@click="confirmDelete(actionsMenuComment!)"
-							>
-								<Icon
-									v-if="deletingCommentId === actionsMenuComment.id"
-									icon="mdi:loading"
-									class="h-4 w-4 animate-spin"
-								/>
-								<Icon v-else icon="mdi:trash-can-outline" class="h-4 w-4" />
-								Delete
-							</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</Teleport>
-
-		<!-- Likers tooltip (portaled to body) -->
+		<!-- Likers tooltip (portaled to body): the same darker swatch as the site's other tooltips. -->
 		<Teleport v-if="likersTooltip" to="body">
 			<div
-				class="fixed z-[60] max-w-[260px] rounded border border-global-text/15 bg-global-bg px-3 py-2 text-xs text-global-text/80"
+				class="likers-tip fixed z-[60] max-w-[260px] px-3 py-2 text-xs text-global-text/80"
 				:style="{ top: `${likersTooltip.top}px`, left: `${likersTooltip.left}px`, transform: 'translateY(-100%)' }"
 				role="tooltip"
 				aria-label="People who liked"
@@ -1117,32 +966,38 @@ provide(commentsCtxKey, ctx);
 					<span>Loading likes…</span>
 				</div>
 				<div v-else-if="likersTooltipUsers.length === 0" class="text-global-text/70">No likes yet.</div>
-				<div v-else class="space-y-2">
-					<div class="text-global-text/60">Liked by</div>
-					<ul class="space-y-1">
-						<li v-for="u in likersTooltipUsers.slice(0, 8)" :key="u.id" class="flex items-center gap-2">
-							<img
-								:src="u.avatarUrl"
-								alt=""
-								class="h-4 w-4 rounded-full ring-1 ring-global-text/10"
-								loading="lazy"
-							/>
-							<a
-								:href="u.profileUrl"
-								target="_blank"
-								rel="noopener noreferrer"
-								class="truncate text-global-text/80 hover:text-accent transition-colors"
-								:title="u.displayName ? `${u.githubLogin} (${u.displayName})` : u.githubLogin"
-							>
-								{{ u.githubLogin }}
-							</a>
-						</li>
-						<li v-if="likersTooltipUsers.length > 8" class="text-global-text/60">
-							+{{ likersTooltipUsers.length - 8 }} more
-						</li>
-					</ul>
+				<div v-else class="flex items-center gap-2">
+					<span class="text-global-text/60">Liked by</span>
+					<span class="flex items-center">
+						<img
+							v-for="u in likersTooltipUsers.slice(0, 5)"
+							:key="u.id"
+							:src="u.avatarUrl"
+							:alt="u.githubLogin"
+							class="-ml-1 h-5 w-5 rounded-full first:ml-0"
+							loading="lazy"
+						/>
+					</span>
+					<span v-if="likersTooltipUsers.length > 5" class="tabular-nums text-global-text/70">
+						+{{ likersTooltipUsers.length - 5 }}
+					</span>
 				</div>
 			</div>
 		</Teleport>
 	</section>
 </template>
+
+<style>
+	/* Not scoped: the tooltip is teleported to <body>. */
+	.likers-tip {
+		background: color-mix(in srgb, var(--color-global-bg) 80%, black);
+		-webkit-mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+		mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
+		pointer-events: none;
+	}
+
+	/* Stacked avatars: a ring in the tooltip's own color separates each one. */
+	.likers-tip img {
+		box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-global-bg) 80%, black);
+	}
+</style>

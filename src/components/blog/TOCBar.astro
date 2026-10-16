@@ -298,6 +298,29 @@ const toc = generateToc(headings);
     padding-left: 1rem;
   }
 
+  /* The dock fills whatever height the sidebar has left: the header stays put
+     and only the list scrolls. The flex chain needs min-height: 0 at each step. */
+  .comments-dock,
+  .comments-dock > div,
+  .comments-dock__inner {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .comments-dock__body {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  /* While both share one column, open comments get the room: the TOC gives up
+     some of its height. Wide screens split them into two gutters (below). */
+  @media (max-width: 1699.98px) {
+    #post-aside:has(#comments-dock-body) .toc-dock__nav {
+      max-height: 35vh;
+    }
+  }
+
   #comments-dock:not(:has(.comments-dock__inner)) {
     display: none;
   }
@@ -341,7 +364,6 @@ const toc = generateToc(headings);
       right: calc(50% + 32rem + 1.5rem);
       width: clamp(13rem, 16.5rem, calc(50vw - 34.5rem));
       max-height: calc(100vh - var(--header-clearance, 72px) - 1.5rem);
-      overflow: auto;
       border-left: 0;
       border-right: 2px solid color-mix(in srgb, var(--color-global-text) 14%, transparent);
       padding-left: 0;

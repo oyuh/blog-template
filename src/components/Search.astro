@@ -1,8 +1,8 @@
 ---
-// Inline header search powered by the Pagefind JS API (no modal). The header bar
-// IS the input; results drop into a panel directly below it, with a toggleable
-// Tags + Technology filter menu. Dismiss by clearing the query or clicking outside
-// a result. Pagefind only exists in a production build, so dev shows a note.
+// Inline header search powered by the Pagefind JS API (no modal). A magnifier
+// and an underline to type on; results drop into a panel directly below it, with
+// a toggleable Tags + Tech filter menu. Dismiss by clearing the query or clicking
+// outside a result. Pagefind only exists in a production build, so dev shows a note.
 import { getAllPosts } from "@/data/post";
 import { getTechIconName } from "@/utils/techIcons";
 import { icons as mdiIcons } from "@iconify-json/mdi";
@@ -42,50 +42,46 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 ---
 
 <site-search id="search" class="site-search">
-	<div class="site-search__bar" data-bar>
-		<span class="site-search__lead">
-			<svg
-				class="site-search__icon"
-				aria-hidden="true"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.7"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				data-glass
-			>
-				<circle cx="11" cy="11" r="7"></circle>
-				<path d="M21 21l-4.3-4.3"></path>
-			</svg>
-			<span class="site-search__count" data-count hidden aria-hidden="true"></span>
+	<label class="site-search__bar">
+		<svg
+			class="site-search__icon"
+			aria-hidden="true"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.7"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+		>
+			<circle cx="11" cy="11" r="7"></circle>
+			<path d="M21 21l-4.3-4.3"></path>
+		</svg>
+		<span class="site-search__line">
+			<input
+				type="search"
+				class="site-search__input"
+				placeholder="Search"
+				aria-label="Search the site"
+				aria-keyshortcuts="Control+K"
+				autocomplete="off"
+				spellcheck="false"
+				data-input
+			/>
+			<button type="button" class="site-search__clear" data-clear hidden aria-label="Clear search">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<path d="M6 6l12 12M18 6L6 18"></path>
+				</svg>
+			</button>
 		</span>
-		<input
-			type="search"
-			class="site-search__input"
-			placeholder="Search…"
-			aria-label="Search the site"
-			autocomplete="off"
-			spellcheck="false"
-			data-input
-		/>
-		<button type="button" class="site-search__clear" data-clear hidden aria-label="Clear search">
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-				<path d="M6 6l12 12M18 6L6 18"></path>
-			</svg>
-		</button>
-	</div>
+	</label>
 
 	<div class="site-search__panel" data-panel hidden role="region" aria-label="Search results">
 		<div class="site-search__toolbar">
-			<button type="button" class="site-search__filter-toggle" data-filter-toggle aria-expanded="false">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-					<path d="M4 5h16M7 12h10M10 19h4"></path>
-				</svg>
-				<span>Filters</span>
-				<span class="site-search__filter-badge" data-filter-count hidden></span>
-			</button>
-			<button type="button" class="site-search__filter-clear" data-clear-filters hidden>Clear filters</button>
+			<span data-status aria-live="polite"></span>
+			<span class="site-search__toolbar-actions">
+				<button type="button" class="site-search__text-btn" data-clear-filters hidden>Clear filters</button>
+				<button type="button" class="site-search__text-btn" data-filter-toggle aria-expanded="false">Filters</button>
+			</span>
 		</div>
 
 		<div class="site-search__filters" data-filters hidden>
@@ -94,7 +90,7 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 				<div class="site-search__chips" data-chips="tag"></div>
 			</div>
 			<div class="site-search__filter-group">
-				<h4 class="site-search__filter-title">Technology</h4>
+				<h4 class="site-search__filter-title">Tech</h4>
 				<div class="site-search__chips" data-chips="tech"></div>
 			</div>
 		</div>
@@ -110,11 +106,12 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 <script>
 	import { getTechIconName } from "@/utils/techIcons";
 
-	const MAX_RESULTS = 8;
+	const MAX_RESULTS = 6;
+	const VISIBLE_FILTERS = 5; // per group, before the "…" toggle (same as the post header)
 	const DEV = import.meta.env.DEV;
 	const PAGEFIND_PATH = import.meta.env.BASE_URL.replace(/\/$/, "") + "/pagefind/pagefind.js";
 
-	type SubResult = { title: string; url: string; excerpt: string };
+	type SubResult = { title: string; url: string; excerpt: string; locations?: number[] };
 	type ResultData = {
 		url: string;
 		meta?: { title?: string };
@@ -131,10 +128,8 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 		#clear = this.querySelector<HTMLButtonElement>("[data-clear]");
 		#panel = this.querySelector<HTMLElement>("[data-panel]");
 		#results = this.querySelector<HTMLElement>("[data-results]");
-		#glass = this.querySelector<SVGElement>("[data-glass]");
-		#count = this.querySelector<HTMLElement>("[data-count]");
+		#status = this.querySelector<HTMLElement>("[data-status]");
 		#filterToggle = this.querySelector<HTMLButtonElement>("[data-filter-toggle]");
-		#filterBadge = this.querySelector<HTMLElement>("[data-filter-count]");
 		#filters = this.querySelector<HTMLElement>("[data-filters]");
 		#clearFilters = this.querySelector<HTMLButtonElement>("[data-clear-filters]");
 		#techIcons = this.querySelector<HTMLTemplateElement>("[data-tech-icons]");
@@ -195,12 +190,19 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 				wrap.innerHTML = `<span class="site-search__chips-empty">None</span>`;
 				return;
 			}
-			wrap.innerHTML = entries
-				.map(([val, count]) => {
+			const more = entries.length - VISIBLE_FILTERS;
+			wrap.innerHTML =
+				entries
+				.map(([val, count], i) => {
 					const icon = key === "tech" ? this.techIconFor(val) : "";
-					return `<button type="button" class="site-search__chip" data-filter="${key}" data-value="${escapeHtml(val)}">${icon}${escapeHtml(val)}<span class="site-search__chip-count">${count}</span></button>`;
+					const label = key === "tag" ? `#${escapeHtml(val)}` : escapeHtml(val);
+					const extra = i >= VISIBLE_FILTERS ? " hidden" : "";
+					return `<button type="button" class="site-search__chip" data-filter="${key}" data-value="${escapeHtml(val)}" aria-pressed="false"${extra}>${icon}${label}<span class="site-search__chip-count">${count}</span></button>`;
 				})
-				.join("");
+				.join("") +
+				(more > 0
+					? `<button type="button" class="site-search__text-btn site-search__more" data-more aria-label="Show ${more} more">…</button>`
+					: "");
 		}
 
 		// Pre-rendered SVG (from the build-time <template>) for a tech's icon.
@@ -247,11 +249,12 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 			if (!DEV) this.loadFilters();
 
 			if (DEV) {
+				this.setStatus("");
 				this.renderMessage("Search runs on the built site. Try it after a production build.");
 				return;
 			}
 			if (!query && !hasFilters) {
-				this.updateCount(0);
+				this.setStatus("");
 				this.renderMessage("Type to search, or pick a filter.");
 				return;
 			}
@@ -271,20 +274,14 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 				search.results.slice(0, MAX_RESULTS).map((r: any) => r.data()),
 			);
 			if (token !== this.#token) return;
-			this.updateCount(total);
+			this.setStatus(
+				total === 0 ? "" : total > data.length ? `Top ${data.length} of ${total}` : `${total} result${total === 1 ? "" : "s"}`,
+			);
 			this.renderResults(data);
 		};
 
-		updateCount(total: number) {
-			if (!this.#glass || !this.#count) return;
-			if (total > 0) {
-				this.#count.textContent = total > 99 ? "99+" : String(total);
-				this.#count.hidden = false;
-				this.#glass.style.display = "none";
-			} else {
-				this.#count.hidden = true;
-				this.#glass.style.display = "";
-			}
+		setStatus(text: string) {
+			if (this.#status) this.#status.textContent = text;
 		}
 
 		renderMessage(message: string) {
@@ -297,45 +294,50 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 				this.#results.innerHTML = `<p class="site-search__message">No results.</p>`;
 				return;
 			}
+			// One row per page: title, the best-matching section, one line of context.
+			// Rows are added after Base.astro's tilt pass, so each gets its own tilt here.
 			this.#results.innerHTML = data
 				.map((d) => {
+					// Pagefind lists sections in page order; take the one with the most hits.
+				const sub =
+					(d.sub_results ?? [])
+						.filter((r) => r.url !== d.url)
+						.sort((a, b) => (b.locations?.length ?? 0) - (a.locations?.length ?? 0))[0] ?? null;
+					const href = escapeHtml(sub?.url ?? d.url);
 					const title = escapeHtml(d.meta?.title || d.url);
-					const subs = (d.sub_results ?? [])
-						.slice(0, 2)
-						.map(
-							(s) =>
-								`<a class="site-search__sub" href="${escapeHtml(s.url)}"><span class="site-search__sub-title">${escapeHtml(s.title)}</span><span class="site-search__sub-excerpt">${s.excerpt}</span></a>`,
-						)
-						.join("");
-					return `<div class="site-search__result"><a class="site-search__result-link" href="${escapeHtml(d.url)}">${title}</a><p class="site-search__result-excerpt">${d.excerpt}</p>${subs}</div>`;
+					const section = sub ? `<span class="site-search__result-section">› ${escapeHtml(sub.title)}</span>` : "";
+					const tilt = ((Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.6)).toFixed(2);
+					return `<a class="site-search__result" href="${href}"><span class="site-search__result-title hl-hover" style="--hl-tilt:${tilt}deg">${title}</span>${section}<p class="site-search__result-excerpt">${sub?.excerpt ?? d.excerpt}</p></a>`;
 				})
 				.join("");
 		}
 
 		onChipClick = (e: MouseEvent) => {
+			const moreBtn = (e.target as HTMLElement)?.closest<HTMLElement>("[data-more]");
+			if (moreBtn) {
+				const revealed = [...(moreBtn.parentElement?.querySelectorAll<HTMLElement>(".site-search__chip[hidden]") ?? [])];
+				for (const c of revealed) c.hidden = false;
+				revealed[0]?.focus();
+				moreBtn.remove();
+				return;
+			}
 			const chip = (e.target as HTMLElement)?.closest<HTMLElement>(".site-search__chip");
 			if (!chip) return;
 			const key = chip.dataset.filter;
 			const value = chip.dataset.value ?? "";
 			if (key !== "tag" && key !== "tech") return;
 			const set = this.#selected[key];
-			if (set.has(value)) {
-				set.delete(value);
-				chip.classList.remove("is-active");
-			} else {
-				set.add(value);
-				chip.classList.add("is-active");
-			}
+			if (set.has(value)) set.delete(value);
+			else set.add(value);
+			chip.classList.toggle("is-active", set.has(value));
+			chip.setAttribute("aria-pressed", String(set.has(value)));
 			this.syncFilterChrome();
 			this.refresh();
 		};
 
 		syncFilterChrome() {
 			const count = this.selectedCount();
-			if (this.#filterBadge) {
-				this.#filterBadge.textContent = String(count);
-				this.#filterBadge.hidden = count === 0;
-			}
+			if (this.#filterToggle) this.#filterToggle.textContent = count > 0 ? `Filters (${count})` : "Filters";
 			if (this.#clearFilters) this.#clearFilters.hidden = count === 0;
 			this.#filterToggle?.classList.toggle("is-active", count > 0);
 		}
@@ -351,7 +353,10 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 		onClearFilters = () => {
 			this.#selected.tag.clear();
 			this.#selected.tech.clear();
-			this.querySelectorAll(".site-search__chip.is-active").forEach((c) => c.classList.remove("is-active"));
+			this.querySelectorAll(".site-search__chip.is-active").forEach((c) => {
+				c.classList.remove("is-active");
+				c.setAttribute("aria-pressed", "false");
+			});
 			this.syncFilterChrome();
 			this.refresh();
 		};
@@ -370,7 +375,7 @@ for (const tech of posts.flatMap((p) => p.data.technologies ?? [])) {
 			if (this.#input) this.#input.value = "";
 			if (this.#clear) this.#clear.hidden = true;
 			this.#token++;
-			this.updateCount(0);
+			this.setStatus("");
 			this.renderResults([]);
 			this.closePanel();
 			this.#input?.focus();
