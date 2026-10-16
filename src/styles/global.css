@@ -1629,36 +1629,6 @@ astro-static-slot {
 	font-weight: 600;
 }
 
-/* Per-letter hop: each letter is split into its own inline-block span (see the
-   splitter in Base.astro). On hover they jump one after the other, staggered by
-   index, for a subtle wave that settles back to rest. Each word is wrapped in
-   `.hw` (nowrap) so the inline-block letters never break apart at a line end. */
-.hero-kw .hw,
-.hero-accent .hw {
-	white-space: nowrap;
-}
-
-.hero-kw .ltr,
-.hero-accent .ltr {
-	display: inline-block;
-	will-change: transform;
-}
-
-.hero-kw:hover .ltr,
-.hero-accent:hover .ltr {
-	animation: letter-jump 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-	animation-delay: calc(var(--i) * 22ms);
-}
-
-@keyframes letter-jump {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	45% {
-		transform: translateY(-0.14em);
-	}
-}
 /* ---------------------------------------------------------------------------
    Technology collage (About page). Same scattered, tilted icon language as the
    home hero socials; hover reveals a tilted tooltip (like the home post cards).
@@ -1969,10 +1939,6 @@ astro-static-slot {
 
 @media (prefers-reduced-motion: reduce) {
 	.hero-name {
-		animation: none;
-	}
-	.hero-kw:hover .ltr,
-	.hero-accent:hover .ltr {
 		animation: none;
 	}
 	.tech-collage__item,

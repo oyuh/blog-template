@@ -19,7 +19,7 @@ const allPostsByDate = allPosts
 	<section class="hero">
 		<div class="hero__text">
 			<h1 id="hero-howdy" class="text-3xl md:text-4xl font-bold text-accent-2 leading-tight">
-				Howdy!
+				<span class="howdy-word">Howdy!</span>
 				<span class="inline-block origin-bottom-right animate-wave">👋</span>
 			</h1>
 			<p class="text-lg text-global-text/85 leading-relaxed">
@@ -81,6 +81,44 @@ const allPostsByDate = allPosts
 	.animate-wave {
 		animation: wave 1.5s ease-in-out infinite;
 		transform-origin: 70% 70%;
+	}
+
+	/* A marker underline draws itself under "Howdy!" on load. On hover the ink
+	   floods up into a full highlighter pass behind the word. */
+	.howdy-word {
+		position: relative;
+		display: inline-block;
+		isolation: isolate;
+	}
+
+	.howdy-word::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		right: -0.1em;
+		bottom: 0.02em;
+		z-index: -1;
+		height: 0.24em;
+		background: color-mix(in srgb, var(--color-accent) 85%, transparent);
+		-webkit-mask: var(--marker-stroke) no-repeat 0 0 / 100% 100%;
+		mask: var(--marker-stroke) no-repeat 0 0 / 100% 100%;
+		transform: rotate(-1.2deg) scaleX(0);
+		transform-origin: left center;
+		animation: howdy-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
+		transition:
+			height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+			background-color 0.3s ease;
+	}
+
+	.howdy-word:hover::before {
+		height: 1em;
+		background-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
+	}
+
+	@keyframes howdy-draw {
+		to {
+			transform: rotate(-1.2deg) scaleX(1);
+		}
 	}
 
 	/* Hero text accents (.hero-name / .hero-kw / .hero-accent) live in global.css
@@ -158,6 +196,11 @@ const allPostsByDate = allPosts
 	@media (prefers-reduced-motion: reduce) {
 		.animate-wave {
 			animation: none !important;
+		}
+		.howdy-word::before {
+			animation: none;
+			transition: none;
+			transform: rotate(-1.2deg);
 		}
 		#hero-howdy {
 			transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease;

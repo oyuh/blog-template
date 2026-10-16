@@ -304,48 +304,5 @@ const {
 				window.addEventListener("scroll", fade, { passive: true });
 			})();
 		</script>
-
-		<script>
-			// Split highlighted hero words into per-letter spans so each letter can
-			// hop in sequence on hover (a staggered wave). Each word is wrapped in a
-			// nowrap span so the inline-block letters can't break mid-word at a line
-			// end; only the spaces between words remain breakable.
-			(() => {
-				const splitLetters = (el: HTMLElement) => {
-					if (el.dataset.lettersSplit === "true") return;
-					const text = el.textContent ?? "";
-					el.textContent = "";
-					let i = 0;
-					// Split on whitespace runs but keep them as separators.
-					for (const token of text.split(/(\s+)/)) {
-						if (token === "") continue;
-						if (/^\s+$/.test(token)) {
-							el.appendChild(document.createTextNode(token));
-							continue;
-						}
-						const word = document.createElement("span");
-						word.className = "hw";
-						for (const ch of token) {
-							const span = document.createElement("span");
-							span.className = "ltr";
-							span.style.setProperty("--i", String(i++));
-							span.textContent = ch;
-							word.appendChild(span);
-						}
-						el.appendChild(word);
-					}
-					el.dataset.lettersSplit = "true";
-				};
-
-				const run = () => {
-					document
-						.querySelectorAll<HTMLElement>(".hero-kw, .hero-accent")
-						.forEach(splitLetters);
-				};
-
-				run();
-				document.addEventListener("astro:page-load", run);
-			})();
-		</script>
 	</body>
 </html>

@@ -1,7 +1,7 @@
 /* Inline header search (Pagefind JS API). A magnifier and a thin line to type
-   on, which widens while focused. Results drop into a darker marker swatch
-   below it (the same floating surface as the post hover card), with plain-text
-   Tags/Tech filters. */
+   on, which widens while focused, with a plain-text Filters toggle beside it.
+   Filters and results drop below as two separate darker marker swatches (the
+   same floating surface as the post hover card). */
 
 .site-search {
 	position: relative;
@@ -20,10 +20,41 @@
 .site-search__bar {
 	display: flex;
 	align-items: center;
-	gap: 0.45rem;
+	gap: 0.75rem;
 	width: 100%;
+}
+
+.site-search__field {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	gap: 0.45rem;
+	min-width: 0;
 	height: 2.25rem;
 	cursor: text;
+}
+
+/* Filters toggle, plus a × to clear them once any are picked. Only offered
+   while the search is in use, so the idle header stays a bare line. */
+.site-search__filter-ctl {
+	display: none;
+	flex: none;
+	align-items: center;
+}
+
+.site-search[data-open] .site-search__filter-ctl,
+.site-search:focus-within .site-search__filter-ctl {
+	display: inline-flex;
+}
+
+.site-search__filter-toggle {
+	height: 2.25rem;
+	font-size: 0.8rem;
+	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+}
+
+.site-search__filter-toggle[aria-expanded="true"] {
+	color: var(--color-global-text);
 }
 
 .site-search__icon {
@@ -34,7 +65,7 @@
 	transition: color 0.2s ease;
 }
 
-.site-search__bar:focus-within .site-search__icon {
+.site-search__field:focus-within .site-search__icon {
 	color: var(--color-accent);
 }
 
@@ -49,7 +80,7 @@
 }
 
 .site-search[data-open] .site-search__line,
-.site-search__bar:focus-within .site-search__line {
+.site-search__field:focus-within .site-search__line {
 	border-color: var(--color-accent);
 }
 
@@ -98,21 +129,35 @@
 	color: var(--color-accent);
 }
 
-/* Results panel: borderless, a shade darker than the page, ragged edge. */
-.site-search__panel {
+/* Filters and results stack below the bar as separate swatches. */
+.site-search__drop {
 	position: absolute;
 	top: calc(100% + 0.4rem);
 	left: 0;
 	z-index: 70;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
 	width: min(30rem, calc(100vw - 2rem));
-	max-height: min(70vh, 30rem);
-	overflow-y: auto;
-	overscroll-behavior: contain;
+}
+
+/* Borderless, a shade darker than the page, ragged edge. */
+.site-search__swatch {
 	padding: 0.75rem 1rem 0.9rem;
 	background: color-mix(in srgb, var(--color-global-bg) 80%, black);
 	-webkit-mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
 	mask: var(--marker-swatch) no-repeat 0 0 / 100% 100%;
 	animation: search-in 0.16s ease;
+}
+
+.site-search__swatch[hidden] {
+	display: none;
+}
+
+.site-search__panel {
+	max-height: min(60vh, 30rem);
+	overflow-y: auto;
+	overscroll-behavior: contain;
 }
 
 @keyframes search-in {
@@ -121,20 +166,15 @@
 	}
 }
 
-/* One muted line: result count on the left, filter toggle on the right. */
-.site-search__toolbar {
-	display: flex;
-	align-items: baseline;
-	justify-content: space-between;
-	gap: 0.75rem;
+/* One muted line with the result count; gone when there is no count. */
+.site-search__status {
 	padding-bottom: 0.4rem;
 	font-size: 0.78rem;
 	color: color-mix(in srgb, var(--color-global-text) 55%, transparent);
 }
 
-.site-search__toolbar-actions {
-	display: inline-flex;
-	gap: 0.9rem;
+.site-search__status:empty {
+	display: none;
 }
 
 .site-search__text-btn {
@@ -157,13 +197,8 @@
 	color: var(--color-accent);
 }
 
-/* Filters: plain text toggles like the post header's tag/tech rows. */
-.site-search__filters {
-	padding: 0.35rem 0 0.7rem;
-	margin-bottom: 0.3rem;
-	border-bottom: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
-}
-
+/* Filters: plain text toggles like the post header's tag/tech rows. Each row
+   shows one line of chips until its "…" expands it. */
 .site-search__filter-group {
 	display: flex;
 	align-items: baseline;
@@ -185,8 +220,11 @@
 
 .site-search__chips {
 	display: flex;
+	flex: 1;
 	flex-wrap: wrap;
+	align-items: baseline;
 	gap: 0.15rem 0.85rem;
+	min-width: 0;
 }
 
 .site-search__chips-empty {
@@ -225,16 +263,25 @@
 }
 
 .site-search__more {
-	font-size: 0.85rem;
-	color: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+	border: 0;
+	padding: 0 0.15rem;
+	background: transparent;
+	color: var(--color-accent);
+	font: inherit;
+	font-size: 1.3rem;
+	font-weight: 700;
+	line-height: 1;
+	cursor: pointer;
+	text-underline-offset: 3px;
+}
+
+.site-search__more:hover,
+.site-search__more:focus-visible {
+	text-decoration: underline;
 }
 
 .site-search__chip-icon {
-	display: inline-flex;
 	flex: none;
-}
-
-.site-search__chip-icon svg {
 	width: 0.8rem;
 	height: 0.8rem;
 }
@@ -295,7 +342,7 @@
 }
 
 /* Pagefind highlight marks: accent text, no fill. */
-.site-search__panel mark {
+.site-search__results mark {
 	color: var(--color-global-text);
 	background: none;
 	text-decoration: underline;
@@ -305,7 +352,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.site-search__panel {
+	.site-search__swatch {
 		animation: none;
 	}
 	.site-search {

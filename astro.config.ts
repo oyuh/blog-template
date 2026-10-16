@@ -185,7 +185,9 @@ export default defineConfig({
 		environments: {
 			// Dev renders on-demand pages in workerd. A dependency discovered on first
 			// request triggers a reload that drops that request, so pre-bundle it.
-			ssr: { optimizeDeps: { include: ["astro-icon/components"] } },
+			// astro-icon's Icon.astro imports @iconify/utils, which the dep scan can't
+			// see through a .astro file; unbundled, its CJS deps throw in workerd.
+			ssr: { optimizeDeps: { include: ["astro-icon/components", "@iconify/utils"] } },
 			// Prerendered pages run in Node in dev (prerenderEnvironment: "node"). The
 			// adapter still pre-bundles Astro's runtime there, which leaves two copies of
 			// it and breaks page scripts ("Unable to resolve ...?astro&type=script").
