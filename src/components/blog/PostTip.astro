@@ -82,8 +82,8 @@ const tilt = tiltFromSeed(post.id);
 
 	/* Borderless floating swatch: an opaque fill a shade darker than the page, with a
 	   subtly ragged edge (--marker-swatch in global.css).
-	   No border, glow, or shadow. The script moves it over the cursor on hover;
-	   without that it sits at the host's right edge. */
+	   No border, glow, or shadow. The script makes it trail the cursor on hover;
+	   without that (keyboard focus) it sits at the host's right edge. */
 	.post-tip {
 		position: absolute;
 		bottom: calc(100% + 0.3rem);
@@ -100,6 +100,12 @@ const tilt = tiltFromSeed(post.id);
 		transform-origin: bottom center;
 		pointer-events: none;
 		transition: opacity 0.2s ease, transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	/* Flipped under the cursor near the top of the viewport: rise in from above. */
+	.post-tip.is-below {
+		transform: translateY(-8px) rotate(var(--tilt, -2deg)) scale(0.98);
+		transform-origin: top center;
 	}
 
 	:global(.post-tip-host:hover) > .post-tip,
@@ -225,6 +231,9 @@ const tilt = tiltFromSeed(post.id);
 	import { randomTilt } from "@/utils/tilt";
 
 	const EDGE = 8;
+	const GAP = 14;
+	const EASE = 0.2;
+	const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 
 	// Re-roll each card's tilt on every load so it's never the same twice.
 	const applyTilts = () => {
@@ -233,24 +242,85 @@ const tilt = tiltFromSeed(post.id);
 		}
 	};
 
-	// When the pointer enters a host, centre its card over the cursor (kept inside
-	// the content column), so the preview lands where you're looking instead of at
-	// the far edge of the row. It stays put while the pointer moves within the host.
-	document.addEventListener("pointerover", (e) => {
-		const target = e.target as Element | null;
-		const host = target?.closest?.<HTMLElement>(".post-tip-host");
-		if (!host || host.contains(e.relatedTarget as Node | null)) return;
-		const tip = host.querySelector<HTMLElement>(":scope > .post-tip");
+	// The card trails the cursor while it's over a host. Positions are viewport
+	// coords; they're converted to host-relative ones only when written, so the
+	// card stays glued to the cursor while the page scrolls under it.
+	let host: HTMLElement | null = null;
+	let tip: HTMLElement | null = null;
+	let mouseX = 0;
+	let mouseY = 0;
+	let x = 0;
+	let y = 0;
+	let frame = 0;
+
+	// Centered above the cursor, flipped below it when the top of the viewport is
+	// too close, and always clamped inside the viewport.
+	const target = (card: HTMLElement): [number, number] => {
+		const w = card.offsetWidth;
+		const h = card.offsetHeight;
+		const tx = Math.min(Math.max(mouseX - w / 2, EDGE), window.innerWidth - w - EDGE);
+		const above = mouseY - h - GAP;
+		const below = above < EDGE;
+		card.classList.toggle("is-below", below);
+		// Extra clearance below so the card doesn't sit under the cursor's tail.
+		const ty = below ? Math.min(mouseY + GAP * 1.6, window.innerHeight - h - EDGE) : above;
+		return [tx, ty];
+	};
+
+	const place = () => {
+		if (!host || !tip) return;
+		const r = host.getBoundingClientRect();
+		tip.style.left = `${x - r.left}px`;
+		tip.style.top = `${y - r.top}px`;
+	};
+
+	const tick = () => {
+		frame = 0;
 		if (!tip) return;
-		const hostLeft = host.getBoundingClientRect().left;
-		const column = document.getElementById("main")?.getBoundingClientRect();
-		const minX = Math.max(column?.left ?? 0, EDGE);
-		const maxX = Math.min(column?.right ?? window.innerWidth, window.innerWidth - EDGE);
-		const width = tip.offsetWidth;
-		const left = Math.min(Math.max(e.clientX - width / 2, minX), maxX - width);
-		tip.style.left = `${left - hostLeft}px`;
+		const [tx, ty] = target(tip);
+		const ease = reducedMotion.matches ? 1 : EASE;
+		x += (tx - x) * ease;
+		y += (ty - y) * ease;
+		place();
+		if (Math.abs(tx - x) > 0.3 || Math.abs(ty - y) > 0.3) frame = requestAnimationFrame(tick);
+	};
+
+	const schedule = () => {
+		if (host && !frame) frame = requestAnimationFrame(tick);
+	};
+
+	document.addEventListener("pointerover", (e) => {
+		if (e.pointerType !== "mouse") return;
+		const next = (e.target as Element | null)?.closest?.<HTMLElement>(".post-tip-host") ?? null;
+		const card = next?.querySelector<HTMLElement>(":scope > .post-tip") ?? null;
+		if (!next || !card || next === host) return;
+		host = next;
+		tip = card;
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+		// Snap on entry so the card doesn't glide in from the previous row.
+		[x, y] = target(card);
 		tip.style.right = "auto";
+		tip.style.bottom = "auto";
+		place();
 	});
+
+	document.addEventListener("pointermove", (e) => {
+		if (!host || e.pointerType !== "mouse") return;
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+		schedule();
+	});
+
+	document.addEventListener("pointerout", (e) => {
+		if (host && !host.contains(e.relatedTarget as Node | null)) {
+			host = null;
+			cancelAnimationFrame(frame);
+			frame = 0;
+		}
+	});
+
+	window.addEventListener("scroll", schedule, { passive: true });
 
 	applyTilts();
 	document.addEventListener("astro:page-load", applyTilts);
