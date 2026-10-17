@@ -83,8 +83,8 @@ const allPostsByDate = allPosts
 		transform-origin: 70% 70%;
 	}
 
-	/* A marker underline draws itself under "Howdy!" on load. On hover the ink
-	   floods up into a full highlighter pass behind the word. */
+	/* A highlighter pass behind "Howdy!", the same marker stroke as .hl-hover.
+	   Base.astro gives it a random --hl-tilt on each load. */
 	.howdy-word {
 		position: relative;
 		display: inline-block;
@@ -94,30 +94,31 @@ const allPostsByDate = allPosts
 	.howdy-word::before {
 		content: "";
 		position: absolute;
-		left: 0;
-		right: -0.1em;
-		bottom: 0.02em;
+		inset: -0.06em -0.3em -0.1em -0.25em;
 		z-index: -1;
-		height: 0.24em;
-		background: color-mix(in srgb, var(--color-accent) 85%, transparent);
+		/* Ink pools at the ends and thins out in the middle, drifting from the
+		   accent blue toward indigo and back. */
+		background: linear-gradient(
+			100deg,
+			oklch(57% 0.1 238 / 0.34),
+			oklch(50% 0.1 245 / 0.18) 28%,
+			oklch(55% 0.11 265 / 0.26) 52%,
+			oklch(52% 0.1 250 / 0.14) 76%,
+			oklch(58% 0.1 232 / 0.3)
+		);
 		-webkit-mask: var(--marker-stroke) no-repeat 0 0 / 100% 100%;
 		mask: var(--marker-stroke) no-repeat 0 0 / 100% 100%;
-		transform: rotate(-1.2deg) scaleX(0);
-		transform-origin: left center;
-		animation: howdy-draw 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.3s forwards;
-		transition:
-			height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-			background-color 0.3s ease;
+		transform: rotate(var(--hl-tilt, -1.2deg));
+		animation: howdy-ink 7s ease-in-out infinite alternate;
 	}
 
-	.howdy-word:hover::before {
-		height: 1em;
-		background-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
-	}
-
-	@keyframes howdy-draw {
+	/* The ink drifts through the blues; a narrow range so it never leaves them. */
+	@keyframes howdy-ink {
+		from {
+			filter: hue-rotate(-25deg);
+		}
 		to {
-			transform: rotate(-1.2deg) scaleX(1);
+			filter: hue-rotate(35deg);
 		}
 	}
 
@@ -155,15 +156,19 @@ const allPostsByDate = allPosts
 
 	/* "Howdy! 👋" has done its job after a moment — fade + collapse it away. */
 	#hero-howdy {
-		margin-bottom: 0.75rem;
+		/* The padding gives the marker room to overhang and tilt inside
+		   overflow: hidden; the negative margins cancel it out of the layout. */
+		padding: 0.2em 0.35em;
+		margin: -0.2em -0.35em calc(0.75rem - 0.2em);
 		overflow: hidden;
-		max-height: 4rem;
-		transition: opacity 0.5s ease, max-height 0.6s ease, margin 0.5s ease, transform 0.5s ease;
+		max-height: 5rem;
+		transition: opacity 0.5s ease, max-height 0.6s ease, margin 0.5s ease, padding 0.5s ease, transform 0.5s ease;
 	}
 
 	#hero-howdy.is-gone {
 		opacity: 0;
 		max-height: 0;
+		padding: 0;
 		margin: 0;
 		transform: translateY(-8px);
 	}
@@ -194,16 +199,12 @@ const allPostsByDate = allPosts
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.animate-wave {
+		.animate-wave,
+		.howdy-word::before {
 			animation: none !important;
 		}
-		.howdy-word::before {
-			animation: none;
-			transition: none;
-			transform: rotate(-1.2deg);
-		}
 		#hero-howdy {
-			transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease;
+			transition: opacity 0.4s ease, max-height 0.4s ease, margin 0.4s ease, padding 0.4s ease;
 		}
 	}
 </style>
@@ -243,6 +244,19 @@ const allPostsByDate = allPosts
 		arrow.style.setProperty("--point", `${deg}deg`);
 	}
 
+	// Reseed the noise in the shared --marker-stroke so the ink texture behind
+	// "Howdy!" differs on every load. Set on the word, it shadows only its ::before.
+	function reseedHowdyMarker() {
+		const word = document.querySelector<HTMLElement>(".howdy-word");
+		if (!word) return;
+		const stroke = getComputedStyle(document.documentElement).getPropertyValue("--marker-stroke");
+		word.style.setProperty(
+			"--marker-stroke",
+			stroke.replace(/seed='\d+'/g, () => `seed='${Math.floor(Math.random() * 1000)}'`),
+		);
+	}
+
+	reseedHowdyMarker();
 	scheduleHowdyExit();
 	pointHeroArrow();
 	window.addEventListener("resize", pointHeroArrow);
@@ -250,6 +264,7 @@ const allPostsByDate = allPosts
 	// The greeting's collapse shifts the hero text — re-aim once it settles.
 	document.getElementById("hero-howdy")?.addEventListener("transitionend", pointHeroArrow);
 	document.addEventListener("astro:page-load", () => {
+		reseedHowdyMarker();
 		scheduleHowdyExit();
 		pointHeroArrow();
 	});

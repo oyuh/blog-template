@@ -211,14 +211,14 @@ const {
 		</script>
 
 		<script>
-			// Give every marker highlight (.hl-hover) its own random tilt. Wide labels
+			// Give every marker highlight (.hl-hover, the home "Howdy!") its own random tilt. Wide labels
 			// get a gentler angle so the stroke still covers the words end to end;
 			// short ones can lean more. Direction is random too.
 			(() => {
 				const MAX_DEG = 2;
 				// Vertical room the stroke has above/below the ink at each end (px).
 				const SLACK_PX = 2.5;
-				for (const el of document.querySelectorAll<HTMLElement>(".hl-hover")) {
+				for (const el of document.querySelectorAll<HTMLElement>(".hl-hover, .howdy-word")) {
 					const width = el.offsetWidth + 12;
 					const limit = Math.min(MAX_DEG, (Math.asin(Math.min(1, (2 * SLACK_PX) / width)) * 180) / Math.PI);
 					const deg = (Math.random() < 0.5 ? -1 : 1) * limit * (0.5 + Math.random() * 0.5);
