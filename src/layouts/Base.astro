@@ -82,6 +82,25 @@ const {
 		</main>
 		<Footer />
 
+		<script>
+			import { enhanceExternalLinks } from "@/utils/externalLinks";
+
+			enhanceExternalLinks(document);
+			// Cover hydrated comments and asynchronously populated link cards too.
+			new MutationObserver((records) => {
+				for (const record of records) {
+					const root = record.target instanceof Element ? record.target : record.target.parentElement;
+					if (root) enhanceExternalLinks(root);
+				}
+			}).observe(document.body, {
+				subtree: true,
+				childList: true,
+				characterData: true,
+				attributes: true,
+				attributeFilter: ["href"],
+			});
+		</script>
+
 		<style>
 			/* Every other page starts a fixed gap below the header so content never
 			   sits flush against the nav or floats mid-screen. */
